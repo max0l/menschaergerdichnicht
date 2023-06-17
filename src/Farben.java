@@ -1,2 +1,7 @@
-package PACKAGE_NAME;public enum Farben {
+public enum Farben {
+    ROT,
+    BLAU,
+    GELB,
+    GRUEN,
+    WEISS
 }
