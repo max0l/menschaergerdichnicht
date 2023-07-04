@@ -4,8 +4,17 @@
 
 ![Komischen Spielbrett](https://hd.z0py.de/uploads/7c3aa462-0bdb-43f6-98e8-669f265d6175.png)
 
+## Entwurfsskizze
+
+- Für jeden Screen eine kleine Skizze zeichnen (z.b Figma)
+- Mit Pfeilen verbinden, wie man wo hinkommt
+- Pro Bild: wie kommuniziert es miteinander + Erklärung
+- mvc strucktur?
 
 ## Klassen
+
+- Backend sollte so gut wie möglich von Frontend abgekapselt werden
+-
 
 ### Spielklasse
 - Spiel Startet
@@ -15,20 +24,25 @@
 -
 
 ### Spielfeld
-- Spielfeld ist 40 Felder groß
-- Pro Team: 2 interne Arrays
+- Spielfeld ist 40 Felder groß (array mir modulo)
+- Wenn feld beseutzt, speichert es farbe/spieler
 - (Felder haben Prioritäten)
--
+
+#### Feld
+- hat Attribute: Besetzt von Farbe und Nummer
+
+### Spielsteine
+- Eigenes Array pro team
+- Hat attribute: Farbe (enum/COLOR.RED), Nummer des Feldes auf Spielfeld
+- Ist zu Hause / auf dem Spielbrett / im Ziel
+- Nummer im Zielfeld
 
 ### Teams
 - Spielfarben Enums/<COLOR.>
 - Liste der Farben
 - 4 Teams
-- Jedes Team hat ein Startfeld (Auf Spielfeld)
-
-#### Spielfiguren
-- Zähler begangener Felder
-- Farbe
+- Jedes Team hat ein Startfeld (Auf Spielfeld) und endbereich bzw. was das letzte Feld vor dem Ziel ist
+- Pro Team: 2 interne Arrays
 
 ### Menschlicher Spieler
 - Hat manchmal die Wahl, ob neuer Spielstein raus oder weiter ziehen
@@ -43,8 +57,12 @@
 
 ## UI
 
-### 
+- JavaFX ist ok, wenn wir die Bib mit includen bzw. alles in eine Zip packen können (das es einfach zu installieren ist)
+- Veränderbare Größe
 
+### Spielsteine
+- Kleinere kreise als Spielfeldkreis
+- Wenn angeklickt -> Feld wo stein hingeschoben ?Blinkt? werden könnte, kann aber wieder zurück (nicht finale entscheidung)
 
 ### Settings
 - Lautstärke
@@ -53,6 +71,8 @@
 
 ### Ideen
 - Würfel Sound
+- Spieler über das Feld bewegen (Animation)
+- Stein schieben/setzen sound
 
 
 ## Multiplayer
@@ -162,4 +182,3 @@ Allgemeine Hinweise für die Prüfungsprojekte
 5. Dokumentation
    Die angeforderten Dokumente müssen vollständig sein.
 
-https://hd.z0py.de/s/9iQjLTpVR
