@@ -1,17 +1,13 @@
-import java.util.ArrayList;
-import java.util.List;
+public class Spielfeld {
+    private Feld[] spielfeld = new Feld[40];
 
-public class Spielfeld
-{
-    public List<Feld> getFields()
-    {
-        return fields;
+    public Spielfeld() {
+        for (int i = 0; i < 40; i++) {
+            spielfeld[i] = new Feld(i);
+        }
+    }
+    public Feld getFeld(int id) {
+        return spielfeld[id];
     }
 
-    public void setFields(List<Feld> fields)
-    {
-        this.fields = fields;
-    }
-
-    private List<Feld> fields = new ArrayList<Feld>();
 }
