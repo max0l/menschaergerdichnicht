@@ -8,7 +8,7 @@ public class Spielstein {
 
     private Team team;
 
-    public Spielstein(Team team) {
+    public Spielstein(Team team, int steinID) {
         this.team = team;
         color = team.getColor();
         state = SpielsteinState.STATE_HOME;

@@ -13,13 +13,12 @@ public class Spiel {
     public Spiel() {
         spielfeld = new Spielfeld();
         setupPlayers(spielfeld);
-        System.out.println("Spiel gestartet");
-        startGame();
     }
 
     //TODO: Muss ein spielestein von dem Spawn wegbewegt werden? Oder kann er da erstmal bleiben (vom eigenen Team)
     // solange man keine 6 würfelt?
     void startGame() {
+        System.out.println("Spiel gestartet");
         while (gameIsRunning) {
             run();
         }
@@ -42,10 +41,11 @@ public class Spiel {
             makeAmove(team);
             System.out.println("Team " + team.getColor() + " ist fertig" + "\n\n");
 
-        }
-        if (teams.checkIfGameIsFinished()) {
-            System.out.println("Spiel beendet");
-            gameIsRunning = false;
+            if(team.getIsFinished())
+            {
+                System.out.println("Spiel beendet");
+                gameIsRunning = false;
+            }
         }
     }
 

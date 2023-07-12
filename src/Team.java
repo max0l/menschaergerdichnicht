@@ -26,7 +26,7 @@ public class Team {
         this.color = color;
         spielsteine = new ArrayList<>();
         for(int i = 0; i<4;i++) {
-            spielsteine.add(new Spielstein(this));
+            spielsteine.add(new Spielstein(this, i));
         }
         this.spielfeld = spielfeld;
     }
