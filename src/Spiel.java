@@ -6,8 +6,8 @@ import java.util.Random;
 public class Spiel {
     private boolean gameIsRunning = true;
     private Random random = new Random();
+    private List<Team> teams = new ArrayList<Team>();
 
-    private Teams teams;
     private Spielfeld spielfeld;
 
     public Spiel() {
@@ -24,19 +24,19 @@ public class Spiel {
         }
     }
 
-    void setupPlayers(Spielfeld spielfeld) {
-        List<Team> generatedTeams = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            generatedTeams.add(new Team(Color.RED, 0, spielfeld));
-            generatedTeams.add(new Team(Color.BLUE, 10, spielfeld));
-            generatedTeams.add(new Team(Color.GREEN, 20, spielfeld));
-            generatedTeams.add(new Team(Color.YELLOW, 30, spielfeld));
+    void setupPlayers(Spielfeld spielfeld)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            teams.add(new Team(Color.RED, 0, spielfeld));
+            teams.add(new Team(Color.BLUE, 10, spielfeld));
+            teams.add(new Team(Color.GREEN, 20, spielfeld));
+            teams.add(new Team(Color.YELLOW, 30, spielfeld));
         }
-        teams = new Teams(generatedTeams);
     }
 
     void run() {
-        for (Team team : teams.getTeams()) {
+        for (Team team : teams) {
             System.out.println("Team " + team.getColor() + " ist am Zug");
             makeAmove(team);
             System.out.println("Team " + team.getColor() + " ist fertig" + "\n\n");
@@ -181,6 +181,18 @@ public class Spiel {
         int rand = random.nextInt(6) + 1;
         System.out.println("Würfel zeigt " + rand);
         return rand;
+    }
+
+    public boolean checkIfGameIsFinished()
+    {
+        for(Team team : teams)
+        {
+            if(!team.getIsFinished())
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void moveSpielstein(Spielstein spielstein, int diceRoll, Team team) {
