@@ -154,12 +154,16 @@ public class Spiel {
         occupier.getTeam().pieceFromFieldToHome(occupier);
     }
 
-    private void tryToGetOutOfSpawn(Team team) {
+    private void tryToGetOutOfSpawn(Team team)
+    {
         System.out.println("Versuche aus dem Spawn zu kommen");
-        for (int j = 0; j < 3; j++) {
-            if (rollDice() == 6) {
+        for (int j = 0; j < 3; j++)
+        {
+            int roll = rollDice();
+            if (roll == 6)
+            {
                 System.out.println("6 gewürfelt, spieler kommt aus dem Spawn");
-                moveSpielstein(movePieceOutOfSpawn(team), rollDice(), team);
+                moveSpielstein(movePieceOutOfSpawn(team), roll, team);
                 break;
             }
         }
