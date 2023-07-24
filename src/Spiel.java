@@ -49,17 +49,11 @@ public class Spiel {
         }
     }
 
-    private void makeAmove(Team team) {
-        switch (getTeamStates(team)) {
-            case allHome:
-                System.out.println("Alle Spielsteine sind im Startfeld");
-                tryToGetOutOfSpawn(team);
-                break;
-            case allFinish:
-                break;
-            case playing:
-                play(team);
-                break;
+    private void makeAmove(Team team)
+    {
+        if(!team.getIsFinished())
+        {
+            play(team);
         }
     }
 
@@ -188,7 +182,7 @@ public class Spiel {
     private void moveSpielstein(Spielstein spielstein, int diceRoll, Team team) {
 
 
-        if(spielstein.getState() == SpielsteinState.STATE_HOME){
+        if(spielstein.getState() == SpielsteinState.STATE_HOME && diceRoll == 6){
             System.out.println("Ausgewählter Spielstein ist im Home");
             movePieceOutOfSpawn(team);
         } else {
