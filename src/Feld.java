@@ -8,6 +8,8 @@ public class Feld {
 
     public Feld(int number) {
         this.number = number;
+        isOccupied = false;
+        occupier = null;
     }
 
     public Spielstein getOccupier() {
@@ -15,6 +17,12 @@ public class Feld {
     }
 
     public void setOccupier(Spielstein occupier) {
+        if(occupier == null) {
+            isOccupied = false;
+            this.occupier = null;
+            return;
+        }
+        isOccupied = true;
         this.occupier = occupier;
     }
 

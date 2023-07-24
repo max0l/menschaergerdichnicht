@@ -27,6 +27,7 @@ public class Team {
         spielsteine = new ArrayList<>();
         for(int i = 0; i<4;i++) {
             spielsteine.add(new Spielstein(this, i));
+            finishFields[i] = new Feld(i);
         }
         this.spielfeld = spielfeld;
     }
@@ -48,13 +49,14 @@ public class Team {
         return true;
     }
 
-    public boolean checkIfAllPiecesAreInFinish() {
+    public void checkIfAllPiecesAreInFinish() {
         for(Spielstein spielstein : spielsteine) {
             if(spielstein.getState() != SpielsteinState.STATE_FINISH) {
-                return false;
+                return;
             }
         }
-        return true;
+        System.out.println("Team " + name + " Farbe: "+ color + " hat gewonnen!");
+        isFinished = true;
     }
 
     public boolean checkIfPieceIsCorrectInFinish() {
@@ -80,12 +82,20 @@ public class Team {
         }
     }
 
-    List<Spielstein> getMovableSpielsteine(int rolledNumber)
+    //
+    List<Spielstein> getMovableSpielsteine(int diceRoll)
     {
-        if(rolledNumber == 6)
-        {
+        List<Spielstein> movableSpielsteine = new ArrayList<>();
 
+        for (Spielstein spielstein : spielsteine) {
+            if (spielstein.getState() == SpielsteinState.STATE_PLAYING) {
+                movableSpielsteine.add(spielstein);
+            }
+            if(diceRoll == 6 && spielstein.getState() == SpielsteinState.STATE_HOME) {
+                movableSpielsteine.add(spielstein);
+            }
         }
+        return movableSpielsteine;
     }
 
     public List<Spielstein> getSpielsteine() {
@@ -136,5 +146,43 @@ public class Team {
             }
         }
         return null;
+    }
+
+    public void printFinishFields() {
+        for(int i = 0; i<4;i++) {
+            System.out.println("FinishField " + i + ": " + finishFields[i].getIsOccupied());
+        }
+    }
+
+    public int getSpielFeldIntOfSpielsteinInFinish(Spielstein spielstein) {
+        for(int i = 0; i<4;i++) {
+            if(finishFields[i].getOccupier() == spielstein) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    public boolean getIsOccupiedInFinish(int index) {
+        System.out.println("Check if Occupied in finish: " + index);
+        return finishFields[index].getIsOccupied();
+    }
+
+    public void moveSpielsteinToFinish(Spielstein spielstein, int goalField) {
+        System.out.println("Bewege Spielstein ins Ziel");
+        System.out.println("GoalField: " + goalField);
+        spielstein.setFieldId(goalField);
+        spielstein.setState(SpielsteinState.STATE_FINISH);
+        printFinishFields();
+        System.out.println("Spielstein: " + spielstein.getFieldId() + " Walked: " + spielstein.getWalkedFields());
+        finishFields[goalField].setOccupier(spielstein);
+        printFinishFields();
+    }
+
+    public void moveSpielsteinAroundFinish(Spielstein spielstein, int currentField, int goalField) {
+        System.out.println("Bewege Spielstein ums Ziel");
+        spielstein.setFieldId(goalField);
+        finishFields[currentField].setOccupier(null);
+        finishFields[goalField].setOccupier(spielstein);
+        printFinishFields();
     }
 }

@@ -4,6 +4,9 @@ public class Spielstein {
     private Color color;
     private SpielsteinState state;
     private int fieldId;
+
+
+
     private int walkedFields;
 
     private Team team;
@@ -41,5 +44,17 @@ public class Spielstein {
     }
     public Team getTeam() {
         return team;
+    }
+
+    public int getWalkedFields() {
+        return walkedFields;
+    }
+
+    public void setWalkedFields(int walkedFields) {
+        this.walkedFields = walkedFields;
+    }
+
+    public void addWalkedFields(int diceRoll) {
+        walkedFields += diceRoll;
     }
 }
