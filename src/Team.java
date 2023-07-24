@@ -80,6 +80,14 @@ public class Team {
         }
     }
 
+    List<Spielstein> getMovableSpielsteine(int rolledNumber)
+    {
+        if(rolledNumber == 6)
+        {
+
+        }
+    }
+
     public List<Spielstein> getSpielsteine() {
         return spielsteine;
     }

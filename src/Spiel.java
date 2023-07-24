@@ -63,34 +63,24 @@ public class Spiel {
         }
     }
 
-    private void play(Team team) {
+    private void play(Team team)
+    {
         int diceRoll = rollDice();
-        if (diceRoll == 6) {
+
+        if (diceRoll == 6)
+        {
             selectPiece(team, diceRoll);
             play(team);
-        } else {
+        }
+        else
+        {
             selectPiece(team, diceRoll);
         }
     }
 
     private void selectPiece(Team team, int diceRoll) {
-        List<Spielstein> movableSpielsteine = new ArrayList<>();
-        //TODO: Selection muss angepasst werden. Es soll nur ein stein ausgewählt werden
-        //Spieler (und Bot) müssen jetzt auswhlen welcher Stein bewegt werden soll, Bei einer 6 kann auch ein Spielstein
-        //aus dem Home ausgewählt werden
-        if(diceRoll == 6) {
-            for (Spielstein spielstein : team.getSpielsteine()) {
-                if (spielstein.getState() == SpielsteinState.STATE_HOME || spielstein.getState() == SpielsteinState.STATE_PLAYING) {
-                    movableSpielsteine.add(spielstein);
-                }
-            }
-        } else {
-            for (Spielstein spielstein : team.getSpielsteine()) {
-                if (spielstein.getState() == SpielsteinState.STATE_PLAYING) {
-                    movableSpielsteine.add(spielstein);
-                }
-            }
-        }
+
+        List<Spielstein> movableSpielsteine = team.getMovableSpielsteine(diceRoll);
 
         if (movableSpielsteine.size() == 1) {
             moveSpielstein(movableSpielsteine.get(0), diceRoll, team);
