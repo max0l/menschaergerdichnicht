@@ -86,6 +86,7 @@ public class Team {
         {
 
         }
+        return null;
     }
 
     public List<Spielstein> getSpielsteine() {
