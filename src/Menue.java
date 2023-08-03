@@ -9,10 +9,10 @@ public class Menue {
     private static CardLayout cardLayout;
     private static JPanel cardPanel;
     
-    static int rows = 15; // Replace this with your array's row count
-    static int cols = 15; // Replace this with your array's column count
- // Function to create a grid with the size of an array
-    
+    static int rows = 15;   // Replace this with your array's row count
+    static int cols = 15;   // Replace this with your array's column count
+                            // Function to create a grid with the size of an array
+
     private static JPanel createArrayGridPanel(int rows, int cols) {
         JPanel gridPanel = new JPanel(new GridLayout(rows, cols));
         // Assuming you have a 2D array of values, you can use nested loops to create buttons for each cell
@@ -183,58 +183,62 @@ public class Menue {
         JPanel card3 = new JPanel();
         card3.setBackground(Color.ORANGE);
         cardPanel.add(card3, "Card 3");
-        
-        JPanel gridPanel = createArrayGridPanel(rows, cols);
-        
-        // Button to go back to the settings (Card 2)
-        JButton btnNewButton_1_1 = new JButton("Zurück zum Menü");
-        btnNewButton_1_1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                cardLayout.next(cardPanel);
-            }
-        });
-        btnNewButton_1_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
-        
+        SpielfeldGui spielfeldGui = new SpielfeldGui();
+        spielfeldGui.test();
+        card3.add(spielfeldGui);
 
-        
-        // Button for rolling the dice
-        JButton btnNewButton_4 = new JButton("Würfeln");
-        btnNewButton_4.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) { 
-        		Spiel spiel = new Spiel(); // Erstellen einer Instanz von Spiel
-        		spiel.rollDice();
-        	}
-        });
-        btnNewButton_4.setFont(new Font("Tahoma", Font.PLAIN, 15));
-        
-        // Panel for displaying the game board
-        card3.add(gridPanel);
-        
-        GroupLayout gl_card3 = new GroupLayout(card3);
-        gl_card3.setHorizontalGroup(
-            gl_card3.createParallelGroup(Alignment.LEADING)
-                .addGroup(gl_card3.createSequentialGroup()
-                    .addContainerGap()
-                    .addGroup(gl_card3.createParallelGroup(Alignment.LEADING)
-                        .addComponent(gridPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 464, Short.MAX_VALUE)
-                        .addGroup(gl_card3.createSequentialGroup()
-                            .addComponent(btnNewButton_4, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(ComponentPlacement.RELATED, 197, Short.MAX_VALUE)
-                            .addComponent(btnNewButton_1_1, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)))
-                    .addContainerGap())
-        );
-        gl_card3.setVerticalGroup(
-            gl_card3.createParallelGroup(Alignment.LEADING)
-                .addGroup(Alignment.TRAILING, gl_card3.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(gridPanel, GroupLayout.DEFAULT_SIZE, 378, Short.MAX_VALUE)
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addGroup(gl_card3.createParallelGroup(Alignment.TRAILING, false)
-                        .addComponent(btnNewButton_4, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnNewButton_1_1, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE))
-                    .addContainerGap())
-        );
-        card3.setLayout(gl_card3);
+
+
+//
+//        // Button to go back to the settings (Card 2)
+//        JButton btnNewButton_1_1 = new JButton("Zurück zum Menü");
+//        btnNewButton_1_1.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                cardLayout.next(cardPanel);
+//            }
+//        });
+//        btnNewButton_1_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
+//
+//
+//
+//        // Button for rolling the dice
+//        JButton btnNewButton_4 = new JButton("Würfeln");
+//        btnNewButton_4.addActionListener(new ActionListener() {
+//        	public void actionPerformed(ActionEvent e) {
+//        		Spiel spiel = new Spiel(); // Erstellen einer Instanz von Spiel
+//        		spiel.rollDice();
+//        	}
+//        });
+//        btnNewButton_4.setFont(new Font("Tahoma", Font.PLAIN, 15));
+//
+//        // Panel for displaying the game board
+//        card3.add(gridPanel);
+//
+//        GroupLayout gl_card3 = new GroupLayout(card3);
+//        gl_card3.setHorizontalGroup(
+//            gl_card3.createParallelGroup(Alignment.LEADING)
+//                .addGroup(gl_card3.createSequentialGroup()
+//                    .addContainerGap()
+//                    .addGroup(gl_card3.createParallelGroup(Alignment.LEADING)
+//                        .addComponent(gridPanel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 464, Short.MAX_VALUE)
+//                        .addGroup(gl_card3.createSequentialGroup()
+//                            .addComponent(btnNewButton_4, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)
+//                            .addPreferredGap(ComponentPlacement.RELATED, 197, Short.MAX_VALUE)
+//                            .addComponent(btnNewButton_1_1, GroupLayout.PREFERRED_SIZE, 150, GroupLayout.PREFERRED_SIZE)))
+//                    .addContainerGap())
+//        );
+//        gl_card3.setVerticalGroup(
+//            gl_card3.createParallelGroup(Alignment.LEADING)
+//                .addGroup(Alignment.TRAILING, gl_card3.createSequentialGroup()
+//                    .addContainerGap()
+//                    .addComponent(gridPanel, GroupLayout.DEFAULT_SIZE, 378, Short.MAX_VALUE)
+//                    .addPreferredGap(ComponentPlacement.UNRELATED)
+//                    .addGroup(gl_card3.createParallelGroup(Alignment.TRAILING, false)
+//                        .addComponent(btnNewButton_4, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+//                        .addComponent(btnNewButton_1_1, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 50, Short.MAX_VALUE))
+//                    .addContainerGap())
+//        );
+//        card3.setLayout(gl_card3);
 
         // Add the cardPanel and button to the frame
         frame.getContentPane().add(cardPanel, BorderLayout.CENTER);
