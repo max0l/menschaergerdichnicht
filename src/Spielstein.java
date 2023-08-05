@@ -1,6 +1,7 @@
 import java.awt.*;
+import java.io.Serializable;
 
-public class Spielstein {
+public class Spielstein implements Serializable {
     private Color color;
     private SpielsteinState state;
     private int fieldId;

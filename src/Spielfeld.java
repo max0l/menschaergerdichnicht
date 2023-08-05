@@ -1,4 +1,6 @@
-public class Spielfeld {
+import java.io.Serializable;
+
+public class Spielfeld implements Serializable {
     private Feld[] spielfeld = new Feld[40];
 
     public Spielfeld() {

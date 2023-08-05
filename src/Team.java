@@ -1,8 +1,9 @@
 import java.awt.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Team {
+public class Team implements Serializable {
     //Only Startfield, the fields can be calaculated
 
     private Spielstein[] homeFields = new Spielstein[4];

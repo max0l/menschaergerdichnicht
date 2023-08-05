@@ -1,10 +1,16 @@
 import java.awt.*;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-public class Spiel {
+public class Spiel implements Serializable{
     private boolean gameIsRunning = true;
     private Random random = new Random();
     private List<Team> teams = new ArrayList<Team>();
@@ -280,5 +286,39 @@ public class Spiel {
         spielfeld.getFeld(currentField).setOccupier(null);
         team.moveSpielsteinToFinish(spielstein, goalField);
         team.checkIfAllPiecesAreInFinish();
+    }
+
+
+    public void saveGameObject()
+    {
+        String programPath = System.getProperty("java.class.path");
+        String directoryName = programPath + "\\saves\\";
+        String saveGameName = programPath + "\\saves\\save_game";
+
+        Path path = Paths.get(directoryName);
+
+        if(!Files.exists(path))
+        {
+            try
+            {
+                System.err.println("Folder doesnt exist. Creating.");
+                Files.createDirectories(path);
+            }
+            catch (IOException e)
+            {
+                System.err.println("Failed to create savegame folder. Aborting...");
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(saveGameName)))
+        {
+            outputStream.writeObject(this);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

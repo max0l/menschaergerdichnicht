@@ -1,6 +1,7 @@
 import java.awt.*;
+import java.io.Serializable;
 
-public class Feld {
+public class Feld implements Serializable {
     private float priority;
     private Spielstein occupier;
     private int number;
