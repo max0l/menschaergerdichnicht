@@ -15,6 +15,8 @@ public class Spiel implements Serializable{
     private Random random = new Random();
     private List<Team> teams = new ArrayList<Team>();
 
+    private int
+
     private Spielfeld spielfeld;
 
     public Spiel() {
@@ -286,39 +288,72 @@ public class Spiel implements Serializable{
         spielfeld.getFeld(currentField).setOccupier(null);
         team.moveSpielsteinToFinish(spielstein, goalField);
         team.checkIfAllPiecesAreInFinish();
+
+        askForSave();
     }
 
 
-    public void saveGameObject()
+    public void saveGame()
     {
-        String programPath = System.getProperty("java.class.path");
-        String directoryName = programPath + "\\saves\\";
-        String saveGameName = programPath + "\\saves\\save_game";
+        String userHome = System.getProperty("user.home");
 
-        Path path = Paths.get(directoryName);
-
-        if(!Files.exists(path))
+        String persistentDirPath;
+        if (System.getProperty("os.name").toLowerCase().contains("win"))
         {
-            try
+            String appData = System.getenv("APPDATA");
+            persistentDirPath = appData + File.separator + "menschaergerdichnicht";
+        }
+        else
+        {
+            persistentDirPath = userHome + File.separator + ".menschaergerdichnicht";
+        }
+
+        File persistentDir = new File(persistentDirPath);
+
+        if (!persistentDir.exists())
+        {
+            if (persistentDir.mkdirs())
             {
-                System.err.println("Folder doesnt exist. Creating.");
-                Files.createDirectories(path);
+                System.out.println("Directory created: " + persistentDirPath);
             }
-            catch (IOException e)
+            else
             {
-                System.err.println("Failed to create savegame folder. Aborting...");
-                e.printStackTrace();
-                return;
+                System.err.println("Failed to create directory: " + persistentDirPath);
             }
         }
 
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(saveGameName)))
+        String fileName = "save_game";
+        String filePath = persistentDirPath + File.separator + fileName;
+
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath)))
         {
             outputStream.writeObject(this);
+            System.out.println("Game saved at: " + filePath);
         }
         catch (IOException e)
         {
             e.printStackTrace();
+        }
+    }
+
+    void askForSave()
+    {
+        Character input = null;
+        System.out.println("Do you want to save a game? (y/n)");
+
+        try
+        {
+            input = (char) System.in.read();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return;
+        }
+
+        if(input == 'y')
+        {
+            saveGame();
         }
     }
 }
