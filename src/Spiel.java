@@ -1,36 +1,45 @@
 import java.awt.*;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-public class Spiel implements Serializable{
+public class Spiel implements Serializable
+{
     private boolean gameIsRunning = true;
     private Random random = new Random();
     private List<Team> teams = new ArrayList<Team>();
 
-    private int
+    private Team nextToPlay = null;
 
     private Spielfeld spielfeld;
+    private boolean firstRun = false;
 
-    public Spiel() {
+    public Spiel()
+    {
         spielfeld = new Spielfeld();
         setupPlayers(spielfeld);
     }
 
-    //TODO: Muss ein spielestein von dem Spawn wegbewegt werden? Oder kann er da erstmal bleiben (vom eigenen Team)
-    // solange man keine 6 würfelt?
-    void startGame() {
-        System.out.println("Spiel gestartet");
-        while (gameIsRunning) {
+    void startGame()
+    {
+        if(this.nextToPlay != null)
+        {
+            firstRun = true;
+            System.out.println("Das Spiel wird bei Spieler: " + this.nextToPlay.getColor() + " fortgesetzt.");
+        }
+        else
+        {
+            System.out.println("Ein neues Spiel wurde gestartet.");
+        }
+
+        while (gameIsRunning)
+        {
             run();
         }
+
+        System.out.println("Spiel beendet");
     }
 
     void setupPlayers(Spielfeld spielfeld)
@@ -41,50 +50,60 @@ public class Spiel implements Serializable{
         teams.add(new Team(Color.YELLOW, 30, spielfeld));
     }
 
-    void run() {
-        for (Team team : teams) {
+    void run()
+    {
+
+        for (int i = 0; i < teams.size(); i++)
+        {
+            if(firstRun)
+            {
+                i = teams.indexOf(this.nextToPlay);
+            }
+
+            Team team = teams.get(i);
+
             System.out.println("Team " + team.getColor() + " ist am Zug");
-            makeAmove(team);
-            System.out.println("Team " + team.getColor() + " ist fertig" + "\n\n");
+            play(team);
+            System.out.println("Team " + team.getColor() + " ist fertig");
 
             if(team.getIsFinished())
             {
-                System.out.println("Spiel beendet");
                 gameIsRunning = false;
                 break;
             }
-        }
-    }
 
-    private void makeAmove(Team team)
-    {
-        //if all figures are in the spawn
-        if(team.checkIfAllPiecesAreInStart())
-        {
-            tryToGetOutOfSpawn(team);
-            return;
-        }
-
-        //Normal Playing
-        if(!team.getIsFinished())
-        {
-            play(team);
+            if (i == teams.size() - 1 && this.firstRun)
+            {
+                this.firstRun = false;
+            }
         }
     }
 
     private void play(Team team)
     {
-        int diceRoll = rollDice();
+        this.nextToPlay = getNextToPlay(team);
 
-        if (diceRoll == 6)
+        if (team.checkIfAllPiecesAreInStart())
         {
-            selectPiece(team, diceRoll);
-            play(team);
+            tryToGetOutOfSpawn(team);
+            return;
         }
-        else
+
+        if (!team.getIsFinished())
         {
+            int diceRoll = rollDice();
             selectPiece(team, diceRoll);
+
+            if (diceRoll == 6)
+            {
+                play(team);
+            }
         }
+    }
+
+    private Team getNextToPlay(Team team)
+    {
+        return teams.get(((teams.indexOf(team) + 1) % teams.size()));
     }
 
     private void selectPiece(Team team, int diceRoll) {
@@ -289,6 +308,7 @@ public class Spiel implements Serializable{
         team.moveSpielsteinToFinish(spielstein, goalField);
         team.checkIfAllPiecesAreInFinish();
 
+        System.out.println("NEXT: " + this.getNextToPlay(team).getColor());
         askForSave();
     }
 
