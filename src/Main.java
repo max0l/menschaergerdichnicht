@@ -1,4 +1,10 @@
 import java.io.*;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class Main
 {
@@ -46,8 +52,32 @@ public class Main
 
             String fileName = "save_game";
             String filePath = persistentDirPath + File.separator + fileName;
+            File saveFile = null;
 
-            File saveFile = new File(filePath);
+            List<Path> saveGameFiles = findSaveGameFiles(Path.of(persistentDirPath));
+
+            if (saveGameFiles.isEmpty()) {
+                System.out.println("No save game files found.");
+                spiel = new Spiel();
+                System.out.println("New Game created!");
+            } else {
+                System.out.println("Select a save game file:");
+                for (int i = 0; i < saveGameFiles.size(); i++) {
+                    System.out.println(i + ": " + saveGameFiles.get(i).getFileName());
+                }
+
+                Scanner scanner = new Scanner(System.in);
+                int selection = scanner.nextInt();
+
+                if (selection >= 0 && selection < saveGameFiles.size()) {
+                    Path selectedFile = saveGameFiles.get(selection);
+                    System.out.println("Selected file: " + selectedFile.getFileName());
+                    saveFile = new File(selectedFile.toString());
+                    filePath = selectedFile.toString();
+                } else {
+                    System.out.println("Invalid selection.");
+                }
+            }
 
             if (!saveFile.exists())
             {
@@ -75,4 +105,21 @@ public class Main
             System.err.println("Invalid input");
         }
     }
+
+    public static List<Path> findSaveGameFiles(Path directory) {
+        List<Path> saveGameFiles = new ArrayList<>();
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory, "save_game*")) {
+            for (Path entry : stream) {
+                if (Files.isRegularFile(entry)) {
+                    saveGameFiles.add(entry);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return saveGameFiles;
+    }
+
 }

@@ -11,8 +11,8 @@ public class Spiel implements Serializable
     private Random random = new Random();
     private List<Team> teams = new ArrayList<Team>();
 
-    private Team nextToPlay = null;
-
+    private Team currentlyPlaying = null;
+    private Integer lastDiceRoll = null;
     private Spielfeld spielfeld;
     private boolean firstRun = false;
 
@@ -24,10 +24,10 @@ public class Spiel implements Serializable
 
     void startGame()
     {
-        if(this.nextToPlay != null)
+        if(currentlyPlaying != null)
         {
             firstRun = true;
-            System.out.println("Das Spiel wird bei Spieler: " + this.nextToPlay.getColor() + " fortgesetzt.");
+            System.out.println("Das Spiel wird bei Spieler: " + this.currentlyPlaying.getColor() + " fortgesetzt.");
         }
         else
         {
@@ -57,14 +57,15 @@ public class Spiel implements Serializable
         {
             if(firstRun)
             {
-                i = teams.indexOf(this.nextToPlay);
+                i = teams.indexOf(this.currentlyPlaying);
+                firstRun = false;
             }
 
             Team team = teams.get(i);
 
             System.out.println("Team " + team.getColor() + " ist am Zug");
             play(team);
-            System.out.println("Team " + team.getColor() + " ist fertig");
+            System.out.println("\nTeam " + team.getColor() + " ist fertig");
 
             if(team.getIsFinished())
             {
@@ -72,17 +73,20 @@ public class Spiel implements Serializable
                 break;
             }
 
+            currentlyPlaying = getNextToPlay(team);
+
+            /*
             if (i == teams.size() - 1 && this.firstRun)
             {
                 this.firstRun = false;
             }
+             */
         }
     }
 
     private void play(Team team)
     {
-        this.nextToPlay = getNextToPlay(team);
-
+        currentlyPlaying = team;
         if (team.checkIfAllPiecesAreInStart())
         {
             tryToGetOutOfSpawn(team);
@@ -91,14 +95,28 @@ public class Spiel implements Serializable
 
         if (!team.getIsFinished())
         {
-            int diceRoll = rollDice();
+            int diceRoll;
+            if(lastDiceRoll == null)
+            {
+                diceRoll = rollDice();
+                lastDiceRoll = diceRoll;
+            }
+            else
+            {
+                diceRoll = lastDiceRoll;
+            }
+
             selectPiece(team, diceRoll);
+
+            lastDiceRoll = null;
 
             if (diceRoll == 6)
             {
                 play(team);
             }
         }
+
+        lastDiceRoll = null;
     }
 
     private Team getNextToPlay(Team team)
@@ -344,6 +362,15 @@ public class Spiel implements Serializable
 
         String fileName = "save_game";
         String filePath = persistentDirPath + File.separator + fileName;
+
+        int i = 0;
+        while(new File(filePath).exists())
+        {
+            i++;
+            String newFileName = fileName + i;
+            filePath = persistentDirPath + File.separator + newFileName;
+
+        }
 
         try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath)))
         {
