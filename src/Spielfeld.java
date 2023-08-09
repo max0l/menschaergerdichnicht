@@ -1,10 +1,10 @@
 import java.io.Serializable;
 
 public class Spielfeld implements Serializable {
-    private Feld[] spielfeld = new Feld[40];
+    private Feld[] spielfeld = new Feld[182];
 
     public Spielfeld() {
-        for (int i = 0; i < 40; i++) {
+        for (int i = 0; i < 182; i++) {
             spielfeld[i] = new Feld(i);
         }
     }
