@@ -1,10 +1,15 @@
 import java.awt.*;
 
 public class Feld {
+
+    private int id;
+    private int buttonNumber;
+    private Object feldObject;
     private float priority;
     private Spielstein occupier;
     private int number;
     private boolean isOccupied;
+
 
     public Feld(int number) {
         this.number = number;
@@ -40,5 +45,24 @@ public class Feld {
 
     public void setPriority(float priority) {
         this.priority = priority;
+    }
+
+    public int getId() {
+        return id;
+    }
+    public int getButtonNumber() {
+        return buttonNumber;
+    }
+    public Object getFeldObject() {
+        return feldObject;
+    }
+
+    public Feld(int id, int buttonNumber) {
+        this.id = id;
+        this.buttonNumber = buttonNumber;
+    }
+
+    public void setFeldObject(Object feldObject) {
+        this.feldObject = feldObject;
     }
 }

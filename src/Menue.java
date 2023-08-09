@@ -8,7 +8,9 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 public class Menue {
     private static CardLayout cardLayout;
     private static JPanel cardPanel;
-    
+
+
+
     static int rows = 15;   // Replace this with your array's row count
     static int cols = 15;   // Replace this with your array's column count
                             // Function to create a grid with the size of an array
@@ -27,9 +29,10 @@ public class Menue {
 
     public static void main(String[] args) {
         // Create the JFrame
-        JFrame frame = new JFrame("Card Layout Example");
+        new Spiel().startGame();
+        JFrame frame = new JFrame("Mensch ärgere Dich nicht!");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(550, 500);
+        frame.setSize(800, 800);
 
         // Create the CardLayout and JPanel
         cardLayout = new CardLayout();
@@ -47,7 +50,7 @@ public class Menue {
                 cardLayout.last(cardPanel);
             }
         });
-        
+
         // Button to switch to the previous card (Card 1)
         JButton btnNewButton_2 = new JButton("Einstellungen");
         btnNewButton_2.addActionListener(new ActionListener() {
@@ -55,7 +58,7 @@ public class Menue {
                 cardLayout.next(cardPanel);
             }
         });
-        
+
         // Button to exit the application
         JButton btnNewButton_3 = new JButton("Verlassen");
         btnNewButton_3.addActionListener(new ActionListener() {
@@ -63,7 +66,7 @@ public class Menue {
                 frame.dispose();
             }
         });
-        
+
         // Label for displaying the game name
         JLabel lblNewLabel = new JLabel("Mensch ärgere Dich nicht!");
         lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -104,15 +107,15 @@ public class Menue {
         comboBox.setFont(new Font("Tahoma", Font.PLAIN, 14));
         comboBox.setModel(new DefaultComboBoxModel(new String[] {"Leicht", "Mittel", "Schwer"}));
         comboBox.setMaximumRowCount(3);
-        
+
         // Label for the difficulty level selection
         JLabel lblNewLabel_1 = new JLabel("Schwierigkeitsgrad");
         lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        
+
         // CheckBox for enabling color-blind mode
         JCheckBox chckbxNewCheckBox = new JCheckBox("Farbenblindenmodus");
         chckbxNewCheckBox.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        
+
         // Slider for adjusting the volume
         JSlider slider = new JSlider();
         slider.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -121,7 +124,7 @@ public class Menue {
         slider.setSnapToTicks(true);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);
-        
+
         // Button to go back to the previous card (Card 1)
         JButton btnNewButton_1 = new JButton("Zurück");
         btnNewButton_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
@@ -131,14 +134,14 @@ public class Menue {
                 System.out.println("Schwierigkeitsgrad: " + comboBox.getSelectedItem());
                 System.out.println("Farbenblindenmodus: " + chckbxNewCheckBox.isSelected());
                 System.out.println("Lautstärke: " + slider.getValue());
-                cardLayout.previous(cardPanel); 
+                cardLayout.previous(cardPanel);
             }
         });
-        
+
         // Label for displaying the settings title
         JLabel lblNewLabel_2 = new JLabel("Lautstärke");
         lblNewLabel_2.setFont(new Font("Tahoma", Font.PLAIN, 14));
-        
+
         // Label for displaying the settings title
         JLabel lblNewLabel_3 = new JLabel("Einstellungen");
         lblNewLabel_3.setFont(new Font("Tahoma", Font.PLAIN, 20));
@@ -177,7 +180,7 @@ public class Menue {
                     .addComponent(btnNewButton_1, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
                     .addGap(41))
         );
-        
+
         card2.setLayout(gl_card2);
 
         JPanel card3 = new JPanel();
@@ -185,9 +188,10 @@ public class Menue {
         flowLayout.setAlignment(FlowLayout.LEADING);
         card3.setBackground(Color.ORANGE);
         cardPanel.add(card3, "Card 3");
-        SpielfeldGui spielfeldGui = new SpielfeldGui();
+        Spielfeld spielfeld = new Spielfeld();
+        SpielfeldGui spielfeldGui = new SpielfeldGui(spielfeld);
         spielfeldGui.test();
-        
+
         JButton btnNewButton_4 = new JButton("Würfeln");
         btnNewButton_4.addActionListener(new ActionListener() {
             @Override
