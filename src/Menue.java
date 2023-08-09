@@ -28,8 +28,6 @@ public class Menue {
     }
 
     public static void main(String[] args) {
-        // Create the JFrame
-        new Spiel().startGame();
         JFrame frame = new JFrame("Mensch ärgere Dich nicht!");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 800);
