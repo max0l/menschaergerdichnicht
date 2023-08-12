@@ -1,3 +1,5 @@
+import game.Spiel;
+
 import java.io.*;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -6,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+@Deprecated
 public class Main
 {
     private static Spiel spiel = null;
@@ -16,7 +19,7 @@ public class Main
             askForLoad();
         }
 
-        spiel.startGame();
+        spiel.startGame(false);
     }
 
     static void askForLoad()

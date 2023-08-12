@@ -1,3 +1,7 @@
+package game;
+
+import server.ClientHandler;
+
 import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -20,8 +24,10 @@ public class Team implements Serializable {
     private boolean isFinished;
 
     private Spielfeld spielfeld;
+    
+    private ClientHandler client;
 
-    public Team(Color color, int startField, Spielfeld spielfeld) {
+    public Team(Color color, int startField, Spielfeld spielfeld, boolean isBot, ClientHandler clientHandler) {
         this.startField = startField;
         this.finishField = (startField + 39) %40;
         this.color = color;
@@ -31,6 +37,7 @@ public class Team implements Serializable {
             finishFields[i] = new Feld(i);
         }
         this.spielfeld = spielfeld;
+        this.client = clientHandler;
     }
 
     public Color getColor() {
@@ -40,6 +47,7 @@ public class Team implements Serializable {
     public boolean getIsBot() {
         return isBot;
     }
+
 
     public boolean checkIfAllPiecesAreInStart() {
         for(Spielstein spielstein : spielsteine) {
@@ -56,7 +64,7 @@ public class Team implements Serializable {
                 return;
             }
         }
-        System.out.println("Team " + name + " Farbe: "+ color + " hat gewonnen!");
+        System.out.println("game.Team " + name + " Farbe: "+ color + " hat gewonnen!");
         isFinished = true;
     }
 
@@ -104,7 +112,7 @@ public class Team implements Serializable {
     }
 
     public void pieceFromHomeToField(Spielstein spielstein) {
-        System.out.println("Bewege Spielstein von Home aufs Feld");
+        System.out.println("Bewege game.Spielstein von Home aufs game.Feld");
         spielstein.setFieldId(startField);
         spielstein.setState(SpielsteinState.STATE_PLAYING);
         spielfeld.getFeld(startField).setOccupier(spielstein);
@@ -169,21 +177,25 @@ public class Team implements Serializable {
     }
 
     public void moveSpielsteinToFinish(Spielstein spielstein, int goalField) {
-        System.out.println("Bewege Spielstein ins Ziel");
+        System.out.println("Bewege game.Spielstein ins Ziel");
         System.out.println("GoalField: " + goalField);
         spielstein.setFieldId(goalField);
         spielstein.setState(SpielsteinState.STATE_FINISH);
         printFinishFields();
-        System.out.println("Spielstein: " + spielstein.getFieldId() + " Walked: " + spielstein.getWalkedFields());
+        System.out.println("game.Spielstein: " + spielstein.getFieldId() + " Walked: " + spielstein.getWalkedFields());
         finishFields[goalField].setOccupier(spielstein);
         printFinishFields();
     }
 
     public void moveSpielsteinAroundFinish(Spielstein spielstein, int currentField, int goalField) {
-        System.out.println("Bewege Spielstein ums Ziel");
+        System.out.println("Bewege game.Spielstein ums Ziel");
         spielstein.setFieldId(goalField);
         finishFields[currentField].setOccupier(null);
         finishFields[goalField].setOccupier(spielstein);
         printFinishFields();
+    }
+
+    public ClientHandler getClient() {
+        return client;
     }
 }

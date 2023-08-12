@@ -1,3 +1,8 @@
+package game;
+
+import server.ClientHandler;
+import server.ClientsBroadcast;
+
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -16,38 +21,84 @@ public class Spiel implements Serializable
     private Spielfeld spielfeld;
     private boolean firstRun = false;
 
+    private ClientsBroadcast clientsBroadcast;
+
+    private boolean doBroadcast;
+
+    private Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
+
+    @Deprecated
     public Spiel()
     {
         spielfeld = new Spielfeld();
         setupPlayers(spielfeld);
     }
 
-    void startGame()
+    /**
+     * Konstruktor der Klasse "Spiel".
+     * Erstellt das Spielfeld initialisiert die Spieler.
+     * @param isLocal
+     * @param numPlayers Die Anzahl der Spieler die am Spiel teilnehmen.
+     * @param clients Die Liste der verbundenen Spieler.
+     */
+    public Spiel(Boolean isLocal, int numPlayers, List<ClientHandler> clients) {
+        spielfeld = new Spielfeld();
+        setupClients(clients, numPlayers);
+        this.clientsBroadcast = new ClientsBroadcast(clients);
+    }
+
+
+    /**
+     * Startet ein neues Spiel oder setzt ein angefangenes Spiel fort.
+     */
+    public void startGame(boolean doBroadcast)
     {
+        this.doBroadcast = doBroadcast;
+
         if(currentlyPlaying != null)
         {
             firstRun = true;
-            System.out.println("Das Spiel wird bei Spieler: " + this.currentlyPlaying.getColor() + " fortgesetzt.");
+            System.out.println("Das game.Spiel wird bei Spieler: " + this.currentlyPlaying.getColor() + " fortgesetzt.");
         }
         else
         {
-            System.out.println("Ein neues Spiel wurde gestartet.");
+            System.out.println("Ein neues game.Spiel wurde gestartet.");
         }
+
+        doBroadcast();
 
         while (gameIsRunning)
         {
             run();
+            doBroadcast();
         }
 
-        System.out.println("Spiel beendet");
+        System.out.println("game.Spiel beendet");
     }
 
+    @Deprecated
     void setupPlayers(Spielfeld spielfeld)
     {
-        teams.add(new Team(Color.RED, 0, spielfeld));
-        teams.add(new Team(Color.BLUE, 10, spielfeld));
-        teams.add(new Team(Color.GREEN, 20, spielfeld));
-        teams.add(new Team(Color.YELLOW, 30, spielfeld));
+
+        teams.add(new Team(Color.RED, 0, spielfeld, false, null));
+        teams.add(new Team(Color.BLUE, 10, spielfeld, false, null));
+        teams.add(new Team(Color.GREEN, 20, spielfeld, false, null));
+        teams.add(new Team(Color.YELLOW, 30, spielfeld, false, null));
+
+    }
+
+    /**
+     * Fügt Teams für verbundene Spieler hinzu und füllt fehlende Spieler mit Bots auf.
+     * @param clients Die Liste der verbundenen Spieler.
+     * @param numPlayers Die Anzahl der Spieler die am Spiel teilnehmen.
+     */
+    void setupClients(List<ClientHandler> clients, int numPlayers) {
+        for(int i = 0; i < numPlayers; i++) {
+            teams.add(new Team(colors[i], i*10, spielfeld, false, clients.get(i)));
+        }
+        for(int k = numPlayers; k < 4; k++) {
+            teams.add(new Team(colors[k], k*10, spielfeld, true, null));
+        }
     }
 
     void run()
@@ -63,9 +114,9 @@ public class Spiel implements Serializable
 
             Team team = teams.get(i);
 
-            System.out.println("Team " + team.getColor() + " ist am Zug");
+            System.out.println("game.Team " + team.getColor() + " ist am Zug");
             play(team);
-            System.out.println("\nTeam " + team.getColor() + " ist fertig");
+            System.out.println("\ngame.Team " + team.getColor() + " ist fertig");
 
             if(team.getIsFinished())
             {
@@ -175,7 +226,7 @@ public class Spiel implements Serializable
         });
 
         //TODO:Also needs to remove pieces that are in goal or would go to the goal
-        //TODO: Spielstein sollte nachdem es im Ziel ist die SpielFeldID des momentanen Feldes im Ziel bekommen
+        //TODO: game.Spielstein sollte nachdem es im Ziel ist die SpielFeldID des momentanen Feldes im Ziel bekommen
         //Figure is already in goal
         movableSpielsteine.removeIf(spielstein -> spielstein.getState() == SpielsteinState.STATE_FINISH
                 && team.getIsOccupiedInFinish(diceRoll + team.getSpielFeldIntOfSpielsteinInFinish(spielstein) - 1));
@@ -200,7 +251,7 @@ public class Spiel implements Serializable
     }
 
     public Spielstein movePieceOutOfSpawn(Team team) {
-        System.out.println("Spielstein aus Spawn bewegen");
+        System.out.println("game.Spielstein aus Spawn bewegen");
 
         Spielstein currentSpielstein = team.getSpielsteinFromHome();
         currentSpielstein.setState(SpielsteinState.STATE_PLAYING);
@@ -225,12 +276,16 @@ public class Spiel implements Serializable
 
 
         spielfeld.getFeld(team.getStartField()).setOccupier(currentSpielstein);
+
+        doBroadcast();
+
         return currentSpielstein;
     }
 
     private void kickSpielstein(Spielstein occupier) {
-        System.out.println("Spielstein von " + occupier.getColor() + " wird gekickt");
+        System.out.println("game.Spielstein von " + occupier.getColor() + " wird gekickt");
         occupier.getTeam().pieceFromFieldToHome(occupier);
+        doBroadcast();
     }
 
     private void tryToGetOutOfSpawn(Team team) {
@@ -267,14 +322,14 @@ public class Spiel implements Serializable
 
 
         if(spielstein.getState() == SpielsteinState.STATE_HOME && diceRoll == 6){
-            System.out.println("Ausgewählter Spielstein ist im Home");
+            System.out.println("Ausgewählter game.Spielstein ist im Home");
             movePieceOutOfSpawn(team);
             return;
         }
 
 
-        System.out.println("Bewege Spielstein von " + spielstein.getFieldId());
-        System.out.println("Bewege Spielstein um " + diceRoll + " Felder");
+        System.out.println("Bewege game.Spielstein von " + spielstein.getFieldId());
+        System.out.println("Bewege game.Spielstein um " + diceRoll + " Felder");
         int nextSpielFeld = (spielstein.getFieldId() + diceRoll) % 40;
         int currentSpielFeld = spielstein.getFieldId();
 
@@ -294,29 +349,43 @@ public class Spiel implements Serializable
             moveSpielsteinInGoalAround(team, diceRoll, spielstein);
         }
 
-        spielstein.setFieldId(nextSpielFeld);
-        spielfeld.getFeld(currentSpielFeld).setOccupier(null);
-        spielstein.setFieldId(nextSpielFeld);
-        spielfeld.getFeld(nextSpielFeld).setOccupier(spielstein);
-        System.out.println("Spielstein ist auf Feld " + spielstein.getFieldId());
-        spielstein.addWalkedFields(diceRoll);
+
+        moveSpielsteinStepByStep(nextSpielFeld, spielstein, currentSpielFeld, diceRoll);
 
     }
 
+    private void moveSpielsteinStepByStep(int nextSpielFeld, Spielstein spielstein, int currentSpielFeld, int diceRoll) {
+
+        while(spielstein.getFieldId() != nextSpielFeld){
+
+            spielstein.setFieldId((spielstein.getFieldId() + 1) % 40);
+            spielfeld.getFeld(currentSpielFeld).setOccupier(null);
+            spielfeld.getFeld(spielstein.getFieldId()).setOccupier(spielstein);
+            currentSpielFeld = spielstein.getFieldId();
+
+            doBroadcast();
+        }
+
+        System.out.println("game.Spielstein ist auf game.Feld " + spielstein.getFieldId());
+        spielstein.addWalkedFields(diceRoll);
+        doBroadcast();
+    }
+
     private void moveSpielsteinInGoalAround(Team team, int diceRoll, Spielstein spielstein) {
-        System.out.println("Spielstein ist im Ziel");
+        System.out.println("game.Spielstein ist im Ziel");
         int currentField = spielstein.getFieldId();
         int goalField = currentField + diceRoll;
 
         System.out.println("Current Field: " + currentField + " Goal Field: " + goalField);
         team.moveSpielsteinAroundFinish(spielstein, currentField, goalField);
         team.checkIfAllPiecesAreInFinish();
+        doBroadcast();
     }
 
     private void moveSpielsteinToGoal(Team team, int diceRoll, Spielstein spielstein) {
-        System.out.println("Spielstein ist auf dem Weg ins Ziel");
-        System.out.println("Spielstein ist auf Feld " + spielstein.getFieldId());
-        System.out.println("Spielstein ist " + spielstein.getWalkedFields() + " Felder gelaufen");
+        System.out.println("game.Spielstein ist auf dem Weg ins Ziel");
+        System.out.println("game.Spielstein ist auf game.Feld " + spielstein.getFieldId());
+        System.out.println("game.Spielstein ist " + spielstein.getWalkedFields() + " Felder gelaufen");
         int currentField = spielstein.getFieldId();
         int goalField = spielstein.getWalkedFields() + diceRoll - 40;
 
@@ -327,10 +396,14 @@ public class Spiel implements Serializable
         team.checkIfAllPiecesAreInFinish();
 
         System.out.println("NEXT: " + this.getNextToPlay(team).getColor());
-        askForSave();
+        doBroadcast();
+        //askForSave();
+
     }
 
-
+    /**
+     * Speichert den Spielstand in einer Datei ab.
+     */
     public void saveGame()
     {
         String userHome = System.getProperty("user.home");
@@ -401,6 +474,12 @@ public class Spiel implements Serializable
         if(input == 'y')
         {
             saveGame();
+        }
+    }
+
+    void doBroadcast() {
+        if(doBroadcast) {
+            clientsBroadcast.broadcast(this);
         }
     }
 }

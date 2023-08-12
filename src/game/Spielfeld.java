@@ -1,3 +1,5 @@
+package game;
+
 import java.io.Serializable;
 
 public class Spielfeld implements Serializable {

@@ -1,4 +1,5 @@
-import java.awt.*;
+package game;
+
 import java.io.Serializable;
 
 public class Feld implements Serializable {
