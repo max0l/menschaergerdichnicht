@@ -282,12 +282,21 @@ public class Spiel implements Serializable
         return currentSpielstein;
     }
 
+    /**
+     * Wirft einen Spielstein und setzt diesen wieder zurück in das Startfeld des jeweiligen Spielers.
+     * @param occupier Der zu werfende Spielstein.
+     */
     private void kickSpielstein(Spielstein occupier) {
         System.out.println("game.Spielstein von " + occupier.getColor() + " wird gekickt");
         occupier.getTeam().pieceFromFieldToHome(occupier);
         doBroadcast();
     }
 
+    /**
+     * Lässt das betroffene Team dreimal würfel. Sollte dabei eine 6 gewürfelt werden
+     * wird ein Spielstein des Teams aus dem Start heraus gerückt.
+     * @param team Das Team welches an der Reihe ist.
+     */
     private void tryToGetOutOfSpawn(Team team) {
         System.out.println("Versuche aus dem Spawn zu kommen");
         for (int j = 0; j < 3; j++) {
@@ -300,12 +309,21 @@ public class Spiel implements Serializable
 
     }
 
+    /**
+     * Würfelt eine zufällige Zahl
+     * @return Gibt die gewürfelte Zahl zurück.
+     */
     int rollDice() {
         int rand = random.nextInt(6) + 1;
         System.out.println("Würfel zeigt " + rand);
         return rand;
     }
 
+    /**
+     * Iteriert durch alle Teams und überprüft, ob das Team fertig ist.
+     * @return Gibt {@code true} zurück, wenn das Spiel beendet ist.
+     * Ansonsten wird entsprechend {@code false} zurückgegeben.
+     */
     public boolean checkIfGameIsFinished()
     {
         for(Team team : teams)
@@ -318,6 +336,12 @@ public class Spiel implements Serializable
         return false;
     }
 
+    /**
+     * Rückt einen Spielstein um eine gewisse Anzahl an Feldern.
+     * @param spielstein Der zu rückende Spielstein
+     * @param diceRoll Die gewürfelte Zahl, um welche der Spielstein gerückt wird.
+     * @param team Das Team, welches am Zug ist.
+     */
     private void moveSpielstein(Spielstein spielstein, int diceRoll, Team team) {
 
 
@@ -382,6 +406,12 @@ public class Spiel implements Serializable
         doBroadcast();
     }
 
+    /**
+     * Bewegt einen Spielstein von den normalen Feldern in eines der Zielfelder.
+     * @param team Das Team, welches am Zug ist.
+     * @param diceRoll Die gewürfelte Zahl, um welche der Spielstein gerückt wird.
+     * @param spielstein Der zu rückende Spielstein
+     */
     private void moveSpielsteinToGoal(Team team, int diceRoll, Spielstein spielstein) {
         System.out.println("game.Spielstein ist auf dem Weg ins Ziel");
         System.out.println("game.Spielstein ist auf game.Feld " + spielstein.getFieldId());
