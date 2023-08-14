@@ -16,12 +16,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Client{
-    private volatile static Spiel spiel;
+public class Client implements Runnable{
+    private volatile Spiel spiel;
+    private String address;
+    private int port;
 
-    public static void main(String[] args) {
-        String address = "localhost";
-        int port = 8080;
+    public Client(String address, int port) {
+        this.address = address;
+        this.port = port;
+    }
+
+    @Override
+    public void run() {
         boolean gameIsFinished = false;
         boolean doBroadcast = false;
 
@@ -102,7 +108,7 @@ public class Client{
 
     }
 
-    private static void sendSelectionToServer(Spiel spiel, Color teamColor, Socket socket, ObjectOutputStream out) {
+    private void sendSelectionToServer(Spiel spiel, Color teamColor, Socket socket, ObjectOutputStream out) {
         Team team = spiel.getTeamByColor(teamColor);
         if(team == null){
             System.out.println("CLIENT:\t\tTeam is null");

@@ -143,11 +143,11 @@ public class LauncherGUI extends JFrame {
 
             serverThread.start();
 
-//            Client client = new Client("localhost", 8080);
-//
-//            Thread clientThread = new Thread(client);
+            Client client = new Client("localhost", 8080);
 
-//            clientThread.start();
+            Thread clientThread = new Thread(client);
+
+            clientThread.start();
         } else if (multiplayerButton.isSelected()) {
             if (hostButton.isSelected()) {
                 Server server = new Server(true, playerCount);
@@ -156,19 +156,19 @@ public class LauncherGUI extends JFrame {
 
                 serverThread.start();
 
-//                Client client = new Client("localhost", 8080);
-//
-//                Thread clientThread = new Thread(client);
-//
-//                clientThread.start();
+                Client client = new Client("localhost", 8080);
+
+                Thread clientThread = new Thread(client);
+
+                clientThread.start();
             } else if (connectButton.isSelected()) {
                 String serverAddress = serverAddressField.getText();
                 int port = Integer.parseInt(portField.getText());
-//                Client client = new Client(serverAddress, port);
-//
-//                Thread clientThread = new Thread(client);
-//
-//                clientThread.start();
+                Client client = new Client(serverAddress, port);
+
+                Thread clientThread = new Thread(client);
+
+                clientThread.start();
             }
         }
     }
