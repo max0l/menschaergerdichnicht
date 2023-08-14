@@ -3,7 +3,7 @@ package game;
 import java.awt.*;
 import java.io.Serializable;
 
-public class Spielstein implements Serializable {
+public class Spielstein implements Serializable, Cloneable {
     private Color color;
     private SpielsteinState state;
     private int fieldId;
@@ -59,5 +59,10 @@ public class Spielstein implements Serializable {
 
     public void addWalkedFields(int diceRoll) {
         walkedFields += diceRoll;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

@@ -1,6 +1,7 @@
 package server;
 
 import game.Spiel;
+import game.Spielfeld;
 import game.Spielstein;
 import game.Team;
 
@@ -18,7 +19,7 @@ public class ClientHandler {
     private Socket client;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
-    private Team team;
+    private volatile Team team;
     public ClientHandler(Socket client, ServerSocket server) throws IOException {
         System.out.println("Trying to creade a new client handler");
         this.client = client;
@@ -47,11 +48,8 @@ public class ClientHandler {
         return number;
     }
 
-    public void sendToClient(Spiel object, Team currentTeam) throws IOException {
-        Spiel spielToSend = object;
-        checkIfClientWouldRecieveCorrectData(spielToSend, currentTeam);
-        outputStream.writeObject(spielToSend);
-        outputStream.flush();
+    public void sendToClient(Spiel spiel) throws IOException, CloneNotSupportedException {
+           outputStream.writeObject((Spiel) spiel.clone());
         System.out.println("SERVER:\tObject sent");
     }
 

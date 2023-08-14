@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Team implements Serializable {
+public class Team implements Serializable, Cloneable {
     //Only Startfield, the fields can be calaculated
 
     private Spielstein[] homeFields = new Spielstein[4];
@@ -202,5 +202,17 @@ public class Team implements Serializable {
 
     public void setIsBot(boolean b) {
         isBot = b;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Team team = (Team) super.clone();
+        team.homeFields = homeFields.clone();
+        team.finishFields = finishFields.clone();
+        team.spielsteine = new ArrayList<>();
+        for(Spielstein spielstein : spielsteine) {
+            team.spielsteine.add((Spielstein) spielstein.clone());
+        }
+        return team;
     }
 }

@@ -2,19 +2,22 @@ package game;
 
 import java.awt.*;
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-public class Spiel implements Serializable
+public class Spiel implements Serializable, Cloneable
 {
-    private final List<Team> teams;
+    private List<Team> teams;
     private boolean gameIsRunning = true;
     private Random random = new Random();
     private Team currentlyPlaying = null;
     private Integer lastDiceRoll;
     private Spielfeld spielfeld;
     private boolean firstRun = false;
+
+    private int numPlayers;
 
     /**
      * Konstruktor der Klasse "Spiel".
@@ -27,6 +30,15 @@ public class Spiel implements Serializable
     public Spiel(Boolean isLocal, int numPlayers, List<Team> teams, Spielfeld spielfeld) {
         this.spielfeld = spielfeld;
         this.teams = teams;
+        this.numPlayers = teams.size();
+    }
+
+    public Spiel(boolean isLocal, int size, List<Team> teams, Spielfeld spielfeld, Team currentlyPlaying, int lastDiceRoll, boolean gameIsRunning) {
+        numPlayers = size;
+        this.spielfeld = spielfeld;
+        this.teams = teams;
+        this.numPlayers = teams.size();
+        this.currentlyPlaying = currentlyPlaying;
     }
 
 
@@ -454,5 +466,51 @@ public class Spiel implements Serializable
 
     public void setCurrentlyPlaying(Team team) {
         this.currentlyPlaying = team;
+    }
+
+    @Serial
+    private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+        currentlyPlaying = (Team) inputStream.readObject();
+        lastDiceRoll = (Integer) inputStream.readObject();
+        spielfeld = (Spielfeld) inputStream.readObject();
+        numPlayers = inputStream.readInt();
+        teams = new ArrayList<>();
+        for(int i = 0; i < numPlayers; i++){
+            Team team = (Team) inputStream.readObject();
+            teams.add(team);
+        }
+        gameIsRunning = inputStream.readBoolean();
+    }
+
+    @Serial
+    private void writeObject(ObjectOutputStream outputStream) throws IOException {
+        outputStream.writeObject(currentlyPlaying);
+        outputStream.writeObject(lastDiceRoll);
+        outputStream.writeObject(spielfeld);
+        outputStream.writeInt(numPlayers);
+        for(int i = 0; i < numPlayers; i++){
+            outputStream.writeObject(teams.get(i));
+        }
+        outputStream.writeBoolean(gameIsRunning);
+    }
+
+    public List<Team> getTeams() {
+        return teams;
+    }
+
+    public Spielfeld getSpielfeld() {
+        return spielfeld;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Spiel clone = (Spiel) super.clone();
+        clone.teams = new ArrayList<>();
+        for(Team team : teams){
+            clone.teams.add((Team) team.clone());
+        }
+
+
+        return clone;
     }
 }

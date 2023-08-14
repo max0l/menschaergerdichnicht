@@ -1,6 +1,7 @@
 package client;
 
 import game.Spiel;
+import game.Spielfeld;
 import game.Spielstein;
 import game.Team;
 
@@ -11,39 +12,79 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class Client implements Runnable{
-    private String address;
-    private int port;
+public class Client{
+    private volatile static Spiel spiel;
 
-    private Spiel spiel = null;
-
-    public Client(String address, int port) {
-        this.address = address;
-        this.port = port;
-    }
-
-    @Override
-    public void run() {
+    public static void main(String[] args) {
+        String address = "localhost";
+        int port = 8080;
         boolean gameIsFinished = false;
         boolean doBroadcast = false;
-        ObjectInputStream inputStream = null;
-        ObjectOutputStream outputStream = null;
+
         Color teamColor = null;
         Socket socket = null;
         try {
             socket = new Socket(address, port);
             System.out.println("CLIENT:\t\tConnected!");
-
+            ObjectInputStream inputStream = new ObjectInputStream(socket.getInputStream());
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
             //recive team from server over socket
 
-
-            inputStream = new ObjectInputStream(socket.getInputStream());
-            outputStream = new ObjectOutputStream(socket.getOutputStream());
             teamColor = (Color) inputStream.readObject();
             System.out.println("CLIENT:\t\tTeam color: " + teamColor);
+
+
+
+
+            while (!gameIsFinished) {
+                try {
+                    System.out.println("\nCLIENT:\t\tWaiting for server...");
+                    Spiel spiel = (Spiel) inputStream.readObject();
+                    System.out.println("CLIENT:\t\tSpiel recived");
+                    //Sending confirmation:
+                    outputStream.writeObject(Boolean.TRUE);
+                    outputStream.flush();
+                    System.out.println("CLIENT:\t\tConfirmation sent");
+
+
+                    if (spiel.getLastDiceRoll() == null) {
+                        System.out.println("CLIENT:\t\tgetLastDiceRoll is null");
+                    } else {
+                        System.out.println("CLIENT:\t\tgetLastDiceRoll is not null: " + spiel.getLastDiceRoll());
+                    }
+
+                    if (spiel == null || spiel.getCurrentlyPlaying() == null) {
+                        if (spiel.getCurrentlyPlaying() == null) {
+                            System.out.println("CLIENT:\t\tcurrently playing is null");
+                        }
+                        if (spiel.getLastDiceRoll() == null) {
+                            System.out.println("CLIENT:\t\tlast dice roll is null");
+                        }
+                    }
+
+                    if (spiel.checkIfGameIsFinished()) {
+                        gameIsFinished = true;
+                        System.out.println("CLIENT:\t\tGame is finished");
+                        socket.close();
+                    }
+
+                    if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
+                        System.out.println("CLIENT:\t\tIt's your turn!");
+                        sendSelectionToServer(spiel, teamColor, socket, outputStream);
+                    }else{
+                        System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
+                        System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
+                    }
+                } catch (ClassNotFoundException | IOException e) {
+                    e.printStackTrace();
+                    teamColor = null;
+                }
+
+            }
 
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
@@ -51,52 +92,7 @@ public class Client implements Runnable{
             return;
         }
 
-        while (!gameIsFinished) {
-            try {
-                System.out.println("\nCLIENT:\t\tWaiting for server...");
-                spiel = (Spiel) inputStream.readObject();
-                System.out.println("CLIENT:\t\tSpiel recived");
-                //Sending confirmation:
-                outputStream.writeObject(Boolean.TRUE);
-                outputStream.flush();
-                System.out.println("CLIENT:\t\tConfirmation sent");
 
-
-                if (spiel.getLastDiceRoll() == null) {
-                    System.out.println("CLIENT:\t\tgetLastDiceRoll is null");
-                } else {
-                    System.out.println("CLIENT:\t\tgetLastDiceRoll is not null: " + spiel.getLastDiceRoll());
-                }
-
-                if (spiel == null || spiel.getCurrentlyPlaying() == null) {
-                    if (spiel.getCurrentlyPlaying() == null) {
-                        System.out.println("CLIENT:\t\tcurrently playing is null");
-                    }
-                    if (spiel.getLastDiceRoll() == null) {
-                        System.out.println("CLIENT:\t\tlast dice roll is null");
-                    }
-                }
-
-                if (spiel.checkIfGameIsFinished()) {
-                    gameIsFinished = true;
-                    System.out.println("CLIENT:\t\tGame is finished");
-                    socket.close();
-                }
-
-                if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
-                    System.out.println("CLIENT:\t\tIt's your turn!");
-                    sendSelectionToServer(spiel, teamColor, socket, outputStream);
-                }else{
-                    System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
-                    System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
-                }
-
-            } catch (ClassNotFoundException | IOException e) {
-                e.printStackTrace();
-                teamColor = null;
-            }
-
-        }
 
         try {
             socket.close();
@@ -106,7 +102,7 @@ public class Client implements Runnable{
 
     }
 
-    private void sendSelectionToServer(Spiel spiel, Color teamColor, Socket socket, ObjectOutputStream out) {
+    private static void sendSelectionToServer(Spiel spiel, Color teamColor, Socket socket, ObjectOutputStream out) {
         Team team = spiel.getTeamByColor(teamColor);
         if(team == null){
             System.out.println("CLIENT:\t\tTeam is null");

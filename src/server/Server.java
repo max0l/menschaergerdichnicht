@@ -17,7 +17,7 @@ public class Server implements Runnable{
 
     private Spielfeld spielfeld;
 
-    private Spiel spiel;
+    private volatile Spiel spiel;
 
     private Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
     private transient List<ClientHandler> clients = new ArrayList<>();
@@ -89,7 +89,7 @@ public class Server implements Runnable{
             spiel.tryToGetOutOfSpawn(team);
             return;
         }
-
+        spiel.setCurrentlyPlaying(team);
         if (!team.getIsFinished())
         {
             System.out.println("SERVER:\tTeam " + team.getColor() + " is playing");
@@ -104,7 +104,8 @@ public class Server implements Runnable{
                 System.out.println("SERVER:\tLast dice roll was null, now: " + spiel.getLastDiceRoll());
                 diceRoll = spiel.getLastDiceRoll();
             }
-
+            spiel.setCurrentlyPlaying(team);
+            spiel.setLastDiceRoll(diceRoll);
             doBroadcastToAllClients(spiel);
 
             if(team.getClient() == null)
@@ -136,7 +137,7 @@ public class Server implements Runnable{
     private void doBroadcastToAllClients(Spiel spiel) {
         for(ClientHandler client : clients) {
             try {
-                client.sendToClient(spiel, spiel.getCurrentlyPlaying());
+                client.sendToClient(spiel);
             } catch (Exception e) {
                 System.out.println("Could not send object to client!");
                 e.printStackTrace();
