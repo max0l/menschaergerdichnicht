@@ -111,7 +111,8 @@ public class Server implements Runnable{
             {
                 spiel.moveSpielstein(botSelection(spiel.selectPiece(team, spiel.getLastDiceRoll())), spiel.getLastDiceRoll(), team);
             } else {
-                System.out.println("SERVER:\tTeam is a Bot; Waiting for client to select stone");
+                System.out.println("SERVER:\t\tTeam is a Player; Waiting for client to select stone");
+                //doBroadcastToAllClients(spiel);
                 Spielstein recivedSpielstein = clientsSelectStone(spiel.selectPiece(team, spiel.getLastDiceRoll()), team.getClient(), spiel, team);
                 spiel.moveSpielstein(recivedSpielstein, spiel.getLastDiceRoll(), team);
             }
@@ -159,8 +160,7 @@ public class Server implements Runnable{
     }
 
     private Spielstein clientsSelectStone(List<Spielstein> spielsteins, ClientHandler client, Spiel spiel, Team currentTeam) {
-
-        client.checkIfClientWouldRecieveCorrectData(spiel, currentTeam);
+        //doBroadcastToAllClients(spiel);
 
         //doBroadcastToAllClients(spiel);
         System.out.println("SERVER:\t\tWaiting for client to select stone");

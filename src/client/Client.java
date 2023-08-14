@@ -83,13 +83,13 @@ public class Client implements Runnable{
                     socket.close();
                 }
 
-//                if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
-//                    System.out.println("CLIENT:\t\tIt's your turn!");
-//                    sendSelectionToServer(spiel, teamColor, socket, outputStream);
-//                }else{
-//                    System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
-//                    System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
-//                }
+                if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
+                    System.out.println("CLIENT:\t\tIt's your turn!");
+                    sendSelectionToServer(spiel, teamColor, socket, outputStream);
+                }else{
+                    System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
+                    System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
+                }
 
             } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();
