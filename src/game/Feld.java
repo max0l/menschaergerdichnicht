@@ -2,7 +2,7 @@ package game;
 
 import java.io.Serializable;
 
-public class Feld implements Serializable {
+public class Feld implements Serializable, Cloneable {
     private float priority;
     private Spielstein occupier;
     private int number;
@@ -64,5 +64,29 @@ public class Feld implements Serializable {
 
     public void setPriority(float priority) {
         this.priority = priority;
+    }
+
+    @Override
+    public String toString() {
+        String output = "";
+        output += "Feld " + number + ":\t" + isOccupied;
+        if(occupier != null) {
+            output += "\t" + occupier.getColor();
+        }
+        return output;
+    }
+
+    @Override
+    public Feld clone() throws CloneNotSupportedException {
+        Feld clone = (Feld) super.clone();
+        if(occupier != null) {
+            clone.occupier = (Spielstein) occupier.clone();
+        }else {
+            clone.occupier = null;
+        }
+        clone.number = number;
+        clone.isOccupied = isOccupied;
+        clone.priority = priority;
+        return clone;
     }
 }

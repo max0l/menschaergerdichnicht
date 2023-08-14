@@ -468,31 +468,31 @@ public class Spiel implements Serializable, Cloneable
         this.currentlyPlaying = team;
     }
 
-    @Serial
-    private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
-        currentlyPlaying = (Team) inputStream.readObject();
-        lastDiceRoll = (Integer) inputStream.readObject();
-        spielfeld = (Spielfeld) inputStream.readObject();
-        numPlayers = inputStream.readInt();
-        teams = new ArrayList<>();
-        for(int i = 0; i < numPlayers; i++){
-            Team team = (Team) inputStream.readObject();
-            teams.add(team);
-        }
-        gameIsRunning = inputStream.readBoolean();
-    }
-
-    @Serial
-    private void writeObject(ObjectOutputStream outputStream) throws IOException {
-        outputStream.writeObject(currentlyPlaying);
-        outputStream.writeObject(lastDiceRoll);
-        outputStream.writeObject(spielfeld);
-        outputStream.writeInt(numPlayers);
-        for(int i = 0; i < numPlayers; i++){
-            outputStream.writeObject(teams.get(i));
-        }
-        outputStream.writeBoolean(gameIsRunning);
-    }
+//    @Serial
+//    private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+//        currentlyPlaying = (Team) inputStream.readObject();
+//        lastDiceRoll = (Integer) inputStream.readObject();
+//        spielfeld = (Spielfeld) inputStream.readObject();
+//        numPlayers = inputStream.readInt();
+//        teams = new ArrayList<>();
+//        for(int i = 0; i < numPlayers; i++){
+//            Team team = (Team) inputStream.readObject();
+//            teams.add(team);
+//        }
+//        gameIsRunning = inputStream.readBoolean();
+//    }
+//
+//    @Serial
+//    private void writeObject(ObjectOutputStream outputStream) throws IOException {
+//        outputStream.writeObject(currentlyPlaying);
+//        outputStream.writeObject(lastDiceRoll);
+//        outputStream.writeObject(spielfeld);
+//        outputStream.writeInt(numPlayers);
+//        for(int i = 0; i < numPlayers; i++){
+//            outputStream.writeObject(teams.get(i));
+//        }
+//        outputStream.writeBoolean(gameIsRunning);
+//    }
 
     public List<Team> getTeams() {
         return teams;
@@ -509,6 +509,13 @@ public class Spiel implements Serializable, Cloneable
         for(Team team : teams){
             clone.teams.add((Team) team.clone());
         }
+        clone.spielfeld = (Spielfeld) spielfeld.clone();
+        clone.numPlayers = numPlayers;
+        clone.gameIsRunning = gameIsRunning;
+        clone.currentlyPlaying = (Team) currentlyPlaying.clone();
+        clone.lastDiceRoll = lastDiceRoll;
+        clone.firstRun = firstRun;
+
 
 
         return clone;

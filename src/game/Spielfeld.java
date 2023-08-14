@@ -3,7 +3,7 @@ package game;
 import java.io.Serializable;
 
 
-public class Spielfeld implements Serializable
+public class Spielfeld implements Serializable, Cloneable
 {
     private Feld[] spielfeld = new Feld[40];
 
@@ -24,6 +24,24 @@ public class Spielfeld implements Serializable
      */
     public Feld getFeld(int index) {
         return spielfeld[index];
+    }
+
+    @Override
+    public String toString() {
+        String output = "";
+        for(int i = 0; i<40; i++) {
+            output += spielfeld[i].toString() + "\n";
+        }
+        return output;
+    }
+
+    @Override
+    public Spielfeld clone() throws CloneNotSupportedException {
+        Spielfeld clone = (Spielfeld) super.clone();
+        for(int i = 0; i<40; i++) {
+            clone.spielfeld[i] = spielfeld[i].clone();
+        }
+        return clone;
     }
 
 }

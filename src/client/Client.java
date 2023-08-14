@@ -49,12 +49,15 @@ public class Client implements Runnable{
             while (!gameIsFinished) {
                 try {
                     System.out.println("\nCLIENT:\t\tWaiting for server...");
-                    Spiel spiel = (Spiel) inputStream.readObject();
+                    spiel = null;
+                    spiel = (Spiel) inputStream.readObject();
                     System.out.println("CLIENT:\t\tSpiel recived");
                     //Sending confirmation:
                     outputStream.writeObject(Boolean.TRUE);
                     outputStream.flush();
                     System.out.println("CLIENT:\t\tConfirmation sent");
+
+                    //System.out.println(spiel.getSpielfeld().toString());
 
 
                     if (spiel.getLastDiceRoll() == null) {
