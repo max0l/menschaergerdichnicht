@@ -11,6 +11,14 @@ public class Feld implements Serializable {
     private int number;
     private boolean isOccupied;
 
+    public Feld(boolean isOccupied) {
+        this.isOccupied = isOccupied;
+    }
+
+    public boolean isOccupied() {
+        return isOccupied;
+    }
+
     public Feld(int number) {
         this.number = number;
         isOccupied = false;

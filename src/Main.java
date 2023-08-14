@@ -5,6 +5,9 @@ public class Main
     private static Spiel spiel = null;
     public static void main(String[] args)
     {
+        Menue menue = new Menue();
+        menue.Gui(args);
+
         while(spiel == null)
         {
             askForLoad();
@@ -12,6 +15,7 @@ public class Main
 
         spiel.startGame();
     }
+
 
     static void askForLoad()
     {

@@ -8,12 +8,12 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 public class Menue {
     private static CardLayout cardLayout;
     private static JPanel cardPanel;
-
+    private static Main mainInstance;
 
 
     static int rows = 15;   // Replace this with your array's row count
     static int cols = 15;   // Replace this with your array's column count
-                            // Function to create a grid with the size of an array
+    // Function to create a grid with the size of an array
 
     private static JPanel createArrayGridPanel(int rows, int cols) {
         JPanel gridPanel = new JPanel(new GridLayout(rows, cols));
@@ -27,7 +27,10 @@ public class Menue {
         return gridPanel;
     }
 
-    public static void main(String[] args) {
+    public static void Gui(String[] args) {
+
+        mainInstance = new Main(); // Hier wird eine Instanz der Hauptklasse erstellt
+
         JFrame frame = new JFrame("Mensch ärgere Dich nicht!");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 800);
@@ -71,28 +74,28 @@ public class Menue {
         lblNewLabel.setFont(new Font("Constantia", Font.BOLD, 20));
         GroupLayout gl_card1 = new GroupLayout(card1);
         gl_card1.setHorizontalGroup(
-            gl_card1.createParallelGroup(Alignment.LEADING)
-                .addGroup(gl_card1.createSequentialGroup()
-                    .addGap(100)
-                    .addGroup(gl_card1.createParallelGroup(Alignment.LEADING)
-                        .addComponent(lblNewLabel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
-                        .addComponent(btnNewButton_3, GroupLayout.PREFERRED_SIZE, 284, Short.MAX_VALUE)
-                        .addComponent(btnNewButton_2, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
-                        .addComponent(btnNewButton, Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGap(100))
+                gl_card1.createParallelGroup(Alignment.LEADING)
+                        .addGroup(gl_card1.createSequentialGroup()
+                                .addGap(100)
+                                .addGroup(gl_card1.createParallelGroup(Alignment.LEADING)
+                                        .addComponent(lblNewLabel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
+                                        .addComponent(btnNewButton_3, GroupLayout.PREFERRED_SIZE, 284, Short.MAX_VALUE)
+                                        .addComponent(btnNewButton_2, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
+                                        .addComponent(btnNewButton, Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(100))
         );
         gl_card1.setVerticalGroup(
-            gl_card1.createParallelGroup(Alignment.TRAILING)
-                .addGroup(gl_card1.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(lblNewLabel, GroupLayout.PREFERRED_SIZE, 71, GroupLayout.PREFERRED_SIZE)
-                    .addGap(18)
-                    .addComponent(btnNewButton, GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
-                    .addGap(18)
-                    .addComponent(btnNewButton_2, GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
-                    .addGap(18)
-                    .addComponent(btnNewButton_3, GroupLayout.DEFAULT_SIZE, 94, Short.MAX_VALUE)
-                    .addGap(41))
+                gl_card1.createParallelGroup(Alignment.TRAILING)
+                        .addGroup(gl_card1.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lblNewLabel, GroupLayout.PREFERRED_SIZE, 71, GroupLayout.PREFERRED_SIZE)
+                                .addGap(18)
+                                .addComponent(btnNewButton, GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
+                                .addGap(18)
+                                .addComponent(btnNewButton_2, GroupLayout.DEFAULT_SIZE, 95, Short.MAX_VALUE)
+                                .addGap(18)
+                                .addComponent(btnNewButton_3, GroupLayout.DEFAULT_SIZE, 94, Short.MAX_VALUE)
+                                .addGap(41))
         );
         card1.setLayout(gl_card1);
 
@@ -109,6 +112,10 @@ public class Menue {
         // Label for the difficulty level selection
         JLabel lblNewLabel_1 = new JLabel("Schwierigkeitsgrad");
         lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+
+        // ComboBox for selecting players
+        JComboBox players = new JComboBox();
+        players.setModel(new DefaultComboBoxModel(new String[] {"1", "2", "3", "4"}));
 
         // CheckBox for enabling color-blind mode
         JCheckBox chckbxNewCheckBox = new JCheckBox("Farbenblindenmodus");
@@ -130,6 +137,7 @@ public class Menue {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Einstellungen von Card 2:");
                 System.out.println("Schwierigkeitsgrad: " + comboBox.getSelectedItem());
+                System.out.println("Spielerzahl: " + players.getSelectedItem());
                 System.out.println("Farbenblindenmodus: " + chckbxNewCheckBox.isSelected());
                 System.out.println("Lautstärke: " + slider.getValue());
                 cardLayout.previous(cardPanel);
@@ -144,39 +152,56 @@ public class Menue {
         JLabel lblNewLabel_3 = new JLabel("Einstellungen");
         lblNewLabel_3.setFont(new Font("Tahoma", Font.PLAIN, 20));
         lblNewLabel_3.setHorizontalAlignment(SwingConstants.CENTER);
+
+
+
+        JLabel lblNewLabel_1_1 = new JLabel("Spieleranzahl");
+        lblNewLabel_1_1.setFont(new Font("Dialog", Font.PLAIN, 14));
         GroupLayout gl_card2 = new GroupLayout(card2);
         gl_card2.setHorizontalGroup(
-            gl_card2.createParallelGroup(Alignment.LEADING)
-                .addGroup(Alignment.TRAILING, gl_card2.createSequentialGroup()
-                    .addGap(100)
-                    .addGroup(gl_card2.createParallelGroup(Alignment.TRAILING)
-                        .addComponent(lblNewLabel_3, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
-                        .addComponent(lblNewLabel_1, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
-                        .addComponent(comboBox, Alignment.LEADING, 0, 284, Short.MAX_VALUE)
-                        .addComponent(chckbxNewCheckBox, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
-                        .addComponent(lblNewLabel_2, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
-                        .addComponent(slider, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE)
-                        .addComponent(btnNewButton_1, GroupLayout.DEFAULT_SIZE, 284, Short.MAX_VALUE))
-                    .addGap(100))
+                gl_card2.createParallelGroup(Alignment.LEADING)
+                        .addGroup(gl_card2.createSequentialGroup()
+                                .addGap(100)
+                                .addGroup(gl_card2.createParallelGroup(Alignment.LEADING)
+                                        .addGroup(gl_card2.createSequentialGroup()
+                                                .addComponent(lblNewLabel_2, GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
+                                                .addContainerGap())
+                                        .addGroup(gl_card2.createSequentialGroup()
+                                                .addComponent(lblNewLabel_1_1, GroupLayout.DEFAULT_SIZE, 678, Short.MAX_VALUE)
+                                                .addContainerGap())
+                                        .addGroup(Alignment.TRAILING, gl_card2.createSequentialGroup()
+                                                .addGroup(gl_card2.createParallelGroup(Alignment.TRAILING)
+                                                        .addComponent(slider, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
+                                                        .addComponent(comboBox, Alignment.LEADING, 0, 590, Short.MAX_VALUE)
+                                                        .addComponent(lblNewLabel_1, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
+                                                        .addComponent(lblNewLabel_3, GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
+                                                        .addComponent(btnNewButton_1, GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE)
+                                                        .addComponent(players, 0, 590, Short.MAX_VALUE)
+                                                        .addComponent(chckbxNewCheckBox, GroupLayout.DEFAULT_SIZE, 590, Short.MAX_VALUE))
+                                                .addGap(100))))
         );
         gl_card2.setVerticalGroup(
-            gl_card2.createParallelGroup(Alignment.LEADING)
-                .addGroup(Alignment.TRAILING, gl_card2.createSequentialGroup()
-                    .addContainerGap(70, Short.MAX_VALUE)
-                    .addComponent(lblNewLabel_3, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
-                    .addGap(18)
-                    .addComponent(lblNewLabel_1)
-                    .addPreferredGap(ComponentPlacement.RELATED)
-                    .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addComponent(chckbxNewCheckBox, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(ComponentPlacement.UNRELATED)
-                    .addComponent(lblNewLabel_2, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-                    .addPreferredGap(ComponentPlacement.RELATED)
-                    .addComponent(slider, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
-                    .addGap(18)
-                    .addComponent(btnNewButton_1, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
-                    .addGap(41))
+                gl_card2.createParallelGroup(Alignment.TRAILING)
+                        .addGroup(gl_card2.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lblNewLabel_3, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
+                                .addGap(18)
+                                .addComponent(lblNewLabel_1)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(comboBox, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
+                                .addGap(18)
+                                .addComponent(lblNewLabel_1_1, GroupLayout.PREFERRED_SIZE, 17, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(players, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
+                                .addGap(18)
+                                .addComponent(chckbxNewCheckBox, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
+                                .addGap(18)
+                                .addComponent(lblNewLabel_2, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED)
+                                .addComponent(slider, GroupLayout.PREFERRED_SIZE, 47, GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(ComponentPlacement.RELATED, 239, Short.MAX_VALUE)
+                                .addComponent(btnNewButton_1, GroupLayout.PREFERRED_SIZE, 94, GroupLayout.PREFERRED_SIZE)
+                                .addGap(41))
         );
 
         card2.setLayout(gl_card2);

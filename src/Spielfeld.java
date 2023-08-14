@@ -12,4 +12,8 @@ public class Spielfeld implements Serializable {
         return spielfeld[id];
     }
 
+    public Feld[] getSpielfeldArray() {
+        return spielfeld;
+    }
+
 }

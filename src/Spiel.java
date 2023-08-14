@@ -44,10 +44,10 @@ public class Spiel implements Serializable
 
     void setupPlayers(Spielfeld spielfeld)
     {
-        teams.add(new Team(Color.RED, 0, spielfeld));
-        teams.add(new Team(Color.BLUE, 10, spielfeld));
-        teams.add(new Team(Color.GREEN, 20, spielfeld));
-        teams.add(new Team(Color.YELLOW, 30, spielfeld));
+        teams.add(new Team(Color.RED, 24, spielfeld));
+        teams.add(new Team(Color.BLUE, 3, spielfeld));
+        teams.add(new Team(Color.GREEN, 57, spielfeld));
+        teams.add(new Team(Color.YELLOW, 78, spielfeld));
     }
 
     void run()
@@ -138,6 +138,29 @@ public class Spiel implements Serializable
             return;
         }
         moveSpielstein(movableSpielsteine.get(random.nextInt(movableSpielsteine.size())), diceRoll, team);
+    }
+
+    private void selectPieceUsingGUI(Team team, int diceRoll) {
+        List<Spielstein> movableSpielsteine = team.getMovableSpielsteine(diceRoll);
+
+        removePiecesThatWouldOverRun(movableSpielsteine, team, diceRoll);
+        removePiecesThatWouldLandOnOwnPiece(team, movableSpielsteine, diceRoll);
+
+        if (movableSpielsteine.isEmpty()) {
+            System.out.println("Keine Spielfiguren können bewegt werden");
+            return;
+        }
+
+        Spielstein selectedSpielstein = null;
+
+        // Assuming you have a GUI class with a method to display and get user input for selecting a Spielstein
+        // For example: selectedSpielstein = gui.displayAndSelectSpielstein(movableSpielsteine);
+
+        if (selectedSpielstein != null) {
+            moveSpielstein(selectedSpielstein, diceRoll, team);
+        } else {
+            System.out.println("Keine Spielfigur ausgewählt.");
+        }
     }
 
     private void removePiecesThatWouldOverRun(List<Spielstein> movableSpielsteine, Team team, int diceRoll) {
