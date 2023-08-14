@@ -153,8 +153,6 @@ public class Spiel implements Serializable
 
         Spielstein selectedSpielstein = null;
 
-        // Assuming you have a GUI class with a method to display and get user input for selecting a Spielstein
-        // For example: selectedSpielstein = gui.displayAndSelectSpielstein(movableSpielsteine);
 
         if (selectedSpielstein != null) {
             moveSpielstein(selectedSpielstein, diceRoll, team);
