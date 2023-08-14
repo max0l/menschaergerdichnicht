@@ -25,7 +25,7 @@ public class Team implements Serializable {
 
     private Spielfeld spielfeld;
     
-    private ClientHandler client;
+    private transient ClientHandler client;
 
     public Team(Color color, int startField, Spielfeld spielfeld, boolean isBot, ClientHandler clientHandler) {
         this.startField = startField;
@@ -38,6 +38,7 @@ public class Team implements Serializable {
         }
         this.spielfeld = spielfeld;
         this.client = clientHandler;
+        this.isBot = isBot;
     }
 
     public Color getColor() {
@@ -197,5 +198,9 @@ public class Team implements Serializable {
 
     public ClientHandler getClient() {
         return client;
+    }
+
+    public void setIsBot(boolean b) {
+        isBot = b;
     }
 }

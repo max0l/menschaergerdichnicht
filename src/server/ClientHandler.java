@@ -1,5 +1,9 @@
 package server;
 
+import game.Spiel;
+import game.Spielstein;
+import game.Team;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -9,16 +13,17 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientHandler implements Serializable {
+public class ClientHandler {
     private ServerSocket server;
     private Socket client;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
+    private Team team;
     public ClientHandler(Socket client, ServerSocket server) throws IOException {
         System.out.println("Trying to creade a new client handler");
         this.client = client;
         this.outputStream = new ObjectOutputStream(client.getOutputStream());
-        //this.inputStream = new ObjectInputStream(server.getInputStream());
+        this.inputStream = new ObjectInputStream(client.getInputStream());
         System.out.println("Done");
 
     }
@@ -40,5 +45,41 @@ public class ClientHandler implements Serializable {
     public int reciveNumber() throws IOException {
         int number = inputStream.readInt();
         return number;
+    }
+
+    public void sendToClient(Spiel object, Team currentTeam) throws IOException {
+        Spiel spielToSend = object;
+        checkIfClientWouldRecieveCorrectData(spielToSend, currentTeam);
+        outputStream.writeObject(spielToSend);
+        outputStream.flush();
+        System.out.println("SERVER:\tObject sent");
+    }
+
+    public Spielstein reciveSpielstein() throws IOException, ClassNotFoundException {
+        Spielstein spielstein = (Spielstein) inputStream.readObject();
+        System.out.println("SERVER:\tSpielstein recived");
+        return spielstein;
+    }
+
+    public void setTeam(Team team) {
+        this.team = team;
+        try{
+            outputStream.writeObject(team.getColor());
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+            //TODO: set to bot if fail
+        }
+
+    }
+
+    public Team getTeam() {
+        return team;
+    }
+
+    public void checkIfClientWouldRecieveCorrectData(Spiel spiel, Team currentTeam) {
+        if(spiel.getCurrentlyPlaying() != currentTeam){
+            System.out.println("SERVER:\t\t________________________________________________Client would recieve wrong data________________________________________________");
+        }
     }
 }

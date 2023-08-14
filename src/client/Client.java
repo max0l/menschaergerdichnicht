@@ -1,46 +1,168 @@
 package client;
 
 import game.Spiel;
+import game.Spielstein;
+import game.Team;
 
+import java.awt.*;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Scanner;
 
-public class Client {
+public class Client implements Runnable{
+    private String address;
+    private int port;
 
-    public static void main(String[] args) throws IOException {
-        Socket socket = new Socket("localhost", 8080);
-        System.out.println("Connected!");
-        Spiel spiel;
+    private Spiel spiel = null;
+
+    public Client(String address, int port) {
+        this.address = address;
+        this.port = port;
+    }
+
+    @Override
+    public void run() {
         boolean gameIsFinished = false;
         boolean doBroadcast = false;
-        ObjectInputStream in;
+        ObjectInputStream inputStream = null;
+        ObjectOutputStream outputStream = null;
+        Color teamColor = null;
+        Socket socket = null;
+        try {
+            socket = new Socket(address, port);
+            System.out.println("CLIENT:\t\tConnected!");
 
-        while(!gameIsFinished) {
-            System.out.println("Waiting for server...");
+            //recive team from server over socket
 
+
+            inputStream = new ObjectInputStream(socket.getInputStream());
+            outputStream = new ObjectOutputStream(socket.getOutputStream());
+            teamColor = (Color) inputStream.readObject();
+            System.out.println("CLIENT:\t\tTeam color: " + teamColor);
+
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            System.out.println("CLIENT:\t\tCould not connect to server!");
+            return;
+        }
+
+        while (!gameIsFinished) {
             try {
-                in = new ObjectInputStream(socket.getInputStream());
-                if(in != null){
-                    System.out.println("in is null");
-                    spiel = (Spiel) in.readObject();
-                    spiel.startGame(doBroadcast);
-                    if(spiel.checkIfGameIsFinished()){
-                        gameIsFinished = true;
+                System.out.println("\nCLIENT:\t\tWaiting for server...");
+                spiel = (Spiel) inputStream.readObject();
+                System.out.println("CLIENT:\t\tSpiel recived");
+                //Sending confirmation:
+                outputStream.writeObject(Boolean.TRUE);
+                outputStream.flush();
+                System.out.println("CLIENT:\t\tConfirmation sent");
+
+
+                if (spiel.getLastDiceRoll() == null) {
+                    System.out.println("CLIENT:\t\tgetLastDiceRoll is null");
+                } else {
+                    System.out.println("CLIENT:\t\tgetLastDiceRoll is not null: " + spiel.getLastDiceRoll());
+                }
+
+                if (spiel == null || spiel.getCurrentlyPlaying() == null) {
+                    if (spiel.getCurrentlyPlaying() == null) {
+                        System.out.println("CLIENT:\t\tcurrently playing is null");
                     }
-                }else {
+                    if (spiel.getLastDiceRoll() == null) {
+                        System.out.println("CLIENT:\t\tlast dice roll is null");
+                    }
+                }
+
+                if (spiel.checkIfGameIsFinished()) {
                     gameIsFinished = true;
+                    System.out.println("CLIENT:\t\tGame is finished");
                     socket.close();
                 }
-            }
-            catch (IOException | ClassNotFoundException e)
-            {
+
+//                if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
+//                    System.out.println("CLIENT:\t\tIt's your turn!");
+//                    sendSelectionToServer(spiel, teamColor, socket, outputStream);
+//                }else{
+//                    System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
+//                    System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
+//                }
+
+            } catch (ClassNotFoundException | IOException e) {
                 e.printStackTrace();
-                gameIsFinished = true;
-                socket.close();
+                teamColor = null;
             }
+
         }
-        socket.close();
+
+        try {
+            socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     }
+
+    private void sendSelectionToServer(Spiel spiel, Color teamColor, Socket socket, ObjectOutputStream out) {
+        Team team = spiel.getTeamByColor(teamColor);
+        if(team == null){
+            System.out.println("CLIENT:\t\tTeam is null");
+        }
+
+        List<Spielstein> movableStones = spiel.selectPiece(team, spiel.getLastDiceRoll());
+
+        if(movableStones == null){
+            System.out.println("CLIENT:\t\tmovableStones is null");
+            try {
+                out.writeObject(null);
+                out.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //Ask user for input for an entry in the list of movable stones
+        for(int i = 0; i < movableStones.size(); i++){
+            System.out.println("CLIENT:\t\t"+i + ": " + movableStones.get(i).getFieldId() + " Gelaufene Felder: " + movableStones.get(i).getWalkedFields());
+        }
+        System.out.println("CLIENT:\t\tSelect a stone to move: ");
+        Scanner scanner = new Scanner(System.in);
+
+        int minRange = 0;
+        int maxRange = movableStones.size()-1;
+
+        System.out.printf("CLIENT:\t\tPlease enter a number between %d and %d: ", minRange, maxRange);
+
+        int userInput;
+
+        while (true) {
+            if (scanner.hasNextInt()) {
+                userInput = scanner.nextInt();
+                if (userInput >= minRange && userInput <= maxRange) {
+                    break;
+                } else {
+                    System.out.printf("CLIENT:\t\tNumber must be between %d and %d. Please try again: ", minRange, maxRange);
+                }
+            } else {
+                String invalidInput = scanner.next(); // Clear invalid input
+                System.out.printf("CLIENT:\t\tInvalid input. Please enter a valid number between %d and %d: ", minRange, maxRange);
+            }
+        }
+
+        System.out.printf("YCLIENT:\t\tou entered: %d\n", userInput);
+        //Send selection to server
+
+        try {
+            out.writeObject(movableStones.get(userInput));
+            out.flush();
+            System.out.println("CLIENT:\t\tSpielstein sent to server\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 }

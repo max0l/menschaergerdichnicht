@@ -1,50 +1,32 @@
 package game;
 
-import server.ClientHandler;
-import server.ClientsBroadcast;
-
 import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
 public class Spiel implements Serializable
 {
+    private final List<Team> teams;
     private boolean gameIsRunning = true;
     private Random random = new Random();
-    private List<Team> teams = new ArrayList<Team>();
-
     private Team currentlyPlaying = null;
-    private Integer lastDiceRoll = null;
+    private Integer lastDiceRoll;
     private Spielfeld spielfeld;
     private boolean firstRun = false;
-
-    private ClientsBroadcast clientsBroadcast;
-
-    private boolean doBroadcast;
-
-    private Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
-
-    @Deprecated
-    public Spiel()
-    {
-        spielfeld = new Spielfeld();
-        setupPlayers(spielfeld);
-    }
 
     /**
      * Konstruktor der Klasse "Spiel".
      * Erstellt das Spielfeld initialisiert die Spieler.
+     *
      * @param isLocal
      * @param numPlayers Die Anzahl der Spieler die am Spiel teilnehmen.
-     * @param clients Die Liste der verbundenen Spieler.
+     * @param spielfeld
      */
-    public Spiel(Boolean isLocal, int numPlayers, List<ClientHandler> clients) {
-        spielfeld = new Spielfeld();
-        setupClients(clients, numPlayers);
-        this.clientsBroadcast = new ClientsBroadcast(clients);
+    public Spiel(Boolean isLocal, int numPlayers, List<Team> teams, Spielfeld spielfeld) {
+        this.spielfeld = spielfeld;
+        this.teams = teams;
     }
 
 
@@ -53,7 +35,6 @@ public class Spiel implements Serializable
      */
     public void startGame(boolean doBroadcast)
     {
-        this.doBroadcast = doBroadcast;
 
         if(currentlyPlaying != null)
         {
@@ -65,148 +46,91 @@ public class Spiel implements Serializable
             System.out.println("Ein neues game.Spiel wurde gestartet.");
         }
 
-        doBroadcast();
-
-        while (gameIsRunning)
-        {
-            run();
-            doBroadcast();
-        }
-
-        System.out.println("game.Spiel beendet");
     }
 
-    @Deprecated
-    void setupPlayers(Spielfeld spielfeld)
-    {
 
-        teams.add(new Team(Color.RED, 0, spielfeld, false, null));
-        teams.add(new Team(Color.BLUE, 10, spielfeld, false, null));
-        teams.add(new Team(Color.GREEN, 20, spielfeld, false, null));
-        teams.add(new Team(Color.YELLOW, 30, spielfeld, false, null));
-
-    }
-
-    /**
-     * Fügt Teams für verbundene Spieler hinzu und füllt fehlende Spieler mit Bots auf.
-     * @param clients Die Liste der verbundenen Spieler.
-     * @param numPlayers Die Anzahl der Spieler die am Spiel teilnehmen.
-     */
-    void setupClients(List<ClientHandler> clients, int numPlayers) {
-        for(int i = 0; i < numPlayers; i++) {
-            teams.add(new Team(colors[i], i*10, spielfeld, false, clients.get(i)));
-        }
-        for(int k = numPlayers; k < 4; k++) {
-            teams.add(new Team(colors[k], k*10, spielfeld, true, null));
-        }
-    }
-
-    void run()
-    {
-
-        for (int i = 0; i < teams.size(); i++)
-        {
-            if(firstRun)
-            {
-                i = teams.indexOf(this.currentlyPlaying);
-                firstRun = false;
-            }
-
-            Team team = teams.get(i);
-
-            System.out.println("game.Team " + team.getColor() + " ist am Zug");
-            play(team);
-            System.out.println("\ngame.Team " + team.getColor() + " ist fertig");
-
-            if(team.getIsFinished())
-            {
-                gameIsRunning = false;
-                break;
-            }
-
-            currentlyPlaying = getNextToPlay(team);
-
-            /*
-            if (i == teams.size() - 1 && this.firstRun)
-            {
-                this.firstRun = false;
-            }
-             */
-        }
-    }
-
-    private void play(Team team)
-    {
-        currentlyPlaying = team;
-        if (team.checkIfAllPiecesAreInStart())
-        {
-            tryToGetOutOfSpawn(team);
-            return;
-        }
-
-        if (!team.getIsFinished())
-        {
-            int diceRoll;
-            if(lastDiceRoll == null)
-            {
-                diceRoll = rollDice();
-                lastDiceRoll = diceRoll;
-            }
-            else
-            {
-                diceRoll = lastDiceRoll;
-            }
-
-            selectPiece(team, diceRoll);
-
-            lastDiceRoll = null;
-
-            if (diceRoll == 6)
-            {
-                play(team);
-            }
-        }
-
-        lastDiceRoll = null;
-    }
+//    public void play(Team team)
+//    {
+//
+//        currentlyPlaying = team;
+//        if (team.checkIfAllPiecesAreInStart())
+//        {
+//            tryToGetOutOfSpawn(team);
+//            return;
+//        }
+//
+//        if (!team.getIsFinished())
+//        {
+//            int diceRoll;
+//            if(lastDiceRoll == null)
+//            {
+//                diceRoll = rollDice();
+//                lastDiceRoll = diceRoll;
+//            }
+//            else
+//            {
+//                diceRoll = lastDiceRoll;
+//            }
+//
+//            selectPiece(team, diceRoll);
+//
+//            lastDiceRoll = null;
+//
+//            if (diceRoll == 6)
+//            {
+//                play(team);
+//            }
+//        }
+//
+//        lastDiceRoll = null;
+//    }
 
     private Team getNextToPlay(Team team)
     {
         return teams.get(((teams.indexOf(team) + 1) % teams.size()));
     }
 
-    private void selectPiece(Team team, int diceRoll) {
+    public List<Spielstein> selectPiece(Team team, int diceRoll) {
         List<Spielstein> movableSpielsteine = team.getMovableSpielsteine(diceRoll);
 
         removePiecesThatWouldOverRun(movableSpielsteine, team, diceRoll);
         removePiecesThatWouldLandOnOwnPiece(team, movableSpielsteine, diceRoll);
 
 
-        if (movableSpielsteine.size() == 1) {
-            moveSpielstein(movableSpielsteine.get(0), diceRoll, team);
-            return;
+//        if (movableSpielsteine.size() == 1) {
+//            moveSpielstein(movableSpielsteine.get(0), diceRoll, team);
+//            return movableSpielsteine;
+//        }
+
+
+
+
+        //This else if case checks if there is a piece on the spawn and if there is one, it will be moved from the spawn
+        //Because You have to move out of spawn if you rolled a 6
+        //It checks if the spawn is occupied by a piece of the same color
+        if(diceRoll == 6 && checkIfSpawnIsOccupiedBySameTeam(team)) {
+            movableSpielsteine.removeIf(
+                    spielstein -> spielstein.getState() == SpielsteinState.STATE_PLAYING
+                            && spielstein.getFieldId() != team.getStartField());
+            return movableSpielsteine;
         }
 
-        //This else if case checks if there is a piece in the spawn and if there is one, it will be moved to the field
-        else if(diceRoll == 6 && checkIfSpawnIsOccupied(team)) {
-            Optional<Spielstein> mustBeMoved = movableSpielsteine.stream().filter(spielstein ->
-                    spielstein.getFieldId() == team.getStartField()).findFirst();
-            mustBeMoved.ifPresent(spielstein -> moveSpielstein(spielstein, diceRoll, team));
-            return;
-        }
-        //This else if case checks if there is a piece in home and if there is one, it should be used
+        //This else if case checks if there is a piece in home and if there is one, it should be used because the rules
+        //say that you have to move first all stones out of spawn before you can use a 6 on another piece
         else if (diceRoll == 6 && (movableSpielsteine.stream().anyMatch(spielstein -> spielstein.getState() == SpielsteinState.STATE_HOME))) {
             movableSpielsteine.removeIf(spielstein -> spielstein.getState() == SpielsteinState.STATE_PLAYING);
 
-        } else if (checkIfPieceCanKickOtherPiece(team, diceRoll, movableSpielsteine)) {
+        }
+        //This else if will check if a piece on the field can kick another one and removed all pieces that can't kick
+        else if (checkIfPieceCanKickOtherPiece(team, diceRoll, movableSpielsteine)) {
             System.out.println("Es kann eine andere Spielfigur geschlagen werden");
             System.out.println("movableSpielsteine: " + movableSpielsteine.size());
         }
         if(movableSpielsteine.isEmpty()) {
             System.out.println("Keine Spielfiguren können bewegt werden");
-            return;
+            return null;
         }
-        moveSpielstein(movableSpielsteine.get(random.nextInt(movableSpielsteine.size())), diceRoll, team);
+        return movableSpielsteine;
     }
 
     private void removePiecesThatWouldOverRun(List<Spielstein> movableSpielsteine, Team team, int diceRoll) {
@@ -236,7 +160,8 @@ public class Spiel implements Serializable
                 && team.getIsOccupiedInFinish(spielstein.getWalkedFields() + diceRoll - 40));
     }
 
-    private boolean checkIfSpawnIsOccupied(Team team) {
+    //Checks if the spawn is occupied by a piece of the same color
+    private boolean checkIfSpawnIsOccupiedBySameTeam(Team team) {
         Feld spawn = spielfeld.getFeld(team.getStartField());
         return spawn.getIsOccupied() && spawn.getOccupier().getColor() == team.getColor();
     }
@@ -245,12 +170,12 @@ public class Spiel implements Serializable
         int oldSize = movableSpielsteine.size();
         movableSpielsteine.removeIf(spielstein -> {
             Feld nextFeld = spielfeld.getFeld((spielstein.getFieldId() + diceRoll) % 40);
-            return spielstein.getState() == SpielsteinState.STATE_PLAYING && nextFeld.getIsOccupied() && nextFeld.getOccupier().getColor() != team.getColor();
+            return spielstein.getState() == SpielsteinState.STATE_PLAYING && nextFeld.getIsOccupied() && nextFeld.getOccupier().getColor() == team.getColor();
         });
         return movableSpielsteine.size() != oldSize;
     }
 
-    public Spielstein movePieceOutOfSpawn(Team team) {
+    private Spielstein movePieceOutOfSpawn(Team team) {
         System.out.println("game.Spielstein aus Spawn bewegen");
 
         Spielstein currentSpielstein = team.getSpielsteinFromHome();
@@ -277,8 +202,6 @@ public class Spiel implements Serializable
 
         spielfeld.getFeld(team.getStartField()).setOccupier(currentSpielstein);
 
-        doBroadcast();
-
         return currentSpielstein;
     }
 
@@ -289,7 +212,6 @@ public class Spiel implements Serializable
     private void kickSpielstein(Spielstein occupier) {
         System.out.println("game.Spielstein von " + occupier.getColor() + " wird gekickt");
         occupier.getTeam().pieceFromFieldToHome(occupier);
-        doBroadcast();
     }
 
     /**
@@ -297,7 +219,7 @@ public class Spiel implements Serializable
      * wird ein Spielstein des Teams aus dem Start heraus gerückt.
      * @param team Das Team welches an der Reihe ist.
      */
-    private void tryToGetOutOfSpawn(Team team) {
+    public void tryToGetOutOfSpawn(Team team) {
         System.out.println("Versuche aus dem Spawn zu kommen");
         for (int j = 0; j < 3; j++) {
             if (rollDice() == 6) {
@@ -313,9 +235,10 @@ public class Spiel implements Serializable
      * Würfelt eine zufällige Zahl
      * @return Gibt die gewürfelte Zahl zurück.
      */
-    int rollDice() {
+    public int rollDice() {
         int rand = random.nextInt(6) + 1;
         System.out.println("Würfel zeigt " + rand);
+        lastDiceRoll = rand;
         return rand;
     }
 
@@ -342,8 +265,12 @@ public class Spiel implements Serializable
      * @param diceRoll Die gewürfelte Zahl, um welche der Spielstein gerückt wird.
      * @param team Das Team, welches am Zug ist.
      */
-    private void moveSpielstein(Spielstein spielstein, int diceRoll, Team team) {
+    public void moveSpielstein(Spielstein spielstein, int diceRoll, Team team) {
 
+        if(spielstein == null){
+            System.out.println("Kein Spielstein ausgewählt");
+            return;
+        }
 
         if(spielstein.getState() == SpielsteinState.STATE_HOME && diceRoll == 6){
             System.out.println("Ausgewählter game.Spielstein ist im Home");
@@ -387,12 +314,10 @@ public class Spiel implements Serializable
             spielfeld.getFeld(spielstein.getFieldId()).setOccupier(spielstein);
             currentSpielFeld = spielstein.getFieldId();
 
-            doBroadcast();
         }
 
         System.out.println("game.Spielstein ist auf game.Feld " + spielstein.getFieldId());
         spielstein.addWalkedFields(diceRoll);
-        doBroadcast();
     }
 
     private void moveSpielsteinInGoalAround(Team team, int diceRoll, Spielstein spielstein) {
@@ -403,7 +328,6 @@ public class Spiel implements Serializable
         System.out.println("Current Field: " + currentField + " Goal Field: " + goalField);
         team.moveSpielsteinAroundFinish(spielstein, currentField, goalField);
         team.checkIfAllPiecesAreInFinish();
-        doBroadcast();
     }
 
     /**
@@ -426,7 +350,6 @@ public class Spiel implements Serializable
         team.checkIfAllPiecesAreInFinish();
 
         System.out.println("NEXT: " + this.getNextToPlay(team).getColor());
-        doBroadcast();
         //askForSave();
 
     }
@@ -507,9 +430,29 @@ public class Spiel implements Serializable
         }
     }
 
-    void doBroadcast() {
-        if(doBroadcast) {
-            clientsBroadcast.broadcast(this);
+
+    public Integer getLastDiceRoll() {
+        return lastDiceRoll;
+    }
+
+    public void setLastDiceRoll(Integer lastDiceRoll) {
+        this.lastDiceRoll = lastDiceRoll;
+    }
+
+    public Team getCurrentlyPlaying() {
+        return currentlyPlaying;
+    }
+
+    public Team getTeamByColor(Color teamColor) {
+        for(Team team : teams){
+            if(team.getColor() == teamColor){
+                return team;
+            }
         }
+        return null;
+    }
+
+    public void setCurrentlyPlaying(Team team) {
+        this.currentlyPlaying = team;
     }
 }

@@ -1,17 +1,18 @@
 import client.Client;
+import gui.LauncherGUI;
 import server.Server;
 
 public class NewMain {
     public static void main(String[] args) {
         System.out.println("Prohramm is Starting...");
+        LauncherGUI launcherGUI = new LauncherGUI();
+        launcherGUI.setVisible(true);
 
-        Server server = new Server(true, 1);
 
-//        Thread serverThread = new Thread(server);
-//
-//        serverThread.start();
 
-        server.run();
+//        server.run();
+
+
 
     }
 }
