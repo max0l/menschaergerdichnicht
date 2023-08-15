@@ -34,8 +34,6 @@ public class LauncherGUI extends JFrame {
 
         playerCountComboBox = new JComboBox<>(new Integer[]{0, 1, 2, 3, 4});
         playerCountComboBox.setEnabled(true);
-        //Selection of bot Count does nothing currently
-        //TODO: add 0 if you want 0 bots or players
         botCountComboBox = new JComboBox<>(new Integer[]{0, 1, 2, 3, 4});
         botCountComboBox.setEnabled(true);
 

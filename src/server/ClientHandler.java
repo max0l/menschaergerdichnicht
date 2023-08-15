@@ -63,10 +63,17 @@ public class ClientHandler {
         System.out.println("SERVER:\tObject sent");
     }
 
-    public int reciveSpielstein() throws IOException, ClassNotFoundException {
-        int spielsteinNumber = inputStream.readInt();
-        System.out.println("SERVER:\tSpielstein recived");
-        return spielsteinNumber;
+    public int reciveSpielstein() {
+        try{
+            int spielsteinNumber = inputStream.readInt();
+            System.out.println("SERVER:\tSpielstein recived");
+            return spielsteinNumber;
+        }catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+            //TODO: Set to bot if fail
+        }
+
     }
 
     public void setTeam(Team team) {
@@ -76,7 +83,7 @@ public class ClientHandler {
             outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
-            //TODO: set to bot if fail
+            team.setIsBot(true);
         }
 
     }
