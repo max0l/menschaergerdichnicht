@@ -70,11 +70,11 @@ public class Server implements Runnable{
     private void startGame() {
 
         while(spiel.isGameIsRunning()){
-             for(Team team : spiel.getTeams()) {
-                 System.out.println("\n\nSERVER:\tCurrently playing: " + team.getColor() + " is bot: " + team.getIsBot());
-                 play(team);
-                 //doBroadcastToAllClients(spiel);
-             }
+            for(Team team : spiel.getTeams()) {
+                System.out.println("\n\nSERVER:\tCurrently playing: " + team.getColor() + " is bot: " + team.getIsBot());
+                play(team);
+                //doBroadcastToAllClients(spiel);
+            }
         }
 
     }
@@ -113,8 +113,17 @@ public class Server implements Runnable{
             } else {
                 System.out.println("SERVER:\t\tTeam is a Player; Waiting for client to select stone");
                 //doBroadcastToAllClients(spiel);
-                Spielstein recivedSpielstein = clientsSelectStone(spiel.selectPiece(team, spiel.getLastDiceRoll()), team.getClient(), spiel, team);
-                spiel.moveSpielstein(recivedSpielstein, spiel.getLastDiceRoll(), team);
+                int recivedSpielsteinNumber = clientsSelectStone(spiel.selectPiece(team, spiel.getLastDiceRoll()), team.getClient(), spiel, team);
+                System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(recivedSpielsteinNumber).getFieldId() + "; " +
+                        "Walked fields pf spielstein: " + team.getSpielsteine().get(recivedSpielsteinNumber).getWalkedFields());
+                spiel.moveSpielstein(team.getSpielsteine().get(recivedSpielsteinNumber), spiel.getLastDiceRoll(), team);
+            }
+
+            //TODO: wait till the movement on server is done, to ensure syncronisation
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
 
             if(team.getIsFinished())
@@ -159,7 +168,7 @@ public class Server implements Runnable{
         System.out.println("SERVER:\t\tGot confirmation from all CLients\n");
     }
 
-    private Spielstein clientsSelectStone(List<Spielstein> spielsteins, ClientHandler client, Spiel spiel, Team currentTeam) {
+    private int clientsSelectStone(List<Spielstein> spielsteins, ClientHandler client, Spiel spiel, Team currentTeam) {
         //doBroadcastToAllClients(spiel);
 
         //doBroadcastToAllClients(spiel);
@@ -168,7 +177,7 @@ public class Server implements Runnable{
             return client.reciveSpielstein();
         } catch (Exception e) {
             System.out.println("SERVER:\t\tCould not recive object from client!");
-            return spielsteins.get(0);
+            return 0;
         }
     }
     private void doBroadcastToOneCLient(ClientHandler client, Spiel spiel) {

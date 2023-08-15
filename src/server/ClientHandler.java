@@ -55,15 +55,18 @@ public class ClientHandler {
            outputStream.writeObject((Spielfeld) spiel.getSpielfeld().clone());
            for(int i = 0; i<spiel.getTeams().size(); i++) {
                outputStream.writeObject((Team) spiel.getTeams().get(i).clone());
+               for(int j = 0; j<spiel.getTeams().get(i).getSpielsteine().size(); j++) {
+                   outputStream.writeObject((Spielstein) spiel.getTeams().get(i).getSpielsteine().get(j).clone());
+               }
            }
            outputStream.flush();
         System.out.println("SERVER:\tObject sent");
     }
 
-    public Spielstein reciveSpielstein() throws IOException, ClassNotFoundException {
-        Spielstein spielstein = (Spielstein) inputStream.readObject();
+    public int reciveSpielstein() throws IOException, ClassNotFoundException {
+        int spielsteinNumber = inputStream.readInt();
         System.out.println("SERVER:\tSpielstein recived");
-        return spielstein;
+        return spielsteinNumber;
     }
 
     public void setTeam(Team team) {

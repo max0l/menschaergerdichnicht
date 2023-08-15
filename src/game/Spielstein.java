@@ -61,6 +61,8 @@ public class Spielstein implements Serializable, Cloneable {
         walkedFields += diceRoll;
     }
 
+
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         Spielstein spielstein = (Spielstein) super.clone();

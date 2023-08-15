@@ -123,6 +123,7 @@ public class Team implements Serializable, Cloneable {
         spielfeld.getFeld(spielstein.getFieldId()).setOccupier(null);
         spielstein.setFieldId(-1);
         addToHome(spielstein);
+        spielstein.setWalkedFields(0);
         spielstein.setState(SpielsteinState.STATE_HOME);
     }
 

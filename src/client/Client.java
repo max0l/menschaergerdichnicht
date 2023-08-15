@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Client implements Runnable{
-    private Spiel spiel;
+    private volatile Spiel spiel;
     private String address;
     private int port;
 
@@ -54,6 +54,9 @@ public class Client implements Runnable{
                     Spielfeld spielfeld = (Spielfeld) inputStream.readObject();
                     for(int i = 0; i<spiel.getTeams().size(); i++) {
                         spiel.getTeams().set(i, (Team) inputStream.readObject());
+                        for(int k = 0; k<spiel.getTeams().get(i).getSpielsteine().size(); k++) {
+                            spiel.getTeams().get(i).getSpielsteine().set(k, (Spielstein) inputStream.readObject());
+                        }
                     }
                     spiel.setSpielfeld = spielfeld;
                     System.out.println("CLIENT:\t\tSpiel recived");
@@ -166,7 +169,7 @@ public class Client implements Runnable{
         //Send selection to server
 
         try {
-            out.writeObject(movableStones.get(userInput));
+            out.writeInt(userInput);
             out.flush();
             System.out.println("CLIENT:\t\tSpielstein sent to server\n");
         } catch (IOException e) {
