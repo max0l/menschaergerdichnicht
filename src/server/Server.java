@@ -9,28 +9,22 @@ import java.util.List;
 import java.util.Random;
 
 public class Server implements Runnable{
-    private String ip;
     private int port;
     private int numPlayers;
-    private boolean isLocal;
+    private int numBots;
     private Spiel spiel;
 
     private Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
     private transient List<ClientHandler> clients = new ArrayList<>();
-    public Server(Boolean isLocal, int numPlayers) {
+    public Server(int numPlayers, int numBots) {
         this.numPlayers = numPlayers;
-        this.isLocal = isLocal;
+        this.numBots = numBots;
 
 //        if(!(numPlayers < 4 && numPlayers >= 1)){
 //            throw new IllegalArgumentException("Number of players must be between 1 and 4");
 //        }
 
-        //For debug always local
-        if(isLocal){
-            //Spiel spiel = new Spiel(isLocal, numPlayers);
-            ip = "localhost";
-            port = 8080;
-        }
+        port = 8080;
 
 
     }
@@ -54,7 +48,7 @@ public class Server implements Runnable{
 
             //Generate game requirements
             System.out.println("SERVER:\t\tGenerating game requirements...");
-            spiel = new Spiel(isLocal, numPlayers, clients, colors);
+            spiel = new Spiel(numPlayers, numBots, clients, colors);
             System.out.println("SERVER:\t\tDone generating game requirements");
 
             startGame();
@@ -113,11 +107,13 @@ public class Server implements Runnable{
             } else {
                 System.out.println("SERVER:\t\tTeam is a Player; Waiting for client to select stone");
                 //doBroadcastToAllClients(spiel);
+                //TODO: Check if the selction (number) is valid
                 int recivedSpielsteinNumber = clientsSelectStone(spiel.selectPiece(team, spiel.getLastDiceRoll()), team.getClient(), spiel, team);
                 System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(recivedSpielsteinNumber).getFieldId() + "; " +
                         "Walked fields pf spielstein: " + team.getSpielsteine().get(recivedSpielsteinNumber).getWalkedFields());
                 spiel.moveSpielstein(team.getSpielsteine().get(recivedSpielsteinNumber), spiel.getLastDiceRoll(), team);
             }
+
 
             //TODO: wait till the movement on server is done, to ensure syncronisation
             try {

@@ -32,11 +32,11 @@ public class LauncherGUI extends JFrame {
         modeGroup.add(singleplayerButton);
         modeGroup.add(multiplayerButton);
 
-        playerCountComboBox = new JComboBox<>(new Integer[]{1, 2, 3, 4});
+        playerCountComboBox = new JComboBox<>(new Integer[]{0, 1, 2, 3, 4});
         playerCountComboBox.setEnabled(true);
         //Selection of bot Count does nothing currently
         //TODO: add 0 if you want 0 bots or players
-        botCountComboBox = new JComboBox<>(new Integer[]{1, 2, 3, 4});
+        botCountComboBox = new JComboBox<>(new Integer[]{0, 1, 2, 3, 4});
         botCountComboBox.setEnabled(true);
 
         hostButton = new JRadioButton("Host + self client");
@@ -160,12 +160,13 @@ public class LauncherGUI extends JFrame {
         int playerCount = (int) playerCountComboBox.getSelectedItem();
         int botCount = (int) botCountComboBox.getSelectedItem();
 
-        if((playerCount + botCount) > 4){
-            JOptionPane.showMessageDialog(null, "Die Summe aus Spielern und Bots muss kleiner gleich 4 sein!");
+        if((playerCount + botCount) > 4 || (playerCount + botCount) == 0){
+            JOptionPane.showMessageDialog(null, "Die Summe aus Spielern und Bots muss" +
+                    "\nkleiner gleich 4 und größer 0 sein!");
             return false;
         }else {
             if (singleplayerButton.isSelected()) {
-                Server server = new Server(true, playerCount);
+                Server server = new Server(playerCount, botCount);
 
                 Thread serverThread = new Thread(server);
 
@@ -178,7 +179,7 @@ public class LauncherGUI extends JFrame {
                 clientThread.start();
             } else if (multiplayerButton.isSelected()) {
                 if (hostButton.isSelected()) {
-                    Server server = new Server(true, playerCount);
+                    Server server = new Server(playerCount, botCount);
 
                     Thread serverThread = new Thread(server);
 
@@ -198,7 +199,7 @@ public class LauncherGUI extends JFrame {
 
                     clientThread.start();
                 } else if(hostOnlyButton.isSelected()) {
-                    Server server = new Server(true, playerCount);
+                    Server server = new Server(playerCount, botCount);
 
                     Thread serverThread = new Thread(server);
 

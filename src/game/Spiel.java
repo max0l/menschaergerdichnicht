@@ -19,6 +19,7 @@ public class Spiel implements Serializable, Cloneable
     private Integer lastDiceRoll;
     private Spielfeld spielfeld;
     private boolean firstRun = false;
+    private int numBots;
 
     private int numPlayers;
 
@@ -26,17 +27,10 @@ public class Spiel implements Serializable, Cloneable
      * Konstruktor der Klasse "Spiel".
      * Erstellt das Spielfeld initialisiert die Spieler.
      *
-     * @param isLocal
-     * @param numPlayers Die Anzahl der Spieler die am Spiel teilnehmen.
      * @param spielfeld
      */
-    public Spiel(Boolean isLocal, int numPlayers, List<Team> teams, Spielfeld spielfeld) {
-        this.spielfeld = spielfeld;
-        this.teams = teams;
-        this.numPlayers = teams.size();
-    }
 
-    public Spiel(boolean isLocal, int size, List<Team> teams, Spielfeld spielfeld, Team currentlyPlaying, int lastDiceRoll, boolean gameIsRunning) {
+    public Spiel(int size, List<Team> teams, Spielfeld spielfeld, Team currentlyPlaying, int lastDiceRoll, boolean gameIsRunning) {
         numPlayers = size;
         this.spielfeld = spielfeld;
         this.teams = teams;
@@ -44,16 +38,17 @@ public class Spiel implements Serializable, Cloneable
         this.currentlyPlaying = currentlyPlaying;
     }
 
-    public Spiel(boolean isLocal, int numPlayers, List<ClientHandler> clients, Color[] colors) {
+    public Spiel(int numPlayers, int numBots, List<ClientHandler> clients, Color[] colors) {
         this.numPlayers = numPlayers;
         this.teams = new ArrayList<>();
         this.spielfeld = new Spielfeld();
         this.gameIsRunning = true;
+        this.numBots = numBots;
 
         giveEachClientTheirTeam(spielfeld, clients, colors);
 
         //Create Bots
-        for(int i = numPlayers; i < 4; i++){
+        for(int i = numPlayers; i < numBots; i++){
             teams.add(new Team(colors[i], i*10, spielfeld, true, null));
         }
 
@@ -545,9 +540,7 @@ public class Spiel implements Serializable, Cloneable
         clone.currentlyPlaying = (Team) currentlyPlaying.clone();
         clone.lastDiceRoll = lastDiceRoll;
         clone.firstRun = firstRun;
-
-
-
+        clone.numBots = numBots;
         return clone;
     }
 
