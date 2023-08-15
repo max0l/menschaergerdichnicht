@@ -49,7 +49,14 @@ public class ClientHandler {
     }
 
     public void sendToClient(Spiel spiel) throws IOException, CloneNotSupportedException {
+        System.out.println("SERVER:\tSending object to client");
+        //System.out.println("SERVER:\t\t" + spiel.getSpielfeld().toString());
            outputStream.writeObject((Spiel) spiel.clone());
+           outputStream.writeObject((Spielfeld) spiel.getSpielfeld().clone());
+           for(int i = 0; i<spiel.getTeams().size(); i++) {
+               outputStream.writeObject((Team) spiel.getTeams().get(i).clone());
+           }
+           outputStream.flush();
         System.out.println("SERVER:\tObject sent");
     }
 

@@ -63,6 +63,12 @@ public class Spielstein implements Serializable, Cloneable {
 
     @Override
     public Object clone() throws CloneNotSupportedException {
-        return super.clone();
+        Spielstein spielstein = (Spielstein) super.clone();
+        spielstein.color = color;
+        spielstein.state = state;
+        spielstein.fieldId = fieldId;
+        spielstein.walkedFields = walkedFields;
+        spielstein.team = team;
+        return spielstein;
     }
 }

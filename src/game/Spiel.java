@@ -1,5 +1,7 @@
 package game;
 
+import server.ClientHandler;
+
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ import java.util.Random;
 
 public class Spiel implements Serializable, Cloneable
 {
+    public Spielfeld setSpielfeld;
     private List<Team> teams;
     private boolean gameIsRunning = true;
     private Random random = new Random();
@@ -39,6 +42,33 @@ public class Spiel implements Serializable, Cloneable
         this.teams = teams;
         this.numPlayers = teams.size();
         this.currentlyPlaying = currentlyPlaying;
+    }
+
+    public Spiel(boolean isLocal, int numPlayers, List<ClientHandler> clients, Color[] colors) {
+        this.numPlayers = numPlayers;
+        this.teams = new ArrayList<>();
+        this.spielfeld = new Spielfeld();
+        this.gameIsRunning = true;
+
+        giveEachClientTheirTeam(spielfeld, clients, colors);
+
+        //Create Bots
+        for(int i = numPlayers; i < 4; i++){
+            teams.add(new Team(colors[i], i*10, spielfeld, true, null));
+        }
+
+        System.out.println("SERVER:\t\tTeam Size of clients and bots: " + teams.size());
+
+    }
+
+    private void giveEachClientTheirTeam(Spielfeld spielfeld, List<ClientHandler> clients, Color[] colors) {
+        for(int i = 0; i < clients.size(); i++){
+            Team team = new Team(colors[i], i*10, spielfeld, false, clients.get(i));
+            teams.add(team);
+            clients.get(i).setTeam(team);
+        }
+
+        System.out.println("SERVER:\t\tTeam Size of clients: " + teams.size());
     }
 
 
@@ -519,5 +549,17 @@ public class Spiel implements Serializable, Cloneable
 
 
         return clone;
+    }
+
+    public boolean isGameIsRunning() {
+        return gameIsRunning;
+    }
+
+    public void setIsGameRunning(boolean b) {
+        gameIsRunning = b;
+    }
+
+    public void setSetSpielfeld(Spielfeld setSpielfeld) {
+        this.setSpielfeld = setSpielfeld;
     }
 }

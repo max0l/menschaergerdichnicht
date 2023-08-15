@@ -13,15 +13,10 @@ public class Server implements Runnable{
     private int port;
     private int numPlayers;
     private boolean isLocal;
-    private boolean isRunning = true;
-
-    private Spielfeld spielfeld;
-
-    private volatile Spiel spiel;
+    private Spiel spiel;
 
     private Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
     private transient List<ClientHandler> clients = new ArrayList<>();
-    private List<Team> teams = new ArrayList<Team>();
     public Server(Boolean isLocal, int numPlayers) {
         this.numPlayers = numPlayers;
         this.isLocal = isLocal;
@@ -56,7 +51,11 @@ public class Server implements Runnable{
 
             System.out.println("SERVER:\t\tAll clients connected!");
 
-            generateGameRequirements();
+
+            //Generate game requirements
+            System.out.println("SERVER:\t\tGenerating game requirements...");
+            spiel = new Spiel(isLocal, numPlayers, clients, colors);
+            System.out.println("SERVER:\t\tDone generating game requirements");
 
             startGame();
 
@@ -69,9 +68,9 @@ public class Server implements Runnable{
     }
 
     private void startGame() {
-        spiel = new Spiel(isLocal, numPlayers, teams, spielfeld);
-        while(isRunning){
-             for(Team team : teams) {
+
+        while(spiel.isGameIsRunning()){
+             for(Team team : spiel.getTeams()) {
                  System.out.println("\n\nSERVER:\tCurrently playing: " + team.getColor() + " is bot: " + team.getIsBot());
                  play(team);
                  //doBroadcastToAllClients(spiel);
@@ -120,7 +119,7 @@ public class Server implements Runnable{
 
             if(team.getIsFinished())
             {
-                isRunning = false;
+                spiel.setIsGameRunning(false);
             }
 
             spiel.setLastDiceRoll(null);
@@ -199,31 +198,5 @@ public class Server implements Runnable{
         }
     }
 
-    private void generateGameRequirements() {
-        System.out.println("SERVER:\t\t-----------------Generating game requirements-----------------");
 
-        spielfeld = new Spielfeld();
-
-        giveEachClientTheirTeam(spielfeld);
-
-        //Create Bots
-        for(int i = numPlayers; i < 4; i++){
-            teams.add(new Team(colors[i], i*10, spielfeld, true, null));
-        }
-
-        System.out.println("SERVER:\t\tTeam Size of clients and bots: " + teams.size());
-
-        System.out.println("SERVER:\t\t-----------------Done generating game requirements-----------------");
-
-    }
-
-    private void giveEachClientTheirTeam(Spielfeld spielfeld) {
-        for(int i = 0; i < clients.size(); i++){
-            Team team = new Team(colors[i], i*10, spielfeld, false, clients.get(i));
-            teams.add(team);
-            clients.get(i).setTeam(team);
-        }
-
-        System.out.println("SERVER:\t\tTeam Size of clients: " + teams.size());
-    }
 }

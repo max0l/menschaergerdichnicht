@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Client implements Runnable{
-    private volatile Spiel spiel;
+    private Spiel spiel;
     private String address;
     private int port;
 
@@ -51,13 +51,18 @@ public class Client implements Runnable{
                     System.out.println("\nCLIENT:\t\tWaiting for server...");
                     spiel = null;
                     spiel = (Spiel) inputStream.readObject();
+                    Spielfeld spielfeld = (Spielfeld) inputStream.readObject();
+                    for(int i = 0; i<spiel.getTeams().size(); i++) {
+                        spiel.getTeams().set(i, (Team) inputStream.readObject());
+                    }
+                    spiel.setSpielfeld = spielfeld;
                     System.out.println("CLIENT:\t\tSpiel recived");
                     //Sending confirmation:
                     outputStream.writeObject(Boolean.TRUE);
                     outputStream.flush();
                     System.out.println("CLIENT:\t\tConfirmation sent");
 
-                    //System.out.println(spiel.getSpielfeld().toString());
+                    System.out.println(spiel.getSpielfeld().toString());
 
 
                     if (spiel.getLastDiceRoll() == null) {

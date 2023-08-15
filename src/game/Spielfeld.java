@@ -17,6 +17,10 @@ public class Spielfeld implements Serializable, Cloneable
         }
     }
 
+    public Spielfeld(Feld[] spielfeld) {
+        this.spielfeld = spielfeld;
+    }
+
     /**
      * Ruft das Spielfeld am angegebenen Index ab.
      * @param index Der Index des abzurufenden Spielfelds.
@@ -35,12 +39,18 @@ public class Spielfeld implements Serializable, Cloneable
         return output;
     }
 
+    public void setFelder(Feld[] felder) {
+        this.spielfeld = felder;
+    }
+
     @Override
     public Spielfeld clone() throws CloneNotSupportedException {
         Spielfeld clone = (Spielfeld) super.clone();
+        Feld[] felder = new Feld[40];
         for(int i = 0; i<40; i++) {
-            clone.spielfeld[i] = spielfeld[i].clone();
+            felder[i] = spielfeld[i].clone();
         }
+        clone.setFelder(felder);
         return clone;
     }
 

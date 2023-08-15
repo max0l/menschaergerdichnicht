@@ -204,15 +204,32 @@ public class Team implements Serializable, Cloneable {
         isBot = b;
     }
 
+    public void setSpielsteine(List<Spielstein> spielsteine) {
+        this.spielsteine = spielsteine;
+    }
+
     @Override
     public Object clone() throws CloneNotSupportedException {
         Team team = (Team) super.clone();
-        team.homeFields = homeFields.clone();
-        team.finishFields = finishFields.clone();
-        team.spielsteine = new ArrayList<>();
-        for(Spielstein spielstein : spielsteine) {
-            team.spielsteine.add((Spielstein) spielstein.clone());
+        team.startField = startField;
+        team.finishField = finishField;
+        team.color = color;
+        team.isBot = isBot;
+        team.name = name;
+        team.isFinished = isFinished;
+        for(int i = 0; i<4;i++) {
+            if(homeFields[i] != null) {
+                team.homeFields[i] = (Spielstein) homeFields[i].clone();
+            }
+            if(finishFields[i] != null) {
+                team.finishFields[i] = (Feld) finishFields[i].clone();
+            }
         }
+        List<Spielstein> copySpielsteine = new ArrayList<>();
+        for(Spielstein spielstein : spielsteine) {
+            copySpielsteine.add((Spielstein) spielstein.clone());
+        }
+        team.setSpielsteine(copySpielsteine);
         return team;
     }
 }
