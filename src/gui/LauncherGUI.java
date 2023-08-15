@@ -16,6 +16,9 @@ public class LauncherGUI extends JFrame {
     private JTextField serverAddressField;
     private JTextField portField;
     private JButton startButton;
+    private JComboBox<Integer> botCountComboBox;
+    private JRadioButton hostOnlyButton;
+    private JOptionPane tooManySelected;
 
     public LauncherGUI() {
         setTitle("Game Launcher");
@@ -30,12 +33,18 @@ public class LauncherGUI extends JFrame {
         modeGroup.add(multiplayerButton);
 
         playerCountComboBox = new JComboBox<>(new Integer[]{1, 2, 3, 4});
-        playerCountComboBox.setEnabled(false);
+        playerCountComboBox.setEnabled(true);
+        //Selection of bot Count does nothing currently
+        //TODO: add 0 if you want 0 bots or players
+        botCountComboBox = new JComboBox<>(new Integer[]{1, 2, 3, 4});
+        botCountComboBox.setEnabled(true);
 
-        hostButton = new JRadioButton("Host");
+        hostButton = new JRadioButton("Host + self client");
+        hostOnlyButton = new JRadioButton("Host Only");
         connectButton = new JRadioButton("Connect");
         ButtonGroup connectionGroup = new ButtonGroup();
         connectionGroup.add(hostButton);
+        connectionGroup.add(hostOnlyButton);
         connectionGroup.add(connectButton);
 
         serverAddressField = new JTextField();
@@ -44,10 +53,10 @@ public class LauncherGUI extends JFrame {
 
         portField = new JTextField();
         portField = new JTextField(6);
-        portField.setEnabled(false);
+        portField.setEnabled(true);
 
         startButton = new JButton("Start");
-        startButton.setEnabled(false);
+        startButton.setEnabled(true);
 
         add(new JLabel("Select Mode:"));
         JPanel modePanel = new JPanel();
@@ -60,9 +69,15 @@ public class LauncherGUI extends JFrame {
         playerCountPanel.add(playerCountComboBox);
         add(playerCountPanel);
 
+        JPanel botCountPanel = new JPanel();
+        playerCountPanel.add(new JLabel("Select Bot Count:"));
+        playerCountPanel.add(botCountComboBox);
+        add(botCountPanel);
+
         add(new JLabel("Select Connection Type (Multiplayer):"));
         JPanel connectionPanel = new JPanel();
         connectionPanel.add(hostButton);
+        connectionPanel.add(hostOnlyButton);
         connectionPanel.add(connectButton);
         add(connectionPanel);
 
@@ -83,20 +98,24 @@ public class LauncherGUI extends JFrame {
         singleplayerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                playerCountComboBox.setEnabled(true);
                 serverAddressField.setEnabled(false);
                 portField.setEnabled(false);
                 startButton.setEnabled(true);
+                hostButton.setEnabled(false);
+                hostOnlyButton.setEnabled(false);
+                connectButton.setEnabled(false);
             }
         });
 
         multiplayerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                playerCountComboBox.setEnabled(true);
                 serverAddressField.setEnabled(true);
                 portField.setEnabled(true);
                 startButton.setEnabled(true);
+                connectButton.setEnabled(true);
+                hostOnlyButton.setEnabled(true);
+                hostButton.setEnabled(true);
             }
         });
 
@@ -105,6 +124,7 @@ public class LauncherGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 serverAddressField.setEnabled(true);
                 portField.setEnabled(true);
+                playerCountComboBox.setEnabled(false);
             }
         });
 
@@ -116,40 +136,35 @@ public class LauncherGUI extends JFrame {
             }
         });
 
+        hostOnlyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                serverAddressField.setEnabled(false);
+                portField.setEnabled(false);
+            }
+        });
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Call your start game function here
-                startGame();
-                dispose();
+                boolean doStartGame = startGame();
+                if(doStartGame) {
+                    dispose();
+                }
             }
         });
     }
 
-    private void startGame() {
+    private boolean startGame() {
         // Perform actions to start the game based on user selections
         int playerCount = (int) playerCountComboBox.getSelectedItem();
+        int botCount = (int) botCountComboBox.getSelectedItem();
 
-        // Start singleplayer game with the selected player count
-        if(playerCount < 1 || playerCount > 4) {
-            throw new IllegalArgumentException("Number of players must be between 1 and 4");
-        }
-
-
-        if (singleplayerButton.isSelected()) {
-            Server server = new Server(true, playerCount);
-
-            Thread serverThread = new Thread(server);
-
-            serverThread.start();
-
-            Client client = new Client("localhost", 8080);
-
-            Thread clientThread = new Thread(client);
-
-            clientThread.start();
-        } else if (multiplayerButton.isSelected()) {
-            if (hostButton.isSelected()) {
+        if((playerCount + botCount) > 4){
+            JOptionPane.showMessageDialog(null, "Die Summe aus Spielern und Bots muss kleiner gleich 4 sein!");
+            return false;
+        }else {
+            if (singleplayerButton.isSelected()) {
                 Server server = new Server(true, playerCount);
 
                 Thread serverThread = new Thread(server);
@@ -161,16 +176,45 @@ public class LauncherGUI extends JFrame {
                 Thread clientThread = new Thread(client);
 
                 clientThread.start();
-            } else if (connectButton.isSelected()) {
-                String serverAddress = serverAddressField.getText();
-                int port = Integer.parseInt(portField.getText());
-                Client client = new Client(serverAddress, port);
+            } else if (multiplayerButton.isSelected()) {
+                if (hostButton.isSelected()) {
+                    Server server = new Server(true, playerCount);
 
-                Thread clientThread = new Thread(client);
+                    Thread serverThread = new Thread(server);
 
-                clientThread.start();
+                    serverThread.start();
+
+                    Client client = new Client("localhost", 8080);
+
+                    Thread clientThread = new Thread(client);
+
+                    clientThread.start();
+                } else if (connectButton.isSelected()) {
+                    String serverAddress = serverAddressField.getText();
+                    int port = Integer.parseInt(portField.getText());
+                    Client client = new Client(serverAddress, port);
+
+                    Thread clientThread = new Thread(client);
+
+                    clientThread.start();
+                } else if(hostOnlyButton.isSelected()) {
+                    Server server = new Server(true, playerCount);
+
+                    Thread serverThread = new Thread(server);
+
+                    serverThread.start();
+                }
             }
         }
+
+        // Start singleplayer game with the selected player count
+        /*
+        if(playerCount < 1 || playerCount > 4) {
+            throw new IllegalArgumentException("Number of players must be between 1 and 4");
+        }*/
+
+        return true;
+
     }
 
     public static void main(String[] args) {
