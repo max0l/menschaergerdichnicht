@@ -13,7 +13,7 @@ public class Spielfeld implements Serializable, Cloneable
      */
     public Spielfeld() {
         for (int i = 0; i < 40; i++) {
-            spielfeld[i] = new Feld(i);
+            spielfeld[i] = new Feld();
         }
     }
 
@@ -34,7 +34,18 @@ public class Spielfeld implements Serializable, Cloneable
     public String toString() {
         String output = "";
         for(int i = 0; i<40; i++) {
-            output += spielfeld[i].toString() + "\n";
+            output += "Feld " + i + ": ";
+
+            if(spielfeld[i].getIsOccupied())
+            {
+                output += spielfeld[i].getOccupier().getColor();
+            }
+            else
+            {
+                output += "False";
+            }
+
+            output += '\n';
         }
         return output;
     }
