@@ -6,7 +6,6 @@ import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 public class Spiel implements Serializable, Cloneable
@@ -20,35 +19,22 @@ public class Spiel implements Serializable, Cloneable
     private Spielfeld spielfeld;
     private boolean firstRun = false;
     private int numBots;
-
     private int numPlayers;
-
-    /**
-     * Konstruktor der Klasse "Spiel".
-     * Erstellt das Spielfeld initialisiert die Spieler.
-     *
-     * @param spielfeld
-     */
-
-    public Spiel(int size, List<Team> teams, Spielfeld spielfeld, Team currentlyPlaying, int lastDiceRoll, boolean gameIsRunning) {
-        numPlayers = size;
-        this.spielfeld = spielfeld;
-        this.teams = teams;
-        this.numPlayers = teams.size();
-        this.currentlyPlaying = currentlyPlaying;
-    }
-
-    public Spiel(int numPlayers, int numBots, List<ClientHandler> clients, Color[] colors) {
+    private int difficulty;
+    public Spiel(int numPlayers, int numBots, List<ClientHandler> clients, Color[] colors, int difficulty) {
         this.numPlayers = numPlayers;
+        this.numBots = numBots;
         this.teams = new ArrayList<>();
         this.spielfeld = new Spielfeld();
         this.gameIsRunning = true;
-        this.numBots = numBots;
-
-        giveEachClientTheirTeam(spielfeld, clients, colors);
+        boolean isSaveGame = false;
+        giveEachClientTheirTeam(spielfeld, clients, colors, isSaveGame);
+        this.difficulty = difficulty;
 
         //Create Bots
-        for(int i = numPlayers; i < numBots; i++){
+        System.out.println("GAME:\t\tCreating Bots. NumPlayers: " + numPlayers + " NumBots: " + numBots);
+        for(int i = numPlayers; i <= numBots; i++){
+            System.out.println("GAME:\t\tCreating Bot " + i);
             teams.add(new Team(colors[i], i*10, spielfeld, true, null));
         }
 
@@ -56,71 +42,23 @@ public class Spiel implements Serializable, Cloneable
 
     }
 
-    private void giveEachClientTheirTeam(Spielfeld spielfeld, List<ClientHandler> clients, Color[] colors) {
+    private void giveEachClientTheirTeam(Spielfeld spielfeld, List<ClientHandler> clients, Color[] colors, boolean isSaveGame) {
+        System.out.println("GAME:\t\tGiving each client their team...");
         for(int i = 0; i < clients.size(); i++){
+            System.out.println("GAME:\t\tGiving client " + i + " their team...");
             Team team = new Team(colors[i], i*10, spielfeld, false, clients.get(i));
-            teams.add(team);
+            if(isSaveGame) {
+                teams.set(i, team);
+            } else{
+                teams.add(team);
+            }
+
             clients.get(i).setTeam(team);
         }
 
         System.out.println("SERVER:\t\tTeam Size of clients: " + teams.size());
     }
 
-
-    /**
-     * Startet ein neues Spiel oder setzt ein angefangenes Spiel fort.
-     */
-    public void startGame(boolean doBroadcast)
-    {
-
-        if(currentlyPlaying != null)
-        {
-            firstRun = true;
-            System.out.println("Das game.Spiel wird bei Spieler: " + this.currentlyPlaying.getColor() + " fortgesetzt.");
-        }
-        else
-        {
-            System.out.println("Ein neues game.Spiel wurde gestartet.");
-        }
-
-    }
-
-
-//    public void play(Team team)
-//    {
-//
-//        currentlyPlaying = team;
-//        if (team.checkIfAllPiecesAreInStart())
-//        {
-//            tryToGetOutOfSpawn(team);
-//            return;
-//        }
-//
-//        if (!team.getIsFinished())
-//        {
-//            int diceRoll;
-//            if(lastDiceRoll == null)
-//            {
-//                diceRoll = rollDice();
-//                lastDiceRoll = diceRoll;
-//            }
-//            else
-//            {
-//                diceRoll = lastDiceRoll;
-//            }
-//
-//            selectPiece(team, diceRoll);
-//
-//            lastDiceRoll = null;
-//
-//            if (diceRoll == 6)
-//            {
-//                play(team);
-//            }
-//        }
-//
-//        lastDiceRoll = null;
-//    }
 
     private Team getNextToPlay(Team team)
     {
@@ -186,8 +124,6 @@ public class Spiel implements Serializable, Cloneable
                     && nextFeld.getOccupier().getColor() == team.getColor();
         });
 
-        //TODO:Also needs to remove pieces that are in goal or would go to the goal
-        //TODO: game.Spielstein sollte nachdem es im Ziel ist die SpielFeldID des momentanen Feldes im Ziel bekommen
         //Figure is already in goal
         movableSpielsteine.removeIf(spielstein -> spielstein.getState() == SpielsteinState.STATE_FINISH
                 && team.getIsOccupiedInFinish(diceRoll + team.getSpielFeldIntOfSpielsteinInFinish(spielstein) - 1));
@@ -195,6 +131,9 @@ public class Spiel implements Serializable, Cloneable
         movableSpielsteine.removeIf(spielstein -> spielstein.getState() == SpielsteinState.STATE_PLAYING
                 && (spielstein.getWalkedFields() + diceRoll) >= 40
                 && team.getIsOccupiedInFinish(spielstein.getWalkedFields() + diceRoll - 40));
+        //Figure is in Home and spawn in Occupied by same team
+        movableSpielsteine.removeIf(spielstein -> spielstein.getState() == SpielsteinState.STATE_HOME
+                && checkIfSpawnIsOccupiedBySameTeam(team));
     }
 
     //Checks if the spawn is occupied by a piece of the same color
@@ -290,6 +229,7 @@ public class Spiel implements Serializable, Cloneable
         {
             if(team.getIsFinished())
             {
+                gameIsRunning = false;
                 return true;
             }
         }
@@ -493,32 +433,6 @@ public class Spiel implements Serializable, Cloneable
         this.currentlyPlaying = team;
     }
 
-//    @Serial
-//    private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
-//        currentlyPlaying = (Team) inputStream.readObject();
-//        lastDiceRoll = (Integer) inputStream.readObject();
-//        spielfeld = (Spielfeld) inputStream.readObject();
-//        numPlayers = inputStream.readInt();
-//        teams = new ArrayList<>();
-//        for(int i = 0; i < numPlayers; i++){
-//            Team team = (Team) inputStream.readObject();
-//            teams.add(team);
-//        }
-//        gameIsRunning = inputStream.readBoolean();
-//    }
-//
-//    @Serial
-//    private void writeObject(ObjectOutputStream outputStream) throws IOException {
-//        outputStream.writeObject(currentlyPlaying);
-//        outputStream.writeObject(lastDiceRoll);
-//        outputStream.writeObject(spielfeld);
-//        outputStream.writeInt(numPlayers);
-//        for(int i = 0; i < numPlayers; i++){
-//            outputStream.writeObject(teams.get(i));
-//        }
-//        outputStream.writeBoolean(gameIsRunning);
-//    }
-
     public List<Team> getTeams() {
         return teams;
     }
@@ -541,6 +455,7 @@ public class Spiel implements Serializable, Cloneable
         clone.lastDiceRoll = lastDiceRoll;
         clone.firstRun = firstRun;
         clone.numBots = numBots;
+        clone.difficulty = difficulty;
         return clone;
     }
 
@@ -554,5 +469,21 @@ public class Spiel implements Serializable, Cloneable
 
     public void setSetSpielfeld(Spielfeld setSpielfeld) {
         this.setSpielfeld = setSpielfeld;
+    }
+
+    public void setClients(List<ClientHandler> clients, Color[] colors, boolean isSavedGame) {
+        giveEachClientTheirTeam(this.getSpielfeld(), clients, colors, isSavedGame);
+    }
+
+    public int getNumBots() {
+        return numBots;
+    }
+
+    public int getNumPlayers() {
+        return numPlayers;
+    }
+
+    public int getDifficulty() {
+        return difficulty;
     }
 }

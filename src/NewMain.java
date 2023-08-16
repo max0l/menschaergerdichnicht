@@ -4,15 +4,8 @@ import server.Server;
 
 public class NewMain {
     public static void main(String[] args) {
-        System.out.println("Prohramm is Starting...");
+        System.out.println("Program is starting...");
         LauncherGUI launcherGUI = new LauncherGUI();
         launcherGUI.setVisible(true);
-
-
-
-//        server.run();
-
-
-
     }
 }

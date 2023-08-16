@@ -6,10 +6,7 @@ import game.Spielstein;
 import game.Team;
 
 import java.awt.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -51,14 +48,6 @@ public class Client implements Runnable{
                     System.out.println("\nCLIENT:\t\tWaiting for server...");
                     spiel = null;
                     spiel = (Spiel) inputStream.readObject();
-                    Spielfeld spielfeld = (Spielfeld) inputStream.readObject();
-                    for(int i = 0; i<spiel.getTeams().size(); i++) {
-                        spiel.getTeams().set(i, (Team) inputStream.readObject());
-                        for(int k = 0; k<spiel.getTeams().get(i).getSpielsteine().size(); k++) {
-                            spiel.getTeams().get(i).getSpielsteine().set(k, (Spielstein) inputStream.readObject());
-                        }
-                    }
-                    spiel.setSpielfeld = spielfeld;
                     System.out.println("CLIENT:\t\tSpiel recived");
                     //Sending confirmation:
                     outputStream.writeObject(Boolean.TRUE);
@@ -92,6 +81,7 @@ public class Client implements Runnable{
                     if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
                         System.out.println("CLIENT:\t\tIt's your turn!");
                         sendSelectionToServer(spiel, teamColor, socket, outputStream);
+                        askForSave();
                     }else{
                         System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
                         System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
@@ -130,8 +120,9 @@ public class Client implements Runnable{
         if(movableStones == null){
             System.out.println("CLIENT:\t\tmovableStones is null");
             try {
-                out.writeObject(null);
+                out.writeInt(-1);
                 out.flush();
+                return;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -160,7 +151,7 @@ public class Client implements Runnable{
                     System.out.printf("CLIENT:\t\tNumber must be between %d and %d. Please try again: ", minRange, maxRange);
                 }
             } else {
-                String invalidInput = scanner.next(); // Clear invalid input
+                scanner.next();
                 System.out.printf("CLIENT:\t\tInvalid input. Please enter a valid number between %d and %d: ", minRange, maxRange);
             }
         }
@@ -176,6 +167,78 @@ public class Client implements Runnable{
             e.printStackTrace();
         }
 
+    }
+    public void saveGame()
+    {
+        String userHome = System.getProperty("user.home");
+
+        String persistentDirPath;
+        if (System.getProperty("os.name").toLowerCase().contains("win"))
+        {
+            String appData = System.getenv("APPDATA");
+            persistentDirPath = appData + File.separator + "menschaergerdichnicht";
+        }
+        else
+        {
+            persistentDirPath = userHome + File.separator + ".menschaergerdichnicht";
+        }
+
+        File persistentDir = new File(persistentDirPath);
+
+        if (!persistentDir.exists())
+        {
+            if (persistentDir.mkdirs())
+            {
+                System.out.println("Directory created: " + persistentDirPath);
+            }
+            else
+            {
+                System.err.println("Failed to create directory: " + persistentDirPath);
+            }
+        }
+
+        String fileName = "save_game";
+        String filePath = persistentDirPath + File.separator + fileName;
+
+        int i = 0;
+        while(new File(filePath).exists())
+        {
+            i++;
+            String newFileName = fileName + i;
+            filePath = persistentDirPath + File.separator + newFileName;
+
+        }
+
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath)))
+        {
+            outputStream.writeObject(spiel);
+            System.out.println("Game saved at: " + filePath);
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    void askForSave()
+    {
+        Character input = null;
+        System.out.println("Do you want to save a game? (y/n)");
+
+        try
+        {
+            input = (char) System.in.read();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            return;
+        }
+
+        if(input == 'y')
+        {
+            saveGame();
+        }
     }
 
 }

@@ -34,7 +34,7 @@ public class Team implements Serializable, Cloneable {
         spielsteine = new ArrayList<>();
         for(int i = 0; i<4;i++) {
             spielsteine.add(new Spielstein(this, i));
-            finishFields[i] = new Feld(i);
+            finishFields[i] = new Feld();
         }
         this.spielfeld = spielfeld;
         this.client = clientHandler;
@@ -232,5 +232,18 @@ public class Team implements Serializable, Cloneable {
         }
         team.setSpielsteine(copySpielsteine);
         return team;
+    }
+
+    @Override
+    public String toString() {
+        return "game.Team{" +
+                "name='" + name + '\'' +
+                ", color=" + color +
+                ", startField=" + startField +
+                ", finishField=" + finishField +
+                ", isBot=" + isBot +
+                ", isFinished=" + isFinished +
+                ", spielsteine=" + spielsteine +
+                '}';
     }
 }

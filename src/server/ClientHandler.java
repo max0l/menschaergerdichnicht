@@ -52,6 +52,7 @@ public class ClientHandler {
         System.out.println("SERVER:\tSending object to client");
         //System.out.println("SERVER:\t\t" + spiel.getSpielfeld().toString());
            outputStream.writeObject((Spiel) spiel.clone());
+           /*
            outputStream.writeObject((Spielfeld) spiel.getSpielfeld().clone());
            for(int i = 0; i<spiel.getTeams().size(); i++) {
                outputStream.writeObject((Team) spiel.getTeams().get(i).clone());
@@ -59,20 +60,16 @@ public class ClientHandler {
                    outputStream.writeObject((Spielstein) spiel.getTeams().get(i).getSpielsteine().get(j).clone());
                }
            }
+
+            */
            outputStream.flush();
         System.out.println("SERVER:\tObject sent");
     }
 
-    public int reciveSpielstein() {
-        try{
-            int spielsteinNumber = inputStream.readInt();
-            System.out.println("SERVER:\tSpielstein recived");
-            return spielsteinNumber;
-        }catch (IOException e) {
-            e.printStackTrace();
-            return 0;
-            //TODO: Set to bot if fail
-        }
+    public int reciveSpielstein() throws IOException {
+        int spielsteinNumber = inputStream.readInt();
+        System.out.println("SERVER:\tSpielstein recived");
+        return spielsteinNumber;
 
     }
 
