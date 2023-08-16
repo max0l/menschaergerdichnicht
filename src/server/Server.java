@@ -102,7 +102,7 @@ public class Server implements Runnable{
         if(isSavedGame) {
             System.out.println("SERVER:\t\tGame is saved. Continuing...");
             System.out.println("SERVER:\t\tCurrently playing: " + spiel.getCurrentlyPlaying().getColor());
-            Thread.sleep(10000);
+            Thread.sleep(2000);
             int i = spiel.getTeams().indexOf(spiel.getCurrentlyPlaying());
             if(i != -1){
                 for(int j = i; j < spiel.getTeams().size(); j++){
