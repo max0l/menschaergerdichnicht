@@ -213,6 +213,10 @@ public class Server implements Runnable{
         }
     }
 
+    /**
+     * Sends the game to all connected clients
+     * @param spiel the game to be sent
+     */
     private void doBroadcastToAllClients(Spiel spiel) {
         for(ClientHandler client : clients) {
             try {
