@@ -233,4 +233,17 @@ public class Team implements Serializable, Cloneable {
         team.setSpielsteine(copySpielsteine);
         return team;
     }
+
+    @Override
+    public String toString() {
+        return "game.Team{" +
+                "name='" + name + '\'' +
+                ", color=" + color +
+                ", startField=" + startField +
+                ", finishField=" + finishField +
+                ", isBot=" + isBot +
+                ", isFinished=" + isFinished +
+                ", spielsteine=" + spielsteine +
+                '}';
+    }
 }

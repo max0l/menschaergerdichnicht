@@ -9,28 +9,44 @@ import java.util.List;
 import java.util.Random;
 
 public class Server implements Runnable{
+
     private int port;
     private int numPlayers;
     private int numBots;
     private Spiel spiel;
-
+    private int difficulty;
+    private boolean isSavedGame = false;
     private Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
     private transient List<ClientHandler> clients = new ArrayList<>();
-    public Server(int numPlayers, int numBots) {
-        this.numPlayers = numPlayers;
-        this.numBots = numBots;
+    public Server(Spiel spiel, int numPlayers, int numBots, int difficulty, int port) {
+        if(spiel == null){
+            this.numPlayers = numPlayers;
+            this.numBots = numBots;
+            this.difficulty = difficulty;
+            if(port == -1){
+                this.port = 8080;
+            } else {
+                this.port = port;
+            }
+        } else {
+            this.spiel = spiel;
+            this.numBots = spiel.getNumBots();
+            this.numPlayers = spiel.getNumPlayers();
+            this.difficulty = spiel.getDifficulty();
+            isSavedGame = true;
+        }
+
+
 
 //        if(!(numPlayers < 4 && numPlayers >= 1)){
 //            throw new IllegalArgumentException("Number of players must be between 1 and 4");
 //        }
 
-        port = 8080;
-
 
     }
 
     @Override
-    public void run() {
+    public void run()  {
         try {
             System.out.println("SERVER:\t\tStarting Server on Port: " + port);
             ServerSocket server = new ServerSocket(port);
@@ -48,8 +64,23 @@ public class Server implements Runnable{
 
             //Generate game requirements
             System.out.println("SERVER:\t\tGenerating game requirements...");
-            spiel = new Spiel(numPlayers, numBots, clients, colors);
+            if(!isSavedGame) {
+                spiel = new Spiel(numPlayers, numBots, clients, colors, difficulty);
+            } else {
+                spiel.setClients(clients, colors, isSavedGame);
+            }
             System.out.println("SERVER:\t\tDone generating game requirements");
+
+            System.out.println("SERVER:\t\tNumber of players: " + numPlayers);
+            System.out.println("SERVER:\t\tNumber of Teams: " + spiel.getTeams().size());
+
+            System.out.println(spiel.getSpielfeld().toString());
+            for(Team team : spiel.getTeams()){
+                System.out.println(team.toString());
+            }
+
+
+            Thread.sleep(2000);
 
             startGame();
 
@@ -61,15 +92,38 @@ public class Server implements Runnable{
         }
     }
 
-    private void startGame() {
+    private void startGame() throws InterruptedException {
+        System.out.println("SERVER:\t\tTeams:");
+        for(Team team : spiel.getTeams()) {
+            System.out.println(team.getColor());
+        }
 
-        while(spiel.isGameIsRunning()){
-            for(Team team : spiel.getTeams()) {
-                System.out.println("\n\nSERVER:\tCurrently playing: " + team.getColor() + " is bot: " + team.getIsBot());
-                play(team);
-                //doBroadcastToAllClients(spiel);
+
+        if(isSavedGame) {
+            System.out.println("SERVER:\t\tGame is saved. Continuing...");
+            System.out.println("SERVER:\t\tCurrently playing: " + spiel.getCurrentlyPlaying().getColor());
+            Thread.sleep(10000);
+            int i = spiel.getTeams().indexOf(spiel.getCurrentlyPlaying());
+            if(i != -1){
+                for(int j = i; j < spiel.getTeams().size(); j++){
+                    Thread.sleep(2000);
+                    play(spiel.getTeams().get(j));
+                }
             }
         }
+
+        while(spiel.isGameIsRunning()) {
+            for(int i = 0; i < spiel.getTeams().size(); i++){
+
+                System.out.println("SERVER:\t\tTeam " + spiel.getTeams().get(i).getColor() + " ist am Zug! Nr.: " + i);
+                play(spiel.getTeams().get(i));
+                Thread.sleep(2000);
+                if(!spiel.isGameIsRunning()){
+                    break;
+                }
+            }
+        }
+
 
     }
 
@@ -107,24 +161,28 @@ public class Server implements Runnable{
             } else {
                 System.out.println("SERVER:\t\tTeam is a Player; Waiting for client to select stone");
                 //doBroadcastToAllClients(spiel);
-                //TODO: Check if the selction (number) is valid
-                int recivedSpielsteinNumber = clientsSelectStone(spiel.selectPiece(team, spiel.getLastDiceRoll()), team.getClient(), spiel, team);
-                System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(recivedSpielsteinNumber).getFieldId() + "; " +
-                        "Walked fields pf spielstein: " + team.getSpielsteine().get(recivedSpielsteinNumber).getWalkedFields());
-                spiel.moveSpielstein(team.getSpielsteine().get(recivedSpielsteinNumber), spiel.getLastDiceRoll(), team);
+                int recivedSpielsteinNumber = clientsSelectStone(team.getClient(), team);
+                if(checkIfSelctionIsValid(recivedSpielsteinNumber, team)) {
+                    if (recivedSpielsteinNumber != -1) {
+                        System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(recivedSpielsteinNumber).getFieldId() + "; " +
+                                "Walked fields pf spielstein: " + team.getSpielsteine().get(recivedSpielsteinNumber).getWalkedFields());
+                        spiel.moveSpielstein(team.getSpielsteine().get(recivedSpielsteinNumber), spiel.getLastDiceRoll(), team);
+                    }
+                }
             }
 
-
-            //TODO: wait till the movement on server is done, to ensure syncronisation
+            /*
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+             */
 
-            if(team.getIsFinished())
+            if(spiel.checkIfGameIsFinished())
             {
                 spiel.setIsGameRunning(false);
+                return;
             }
 
             spiel.setLastDiceRoll(null);
@@ -136,6 +194,23 @@ public class Server implements Runnable{
         }
 
         spiel.setLastDiceRoll(null);
+    }
+
+    private boolean checkIfSelctionIsValid(int recivedSpielsteinNumber, Team team) {
+        List<Spielstein> movablePieces = spiel.selectPiece(team, spiel.getLastDiceRoll());
+        if(movablePieces == null){
+            if(recivedSpielsteinNumber == -1){
+                return true;
+            } else {
+                return false;
+            }
+        }
+        int movablePiecesSize = movablePieces.size();
+        if(recivedSpielsteinNumber <= movablePiecesSize){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void doBroadcastToAllClients(Spiel spiel) {
@@ -164,42 +239,54 @@ public class Server implements Runnable{
         System.out.println("SERVER:\t\tGot confirmation from all CLients\n");
     }
 
-    private int clientsSelectStone(List<Spielstein> spielsteins, ClientHandler client, Spiel spiel, Team currentTeam) {
-        //doBroadcastToAllClients(spiel);
-
-        //doBroadcastToAllClients(spiel);
+    private int clientsSelectStone(ClientHandler client, Team currentTeam) {
         System.out.println("SERVER:\t\tWaiting for client to select stone");
         try {
             return client.reciveSpielstein();
         } catch (Exception e) {
             System.out.println("SERVER:\t\tCould not recive object from client!");
+            currentTeam.setIsBot(true);
             return 0;
-        }
-    }
-    private void doBroadcastToOneCLient(ClientHandler client, Spiel spiel) {
-        try {
-            client.getOutputStream().writeObject(spiel);
-            client.getOutputStream().flush();
-            System.out.println("SERVER:\t\tBroadcasted to one client\n");
-        } catch (Exception e) {
-            System.out.println("SERVER:\t\tCould not send object to client!");
-            e.printStackTrace();
-//                client.getTeam().setIsBot(true);
-//                clients.remove(client);
         }
     }
 
     private Spielstein botSelection(List<Spielstein> spielsteine) {
-        //TODO: Better selction for bot + null handler
         if(spielsteine == null){
             System.out.println("SERVER:\t\tBot selection is null");
             return null;
-        } else if(spielsteine.size() > 0){
-            Random random = new Random();
-            int rand = random.nextInt(spielsteine.size());
-            return spielsteine.get(rand);
+        } else if(spielsteine.size() == 1) {;
+            return spielsteine.get(0);
+        } else if(spielsteine.size() > 1) {
+            return selectPieceOnDifficulty(spielsteine);
         } else {
             return null;
+        }
+    }
+
+    private Spielstein selectPieceOnDifficulty(List<Spielstein> spielsteine) {
+        Spielstein walkingLeast = null;
+        switch(difficulty){
+            case 0:
+                for (Spielstein spielstein : spielsteine) {
+                    if (spielstein.getWalkedFields() < spielstein.getWalkedFields()) {
+                        walkingLeast = spielstein;
+                    }
+                }
+                return walkingLeast;
+            case 1:
+                Random random = new Random();
+                int rand = random.nextInt(spielsteine.size());
+                return spielsteine.get(rand);
+            case 2:
+                for (Spielstein spielstein : spielsteine) {
+                    if (spielstein.getWalkedFields() > spielstein.getWalkedFields()) {
+                        walkingLeast = spielstein;
+                    }
+                }
+                return walkingLeast;
+            default:
+                return spielsteine.get(0);
+
         }
     }
 
