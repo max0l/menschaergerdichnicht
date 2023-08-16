@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.awt.*;
 import java.io.Serializable;
 
@@ -10,6 +11,8 @@ public class Feld implements Serializable {
     private Spielstein occupier;
     private int number;
     private boolean isOccupied;
+    private JButton associatedButton;
+
 
     public Feld(boolean isOccupied) {
         this.isOccupied = isOccupied;
@@ -73,10 +76,12 @@ public class Feld implements Serializable {
         return feldObject;
     }
 
-    public Feld(int id, int buttonNumber) {
+    public Feld(int id, int buttonNumber, JButton associatedButton) {
         this.id = id;
         this.buttonNumber = buttonNumber;
+        this.associatedButton = associatedButton;
     }
+
 
     public void setFeldObject(Object feldObject) {
         this.feldObject = feldObject;

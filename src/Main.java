@@ -1,17 +1,16 @@
 import java.io.*;
-
 public class Main
 {
     private static Spiel spiel = null;
+    private static SpielfeldGui spielfeldGui = null;
     public static void main(String[] args)
     {
-        Menue menue = new Menue();
-        menue.Gui(args);
 
         while(spiel == null)
         {
             askForLoad();
         }
+        Menue.Gui(args);
 
         spiel.startGame();
     }

@@ -9,6 +9,9 @@ public class Menue {
     private static CardLayout cardLayout;
     private static JPanel cardPanel;
     private static Main mainInstance;
+    private static int refreshCounter = 0;
+    private static JLabel refreshLabel;
+
 
 
     static int rows = 15;   // Replace this with your array's row count
@@ -26,8 +29,41 @@ public class Menue {
         }
         return gridPanel;
     }
+    private static void refreshCard3() {
+        refreshCounter++;
+
+        cardPanel.remove(2); // Remove the current Card 3
+        JPanel card3 = new JPanel();
+        card3.setBackground(Color.ORANGE);
+        cardPanel.add(card3, "Card 3");
+
+        Spielfeld spielfeld = new Spielfeld();
+        SpielfeldGui spielfeldGui = new SpielfeldGui(spielfeld);
+        spielfeldGui.test();
+
+        JButton btnNewButton_4 = new JButton("Würfeln");
+        btnNewButton_4.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Spiel spiel = new Spiel(); // Erstellen einer Instanz von Spiel
+                spiel.rollDice();
+                refreshCard3();
+            }
+        });
+        card3.add(btnNewButton_4);
+        card3.add(spielfeldGui);
+        card3.add(refreshLabel);
+
+        // Update the refresh counter label
+        refreshLabel.setText("Refresh Count: " + refreshCounter);
+
+        cardPanel.revalidate(); // Revalidate the cardPanel
+        cardLayout.show(cardPanel, "Card 3"); // Show the refreshed Card 3
+    }
+
 
     public static void Gui(String[] args) {
+
 
         mainInstance = new Main(); // Hier wird eine Instanz der Hauptklasse erstellt
 
@@ -221,8 +257,10 @@ public class Menue {
             public void actionPerformed(ActionEvent e) {
                 Spiel spiel = new Spiel(); // Erstellen einer Instanz von Spiel
                 spiel.rollDice();
+                refreshCard3();
             }
         });
+        refreshLabel = new JLabel("Refresh Count: " + refreshCounter);
         card3.add(btnNewButton_4);
         card3.add(spielfeldGui);
 

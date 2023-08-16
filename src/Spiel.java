@@ -13,7 +13,7 @@ public class Spiel implements Serializable
 
     private Team nextToPlay = null;
 
-    private Spielfeld spielfeld;
+    private static Spielfeld spielfeld;
     private boolean firstRun = false;
 
     public Spiel()
@@ -24,6 +24,7 @@ public class Spiel implements Serializable
 
     void startGame()
     {
+
         if(this.nextToPlay != null)
         {
             firstRun = true;
@@ -33,6 +34,7 @@ public class Spiel implements Serializable
         {
             System.out.println("Ein neues Spiel wurde gestartet.");
         }
+
 
         while (gameIsRunning)
         {
@@ -303,7 +305,7 @@ public class Spiel implements Serializable
         spielfeld.getFeld(nextSpielFeld).setOccupier(spielstein);
         System.out.println("Spielstein ist auf Feld " + spielstein.getFieldId());
         spielstein.addWalkedFields(diceRoll);
-
+        printGameBoard();
     }
 
     private void moveSpielsteinInGoalAround(Team team, int diceRoll, Spielstein spielstein) {
@@ -395,6 +397,31 @@ public class Spiel implements Serializable
         if(input == 'y')
         {
             saveGame();
+        }
+    }
+
+    public void printGameBoard() {
+        System.out.println("Current Game Board:");
+
+        Feld[] fieldArray = spielfeld.getSpielfeldArray();
+
+        for (int i = 0; i < fieldArray.length; i++) {
+            Feld field = fieldArray[i];
+
+            System.out.print(String.format("%2d: ", i));
+
+            if (field.isOccupied()) {
+                Spielstein occupier = field.getOccupier();
+                System.out.print(occupier.getTeam().getColor());
+            } else {
+                System.out.print("   ");
+            }
+
+            System.out.print(" | ");
+
+            if ((i + 1) % 10 == 0) {
+                System.out.println();
+            }
         }
     }
 }

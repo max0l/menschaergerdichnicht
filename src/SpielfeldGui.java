@@ -1,21 +1,18 @@
-import org.w3c.dom.css.RGBColor;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Field;
 
 public class SpielfeldGui extends JPanel {
-    Spielfeld spielfeldInstanz = new Spielfeld();
-    Feld[] spielfeldArray = spielfeldInstanz.getSpielfeldArray();
+    private Spielfeld spielfeldInstance; // Referenz auf die Spielfeld-Instanz
+    private Feld[] spielfeldArray; // Das Spielfeld-Array
+    private String Symbol = "\u2654";
+    private int fieldNumber;
 
-    String Symbol = "\u2654";
-    private Spielfeld spielfeldInstance; // Add a reference to the Spielfeld instance
-    int fieldNumber;
 
     public SpielfeldGui(Spielfeld spielfeldInstance) {
-        this.spielfeldInstance = spielfeldInstance;
+        this.spielfeldInstance = spielfeldInstance; // Die übergebene Spielfeld-Instanz speichern
+        this.spielfeldArray = spielfeldInstance.getSpielfeldArray(); // Das Spielfeld-Array der übergebenen Instanz
         this.fieldNumber = 0;
     }
 
@@ -38,25 +35,63 @@ public class SpielfeldGui extends JPanel {
         Feld feld = spielfeldInstance.getFeld(buttonNumber);
         feld.setFeldObject(customObject);
     }
+    public boolean isFieldOccupied(int fieldNumber) {
+        Feld field = spielfeldArray[fieldNumber];
+        return field.isOccupied();
+    }
 
+
+    public void printGameBoard() {
+        System.out.println("-------------------------");
+
+        Feld[] fieldArray = spielfeldInstance.getSpielfeldArray();
+
+        for (int i = 0; i < fieldArray.length; i++) {
+            Feld field = fieldArray[i];
+
+           System.out.printf("%2d: ", i);
+
+            if (field.isOccupied()) {
+                System.out.print(Symbol);
+            } else {
+                System.out.print("   ");
+            }
+
+            System.out.print(" | ");
+
+            if ((i + 1) % 10 == 0) {
+                System.out.println();
+            }
+        }
+    }
 
 
     public void test() {
         setLayout(new GridLayout(13, 14));
-
         int totalButtons = 13 * 13;
-
         for (int i = 1; i <= totalButtons; i++) {
-            Feld currentFeld = spielfeldArray[i];
+            Feld currentFeld = spielfeldArray[i - 1];
             JButton button = new JButton();
+            Feld[] fieldArray = spielfeldInstance.getSpielfeldArray();
            /* int finalI = i;    //debug
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     System.out.println(finalI);
                 }
+
             });*/
+
+            setIsOccupiedForButtonNumber(25,true);
+
+            if (isFieldOccupied(i)){
+                button.setText(Symbol);
+            }
+
+            Feld feld = spielfeldArray[i];
             button.setBackground(Color.orange);
+
+
 
 
             if ((i >= 93 && i<= 103 && i != 98) || (i >= 67 && i<= 77 && i != 72) ||(i == 32)||(i == 20)||(i == 45)||(i == 58)||(i == 34)||(i == 47)||(i == 60)||(i == 80)||(i == 90)||(i == 110)||(i == 123)||(i == 136)||(i == 149)||(i == 150)||(i == 112)||(i == 21)||(i == 125)||(i == 138)||(i == 151)||(i == 19)){
@@ -85,13 +120,13 @@ public class SpielfeldGui extends JPanel {
                 button.setEnabled(false);
                 button.setBorderPainted(false);
             }
-            if (currentFeld.isOccupied()) {
-                button.setText(Symbol);
-            }
+
+
+
 
             if (i==21) {
                 fieldNumber = 1; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -105,7 +140,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==34) {
                 fieldNumber = 2; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -119,7 +154,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==47) {
                 fieldNumber = 3; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -133,7 +168,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==60) {
                 fieldNumber = 4; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -147,7 +182,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==73) {
                 fieldNumber = 5; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -161,7 +196,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==74) {
                 fieldNumber = 6; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -175,7 +210,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==75) {
                 fieldNumber = 7; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -189,7 +224,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==76) {
                 fieldNumber = 8; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -204,7 +239,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==77) {
                 fieldNumber = 9; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -218,7 +253,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==90) {
                 fieldNumber = 10; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -232,7 +267,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==103) {
                 fieldNumber = 11; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -246,7 +281,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==102) {
                 fieldNumber = 12; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -260,7 +295,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==101) {
                 fieldNumber = 13; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -274,7 +309,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==100) {
                 fieldNumber = 14; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -289,7 +324,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==99) {
                 fieldNumber = 15; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -302,7 +337,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==112) {
                 fieldNumber = 16; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -315,7 +350,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==125) {
                 fieldNumber = 17; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -328,7 +363,7 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i==138) {
                 fieldNumber = 18; // Increment the field number
-                Feld feld = new Feld(i, fieldNumber); // Pass the current field number as the button number
+                 // Pass the current field number as the button number
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -342,7 +377,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 151) {
                 fieldNumber=19; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -357,7 +392,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 150) {
                 fieldNumber= 20; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -372,7 +407,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 149) {
                 fieldNumber=21; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -387,7 +422,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 136) {
                 fieldNumber=22; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -402,7 +437,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 123) {
                 fieldNumber=23; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -417,7 +452,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 110) {
                 fieldNumber=24; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -432,7 +467,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 97) {
                 fieldNumber=25; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -447,7 +482,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 96) {
                 fieldNumber=26; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -462,7 +497,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 95) {
                 fieldNumber=27; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -477,7 +512,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 94) {
                 fieldNumber=28; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -492,7 +527,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 93) {
                 fieldNumber=29; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -507,7 +542,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 80) {
                 fieldNumber=30; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -522,7 +557,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 67) {
                 fieldNumber=31; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -537,7 +572,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 68) {
                 fieldNumber=32; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -552,7 +587,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 69) {
                 fieldNumber=33; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -567,7 +602,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 70) {
                 fieldNumber=34; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -582,7 +617,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 71) {
                 fieldNumber=35; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -597,7 +632,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 58) {
                 fieldNumber=36; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -612,7 +647,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 45) {
                 fieldNumber=37; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -627,7 +662,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 32) {
                 fieldNumber=38; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -642,7 +677,7 @@ public class SpielfeldGui extends JPanel {
             else if (i == 19) {
                 fieldNumber=39; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
 
-                Feld feld = new Feld(i, fieldNumber);
+
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -656,8 +691,6 @@ public class SpielfeldGui extends JPanel {
             }
             else if (i == 20) {
                 fieldNumber=40; // Fieldnumber bei jedem passenden Durchlauf um eins erhöhen
-
-                Feld feld = new Feld(i, fieldNumber);
                 spielfeldInstance.getFeld(fieldNumber).setFeldObject(feld);
 
                 final int currentField = fieldNumber;
@@ -669,17 +702,10 @@ public class SpielfeldGui extends JPanel {
                     }
                 });
             }
-
-
-
-
-
             button.setPreferredSize(new Dimension(50, 50)); // Set the preferred size of the button to create a square shape
             add(button);
-
-
         }
-
+    printGameBoard();
     }
 
 }
