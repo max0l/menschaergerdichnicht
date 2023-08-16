@@ -15,9 +15,15 @@ import java.util.Scanner;
 
 public class Client implements Runnable{
     private volatile Spiel spiel;
-    private String address;
-    private int port;
+    private final String address;
+    private final int port;
 
+    /**
+     * Constructor of the Client class.
+     * Sets member variables to its arguments
+     * @param address the address the client will connect to
+     * @param port the port the client will connect on
+     */
     public Client(String address, int port) {
         this.address = address;
         this.port = port;
@@ -39,9 +45,6 @@ public class Client implements Runnable{
 
             teamColor = (Color) inputStream.readObject();
             System.out.println("CLIENT:\t\tTeam color: " + teamColor);
-
-
-
 
             while (!gameIsFinished) {
                 try {
@@ -98,8 +101,6 @@ public class Client implements Runnable{
             System.out.println("CLIENT:\t\tCould not connect to server!");
             return;
         }
-
-
 
         try {
             socket.close();
@@ -168,6 +169,10 @@ public class Client implements Runnable{
         }
 
     }
+
+    /**
+     * Saves the game to a persistent directory
+     */
     public void saveGame()
     {
         String userHome = System.getProperty("user.home");

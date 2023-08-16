@@ -7,11 +7,7 @@ public class Spielstein implements Serializable, Cloneable {
     private Color color;
     private SpielsteinState state;
     private int fieldId;
-
-
-
     private int walkedFields;
-
     private Team team;
 
     public Spielstein(Team team, int steinID) {
