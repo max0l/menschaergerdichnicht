@@ -177,6 +177,7 @@ public class LauncherGUI extends JFrame {
                 playerCountComboBox.setEnabled(true);
                 botCountComboBox.setEnabled(true);
                 difficultyComboBox.setEnabled(true);
+                serverAddressField.setEnabled(false);
             }
         });
 
@@ -188,6 +189,7 @@ public class LauncherGUI extends JFrame {
                 playerCountComboBox.setEnabled(true);
                 botCountComboBox.setEnabled(true);
                 difficultyComboBox.setEnabled(true);
+                serverAddressField.setEnabled(false);
             }
         });
         startButton.addActionListener(new ActionListener() {
@@ -225,12 +227,13 @@ public class LauncherGUI extends JFrame {
                 JOptionPane.showMessageDialog(null, "Please enter a Valid port!");
                 return false;
             }
-            if(!checkIfPortIsAvailable(port)){
-                JOptionPane.showMessageDialog(null, "Port is already in use!");
-                return false;
-            }
 
             if (singleplayerButton.isSelected()) {
+
+                if(!checkIfPortIsAvailable(port)){
+                    JOptionPane.showMessageDialog(null, "Port is already in use!");
+                    return false;
+                }
                 Server server = new Server(spiel, playerCount, botCount, difficulty, port);
 
                 Thread serverThread = new Thread(server);
@@ -246,6 +249,11 @@ public class LauncherGUI extends JFrame {
 
 
                 if (hostButton.isSelected()) {
+
+                    if(!checkIfPortIsAvailable(port)){
+                        JOptionPane.showMessageDialog(null, "Port is already in use!");
+                        return false;
+                    }
                     Server server = new Server(spiel, playerCount, botCount, difficulty, port);
 
                     Thread serverThread = new Thread(server);
@@ -258,6 +266,7 @@ public class LauncherGUI extends JFrame {
 
                     clientThread.start();
                 } else if (connectButton.isSelected()) {
+
                     String serverAddressFromField = serverAddressField.getText();
                     if(!isServerAddressValid(serverAddressFromField)){
                         JOptionPane.showMessageDialog(null, "Please enter a valid server address!");
@@ -269,6 +278,12 @@ public class LauncherGUI extends JFrame {
 
                     clientThread.start();
                 } else if(hostOnlyButton.isSelected()) {
+
+                    if(!checkIfPortIsAvailable(port)){
+                        JOptionPane.showMessageDialog(null, "Port is already in use!");
+                        return false;
+                    }
+
                     Server server = new Server(spiel, playerCount, botCount, difficulty, port);
 
                     Thread serverThread = new Thread(server);
@@ -287,6 +302,8 @@ public class LauncherGUI extends JFrame {
         return true;
 
     }
+
+
 
     private boolean checkIfPortIsAvailable(int port) {
         try {
