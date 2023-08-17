@@ -143,6 +143,8 @@ public class LauncherGUI extends JFrame {
                 hostButton.setEnabled(false);
                 hostOnlyButton.setEnabled(false);
                 connectButton.setEnabled(false);
+                playerCountComboBox.setEnabled(false);
+                playerCountComboBox.setSelectedIndex(1);
             }
         });
 
@@ -155,6 +157,7 @@ public class LauncherGUI extends JFrame {
                 connectButton.setEnabled(true);
                 hostOnlyButton.setEnabled(true);
                 hostButton.setEnabled(true);
+                playerCountComboBox.setEnabled(true);
             }
         });
 
