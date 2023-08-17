@@ -4,20 +4,19 @@ import game.Spiel;
 import game.Spielfeld;
 import game.Spielstein;
 import game.Team;
-
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
 public class Client implements Runnable{
     private volatile Spiel spiel;
     private final String address;
     private final int port;
-
+    private JFrame frame;
+    private JTextArea textArea;
+    private FeldGUI feldGUI; // Declare a FeldGUI object
     /**
      * Constructor of the Client class.
      * Sets member variables to its arguments
@@ -27,13 +26,23 @@ public class Client implements Runnable{
     public Client(String address, int port) {
         this.address = address;
         this.port = port;
+        frame = new JFrame("Client GUI");
+        textArea = new JTextArea(20, 50);
+        textArea.setEditable(false);
+        frame.add(new JScrollPane(textArea));
+        feldGUI = new FeldGUI();
+        frame.add(feldGUI);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
-
     @Override
     public void run() {
         boolean gameIsFinished = false;
         boolean doBroadcast = false;
-
         Color teamColor = null;
         Socket socket = null;
         try {
@@ -56,6 +65,11 @@ public class Client implements Runnable{
                     outputStream.writeObject(Boolean.TRUE);
                     outputStream.flush();
                     System.out.println("CLIENT:\t\tConfirmation sent");
+
+                    SwingUtilities.invokeLater(() -> updateGUIWithData(spiel));
+
+                    // Repaint the GUI
+                    SwingUtilities.invokeLater(() -> frame.repaint());
 
                     System.out.println(spiel.getSpielfeld().toString());
 
@@ -83,9 +97,15 @@ public class Client implements Runnable{
 
                     if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
                         System.out.println("CLIENT:\t\tIt's your turn!");
-                        sendSelectionToServer(spiel, teamColor, socket, outputStream);
+
+                        // Receive the selected field number from the server
+                        int selectedFieldNumber = inputStream.readInt();
+
+                        // Call the sendSelectionToServer method with the received field number
+                        sendSelectionToServer(spiel, teamColor, socket, outputStream, selectedFieldNumber);
+
                         askForSave();
-                    }else{
+                    } else {
                         System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
                         System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
                     }
@@ -127,15 +147,16 @@ public class Client implements Runnable{
 
     }
 
-    private void sendSelectionToServer(Spiel spiel, Color teamColor, Socket socket, ObjectOutputStream out) {
+    private void sendSelectionToServer(Spiel spiel, Color teamColor, Socket socket, ObjectOutputStream out, int selectedFieldNumber) {
         Team team = spiel.getTeamByColor(teamColor);
-        if(team == null){
+        if (team == null) {
             System.out.println("CLIENT:\t\tTeam is null");
+            return;
         }
 
         List<Spielstein> movableStones = spiel.selectPiece(team, spiel.getLastDiceRoll());
 
-        if(movableStones == null){
+        if (movableStones == null) {
             System.out.println("CLIENT:\t\tmovableStones is null");
             try {
                 out.writeInt(-1);
@@ -143,6 +164,7 @@ public class Client implements Runnable{
                 return;
             } catch (IOException e) {
                 e.printStackTrace();
+                return;
             }
         }
 
@@ -184,12 +206,14 @@ public class Client implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     /**
      * Saves the game to a persistent directory
      */
+
+
+
     public void saveGame()
     {
         String userHome = System.getProperty("user.home");
@@ -228,9 +252,7 @@ public class Client implements Runnable{
             i++;
             String newFileName = fileName + i;
             filePath = persistentDirPath + File.separator + newFileName;
-
         }
-
         try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath)))
         {
             outputStream.writeObject(spiel);
@@ -261,6 +283,16 @@ public class Client implements Runnable{
         {
             saveGame();
         }
+    }
+    private void updateGUIWithData(Spiel data) {
+        SwingUtilities.invokeLater(() -> {
+            Spielfeld spielfeld = data.getSpielfeld();
+            feldGUI.updateGUIWithSpielfeld(spielfeld);
+        });
+    }
+    public void receiveFieldNumber(int fieldNumber) {
+        System.out.println("Received field number: " + fieldNumber);
+        // You can perform any additional actions you want with the received field number
     }
 
 }

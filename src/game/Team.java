@@ -1,7 +1,7 @@
 package game;
 
 import server.ClientHandler;
-
+import client.FeldGUI;
 import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -240,5 +240,8 @@ public class Team implements Serializable, Cloneable {
                 ", isFinished=" + isFinished +
                 ", spielsteine=" + spielsteine +
                 '}';
+    }
+    public Feld[] getFinishFields() {
+        return finishFields;
     }
 }

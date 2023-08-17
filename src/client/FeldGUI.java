@@ -1,53 +1,50 @@
 package client;
-
 import game.Feld;
+import game.Spiel;
 import game.Spielfeld;
-
+import game.Team;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
-    public class FeldGUI extends JPanel {
-
-        private String Symbolred = "♙";
-        private String Symbolblue = "♟";
-        private String Symbolgreen = "♛";
-        private String Symbolyellow = "♕";
-
-        private int buttonCounter = 0; // Die Zählervariable für die Buttons
-
-
+public class FeldGUI extends JPanel {
+        private String Symbol = "♟";
+        private String Symbole= "♙";
         private Font buttonFont = new Font("Arial", Font.BOLD, 23);
-
-        private Spielfeld spielfeld;
-        private Feld feld;
         private int fieldNumber;
+        int redOccupiedCount = 0;
+        int blueOccupiedCount = 0;
+        int greenOccupiedCount = 0;
+        int yellowOccupiedCount = 0;
         int totalButtons = 13 * 13;
-
         private JButton[][] buttons;
-
+        private Client client;
+        private Feld[] startFields = new Feld[4];
+        private Feld[] finishFields = new Feld[4];
+        private boolean[][] occupiedCells = new boolean[13][13];
+        private Color[] playerColors = {Color.red, Color.blue, Color.green, Color.yellow};
+        private int currentPlayer = 0;
+        public void setFinishFields(Feld[] finishFields) {
+            this.finishFields = finishFields;
+        }
         public FeldGUI() {
             setLayout(new GridLayout(13, 14)); // Set the layout to a 13x14 grid
-
             buttons = new JButton[13][13];
-
             for (int i = 1; i <= totalButtons; i++) {
                 JButton button = new JButton();
                 int row = (i - 1) / 13;
                 int col = (i - 1) % 13;
-
                 buttons[row][col] = button;
                 configureButton(button,i);
-
-
                 button.setPreferredSize(new Dimension(55, 55));
                 add(button);
             }
         }
             public JButton getButtonForFieldNumber(int fieldNumber) {
                 JButton targetButton = null;
-
                 switch (fieldNumber) {
                     case 1:
                         targetButton = buttons[1][7];
@@ -172,28 +169,33 @@ import java.awt.event.ActionListener;
                     default:
                         break;
                 }
-
                 return targetButton;
             }
+        private static void printButtonTextAsInt(JButton buttons) {
+            String buttonText = buttons.getText();
+            try {
+                int intValue = Integer.parseInt(buttonText);
+                System.out.println("Button Text as Integer: " + intValue);
+            } catch (NumberFormatException e) {
+                System.out.println("Button Text is not a valid integer.");
+            }
+        }
 
             private ActionListener createButtonActionListener(int currentField) {
             return new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     System.out.println("Button " + currentField + " wurde geklickt.");
+                    client.receiveFieldNumber(currentField);
                 }
             };
         }
-
         public void updateGUIWithSpielfeld(Spielfeld spielfeld) {
             int j =0;
-
             for (int i = 0; i < totalButtons; i++) {
                 int buttonRow = i / 13;
                 int buttonCol = i % 13;
                 JButton button = buttons[buttonRow][buttonCol];
-
-
                 if (buttonRow==1 && buttonCol == 7) {
                     fieldNumber = 1; // Increment the field number
                     final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
@@ -395,39 +397,227 @@ import java.awt.event.ActionListener;
                     final int currentField = fieldNumber; // Store the current field number for use in the ActionListener
                     button.addActionListener(createButtonActionListener(currentField));
                 }
+                if (buttonRow==1 && buttonCol == 1) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==1 && buttonCol == 2) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==2 && buttonCol == 1) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==2 && buttonCol == 2) {
+                    button.setText(Symbole);
+                }
 
+                if (buttonRow==1 && buttonCol == 10) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==1 && buttonCol == 11) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==2 && buttonCol == 10) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==2 && buttonCol == 11) {
+                    button.setText(Symbole);
+                }
 
+                if (buttonRow==10 && buttonCol == 10) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==10 && buttonCol == 11) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==11 && buttonCol == 10) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==11 && buttonCol == 11) {
+                    button.setText(Symbole);
+                }
 
-
-
-
-
-
-
+                if (buttonRow==10 && buttonCol == 1) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==10 && buttonCol == 2) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==11 && buttonCol == 1) {
+                    button.setText(Symbole);
+                }
+                if (buttonRow==11 && buttonCol == 2) {
+                    button.setText(Symbole);
+                }
                 if (button.getBackground() == Color.lightGray) {
-                    int fieldNumber = j + 1; // Berechne die fieldNumber aus dem Index j
+                    int fieldNumber = j + 1; // Calculate the fieldNumber from the index j
                     JButton targetButton = getButtonForFieldNumber(fieldNumber);
-
                     if (targetButton != null) {
-                        Feld feld = spielfeld.getFeld(j); // Annahme: Index i entspricht dem Feld im Spielfeld
+                        Feld feld = spielfeld.getFeld(j); // Assuming index i corresponds to the field in the Spielfeld
                         j++;
-
                         if (feld.getIsOccupied()) {
                             targetButton.setFont(buttonFont);
-                            targetButton.setText(feld.getOccupier().getColor().equals(Color.red) ? Symbolred :
-                                    feld.getOccupier().getColor().equals(Color.blue) ? Symbolblue :
-                                            feld.getOccupier().getColor().equals(Color.green) ? Symbolgreen :
-                                                    feld.getOccupier().getColor().equals(Color.yellow) ? Symbolyellow : Symbolyellow);
+                            Color occupierColor = feld.getOccupier().getColor();
+                            if (occupierColor.equals(Color.red)) {
+                                targetButton.setForeground(Color.red);
+                                targetButton.setText(Symbol);
+                                redOccupiedCount++;
+                            } else if (occupierColor.equals(Color.blue)) {
+                                targetButton.setForeground(Color.blue);
+                                targetButton.setText(Symbol);
+                                blueOccupiedCount++;
+                            } else if (occupierColor.equals(Color.green)) {
+                                targetButton.setForeground(Color.green);
+                                targetButton.setText(Symbol);
+                                greenOccupiedCount++;
+                            } else if (occupierColor.equals(Color.yellow)) {
+                                targetButton.setForeground(Color.yellow);
+                                targetButton.setText(Symbol);
+                                yellowOccupiedCount++;
+                            }
                         } else {
                             targetButton.setText("");
                         }
+
+
                     }
                 }
             }
+            handleRedTeam(redOccupiedCount);
+            handleBlueTeam(blueOccupiedCount);
+            handleGreenTeam(greenOccupiedCount);
+            handleYellowTeam(yellowOccupiedCount);
             repaint(); // Repaint the GUI to reflect the changes
+            redOccupiedCount=0;
+            blueOccupiedCount=0;
+            greenOccupiedCount=0;
+            yellowOccupiedCount=0;
         }
-
-
+        public void addPieceClickListener(ActionListener listener, int fieldNumber) {
+            JButton targetButton = getButtonForFieldNumber(fieldNumber);
+            if (targetButton != null) {
+                targetButton.addActionListener(listener);
+            }
+        }
+        private void handleRedTeam(int redOccupiedCount) {
+            switch (redOccupiedCount) {
+                case 0:
+                    // Keine besetzten Felder für das rote Team
+                    break;
+                case 1:
+                    setButtonText(2,11,"1");
+                    break;
+                case 2:
+                    setButtonText(2,11,"1");
+                    setButtonText(2,10,"2");
+                    break;
+                case 3:
+                    setButtonText(2,11,"1");
+                    setButtonText(2,10,"2");
+                    setButtonText(1,11,"3");
+                    break;
+                case 4:
+                    setButtonText(2,11,"1");
+                    setButtonText(2,10,"2");
+                    setButtonText(1,11,"3");
+                    setButtonText(1,10,"4");
+                    break;
+                default:
+                    // Fall, wenn die Anzahl der besetzten Felder nicht in den vorherigen Fällen abgedeckt ist
+                    break;
+            }
+        }
+        private void handleBlueTeam(int blueOccupiedCount) {
+            switch (blueOccupiedCount) {
+                case 0:
+                    // Keine besetzten Felder für das rote Team
+                    break;
+                case 1:
+                    setButtonText(11,11,"1");
+                    break;
+                case 2:
+                    setButtonText(11,11,"1");
+                    setButtonText(11,10,"2");
+                    break;
+                case 3:
+                    setButtonText(11,11,"1");
+                    setButtonText(11,10,"2");
+                    setButtonText(10,11,"3");
+                    break;
+                case 4:
+                    setButtonText(11,11,"1");
+                    setButtonText(11,10,"2");
+                    setButtonText(10,11,"3");
+                    setButtonText(10,10,"4");
+                    break;
+                default:
+                    // Fall, wenn die Anzahl der besetzten Felder nicht in den vorherigen Fällen abgedeckt ist
+                    break;
+            }
+        }
+        private void handleGreenTeam(int greenOccupiedCount) {
+            switch (greenOccupiedCount) {
+                case 0:
+                    // Keine besetzten Felder für das rote Team
+                    break;
+                case 1:
+                    setButtonText(11,2,"1");
+                    break;
+                case 2:
+                    setButtonText(11,2,"1");
+                    setButtonText(11,1,"2");
+                    break;
+                case 3:
+                    setButtonText(11,2,"1");
+                    setButtonText(11,1,"2");
+                    setButtonText(10,2,"3");
+                    break;
+                case 4:
+                    setButtonText(11,2,"1");
+                    setButtonText(11,1,"2");
+                    setButtonText(10,2,"3");
+                    setButtonText(10,1,"4");
+                    break;
+                default:
+                    // Fall, wenn die Anzahl der besetzten Felder nicht in den vorherigen Fällen abgedeckt ist
+                    break;
+            }
+        }
+        private void handleYellowTeam(int yellowOccupiedCount) {
+            switch (yellowOccupiedCount) {
+                case 0:
+                    // Keine besetzten Felder für das rote Team
+                    break;
+                case 1:
+                    setButtonText(2,2,"1");
+                    break;
+                case 2:
+                    setButtonText(2,2,"1");
+                    setButtonText(2,1,"2");
+                    break;
+                case 3:
+                    setButtonText(2,2,"1");
+                    setButtonText(2,1,"2");
+                    setButtonText(1,2,"3");
+                    break;
+                case 4:
+                    setButtonText(2,2,"1");
+                    setButtonText(2,1,"2");
+                    setButtonText(1,2,"3");
+                    setButtonText(1,1,"4");
+                    break;
+                default:
+                    // Fall, wenn die Anzahl der besetzten Felder nicht in den vorherigen Fällen abgedeckt ist
+                    break;
+            }
+        }
+        private void setButtonText(int row, int col, String newText) {
+            if (row >= 0 && row < buttons.length && col >= 0 && col < buttons[row].length) {
+                JButton button = buttons[row][col];
+                button.setText(newText);
+            } else {
+                System.out.println("Ungültige Zeile oder Spalte.");
+            }
+        }
         private void configureButton(JButton button, final int fieldNumber) {
 
             if (fieldNumber < 183)
@@ -449,6 +639,18 @@ import java.awt.event.ActionListener;
             if ((fieldNumber == 24) || (fieldNumber == 25) || (fieldNumber == 37) || (fieldNumber == 38) || (fieldNumber == 72) || (fieldNumber == 21) || (fieldNumber == 33) || (fieldNumber == 46) || (fieldNumber == 59)) {
                 button.setBackground(Color.red);
             }
+            if ((fieldNumber == 24) || (fieldNumber == 25) || (fieldNumber == 37) || (fieldNumber == 38)){
+                button.setText(Symbole);
+            }
+            if ((fieldNumber == 15) || (fieldNumber == 16) || (fieldNumber == 28) || (fieldNumber == 29)){
+                button.setText(Symbole);
+            }
+            if ((fieldNumber == 141) || (fieldNumber == 142) || (fieldNumber == 154) || (fieldNumber == 155)){
+                button.setText(Symbole);
+            }
+            if ((fieldNumber == 132) || (fieldNumber == 133) || (fieldNumber == 145) || (fieldNumber == 146)){
+                button.setText(Symbole);
+            }
             if (button.getBackground() == Color.orange)
             {
                 button.setBorderPainted(false);
@@ -458,9 +660,52 @@ import java.awt.event.ActionListener;
             {
                 button.setEnabled(true);
             }
+        }
+    private static void addHoverEffect(JButton button, JButton[][] buttonsArray) {
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                // Find the next occupied button within the buttonsArray
+                for (int row = 0; row < buttonsArray.length; row++) {
+                    for (int col = 0; col < buttonsArray[row].length; col++) {
+                        if (buttonsArray[row][col] == button) {
+                            for (int i = 1; i < buttonsArray.length * buttonsArray[row].length; i++) {
+                                int nextRow = (row + i / buttonsArray[row].length) % buttonsArray.length;
+                                int nextCol = (col + i) % buttonsArray[row].length;
 
-
+                                if (buttonsArray[nextRow][nextCol].getBackground() == Color.lightGray) {
+                                    buttonsArray[nextRow][nextCol].setBorder(BorderFactory.createLineBorder(Color.black));
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
             }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                // Reset the border when leaving
+                for (int row = 0; row < buttonsArray.length; row++) {
+                    for (int col = 0; col < buttonsArray[row].length; col++) {
+                        if (buttonsArray[row][col] == button) {
+                            for (int i = 1; i < buttonsArray.length * buttonsArray[row].length; i++) {
+                                int nextRow = (row + i / buttonsArray[row].length) % buttonsArray.length;
+                                int nextCol = (col + i) % buttonsArray[row].length;
+
+                                if (buttonsArray[nextRow][nextCol].getBackground() == Color.lightGray) {
+                                    buttonsArray[nextRow][nextCol].setBorder(BorderFactory.createEmptyBorder());
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
+
+
+}
 
 
