@@ -2,7 +2,6 @@ package server;
 import game.*;
 
 import java.awt.*;
-import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,12 +10,12 @@ import java.util.Random;
 public class Server implements Runnable{
 
     private int port;
-    private int numPlayers;
-    private int numBots;
+    private final int numPlayers;
+    private final int numBots;
     private Spiel spiel;
-    private int difficulty;
+    private final int difficulty;
     private boolean isSavedGame = false;
-    private Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
+    private final Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
     private transient List<ClientHandler> clients = new ArrayList<>();
     public Server(Spiel spiel, int numPlayers, int numBots, int difficulty, int port) {
         if(spiel == null){
@@ -166,7 +165,7 @@ public class Server implements Runnable{
                 System.out.println("SERVER:\t\tTeam is a Player; Waiting for client to select stone");
                 //doBroadcastToAllClients(spiel);
                 int recivedSpielsteinNumber = clientsSelectStone(team.getClient(), team);
-                if(checkIfSelctionIsValid(recivedSpielsteinNumber, team)) {
+                if(checkIfSelectionIsValid(recivedSpielsteinNumber, team)) {
                     selection = recivedSpielsteinNumber;
                     if (recivedSpielsteinNumber != -1) {
                         System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(recivedSpielsteinNumber).getFieldId() + "; " +
@@ -220,23 +219,33 @@ public class Server implements Runnable{
         getConfirmationFromAllClients();
     }
 
-    private boolean checkIfSelctionIsValid(int recivedSpielsteinNumber, Team team) {
+    /**
+     *
+     * @param receivedSpielsteinNumber
+     * @param team
+     * @return
+     */
+    private boolean checkIfSelectionIsValid(int receivedSpielsteinNumber, Team team) {
         List<Spielstein> movablePieces = spiel.selectPiece(team, spiel.getLastDiceRoll());
         if(movablePieces == null){
-            if(recivedSpielsteinNumber == -1){
+            if(receivedSpielsteinNumber == -1){
                 return true;
             } else {
                 return false;
             }
         }
-        int movablePiecesSize = movablePieces.size();
-        if(recivedSpielsteinNumber <= movablePiecesSize){
+
+        if(receivedSpielsteinNumber <= movablePieces.size()){
             return true;
         } else {
             return false;
         }
     }
 
+    /**
+     * Sends the game to all connected clients
+     * @param spiel the game to be sent
+     */
     private void doBroadcastToAllClients(Spiel spiel) {
         for(ClientHandler client : clients) {
             try {
@@ -270,7 +279,7 @@ public class Server implements Runnable{
     private int clientsSelectStone(ClientHandler client, Team currentTeam) {
         System.out.println("SERVER:\t\tWaiting for client to select stone");
         try {
-            return client.reciveSpielstein();
+            return client.receiveSpielstein();
         } catch (Exception e) {
             System.out.println("SERVER:\t\tCould not recive object from client!");
             currentTeam.setIsBot(true);

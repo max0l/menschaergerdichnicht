@@ -1,18 +1,13 @@
 package server;
 
 import game.Spiel;
-import game.Spielfeld;
-import game.Spielstein;
 import game.Team;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ClientHandler {
     private ServerSocket server;
@@ -66,7 +61,7 @@ public class ClientHandler {
         System.out.println("SERVER:\tObject sent");
     }
 
-    public int reciveSpielstein() throws IOException {
+    public int receiveSpielstein() throws IOException {
         int spielsteinNumber = inputStream.readInt();
         System.out.println("SERVER:\tSpielstein recived");
         return spielsteinNumber;

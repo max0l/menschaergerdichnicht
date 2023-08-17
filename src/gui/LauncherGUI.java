@@ -32,6 +32,10 @@ public class LauncherGUI extends JFrame {
     private final JFileChooser fileChooser;
     private Spiel spiel = null;
 
+    /**
+     * The Constructor of the LauncherGUI class.
+     * Sets up the launcher's gui and handles user interaction with action listeners.
+     */
     public LauncherGUI() {
         setTitle("Game Launcher");
         setSize(400, 400);
@@ -127,7 +131,7 @@ public class LauncherGUI extends JFrame {
                     File selectedFile = fileChooser.getSelectedFile();
                     selectedFileLabel.setText("Selected File: " + selectedFile.getName());
 
-                    loadSpielFromFile(selectedFile);
+                    loadGameFromFile(selectedFile);
                 }
             }
         });
@@ -206,6 +210,11 @@ public class LauncherGUI extends JFrame {
         });
     }
 
+    /**
+     * Performs checks on the selections of the user and displays an error dialog if the user
+     * has made invalid selections. If all checks are met this function starts the client, the server or both and returns true.
+     * @return {@code true} if the game has been started successfully, otherwise {@code false}
+     */
     private boolean startGame() {
         // Perform actions to start the game based on user selections
         int playerCount = (int) playerCountComboBox.getSelectedItem();
@@ -296,12 +305,23 @@ public class LauncherGUI extends JFrame {
             }
         }
 
+        // Start singleplayer game with the selected player count
+        /*
+        if(playerCount < 1 || playerCount > 4) {
+            throw new IllegalArgumentException("Number of players must be between 1 and 4");
+        }*/
+
         return true;
 
     }
 
 
-
+    /**
+     * Tries to create a ServerSocket on the specified port to check if the given
+     * port is available or if it's already in use.
+     * @param port the port to be checked
+     * @return {@code true} if the port is Occupied and {@code false} if it's not in use.
+     */
     private boolean checkIfPortIsOccupied(int port) {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
@@ -312,11 +332,21 @@ public class LauncherGUI extends JFrame {
         }
     }
 
+    /**
+     * Checks if the given server address is a valid address or not
+     * @param serverAddressFromField the address that has to be checked
+     * @return {@code true} if the server address is a valid address, otherwise {@code false}
+     */
     private boolean isServerAddressValid(String serverAddressFromField) {
         String ipv4Pattern = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
         return serverAddressFromField.matches(ipv4Pattern) || serverAddressFromField.equals("localhost");
     }
 
+    /**
+     * Checks if a given port is in a valid port range
+     * @param portStr the port that needs to be checked
+     * @return the port if it's in a valid port range, otherwise {@code -1}
+     */
     private int checkIfPortIsValid(String portStr) {
         try {
             int port = Integer.parseInt(portStr);
@@ -330,7 +360,11 @@ public class LauncherGUI extends JFrame {
         }
     }
 
-    private void loadSpielFromFile(File file) {
+    /**
+     * Tries to load a save game
+     * @param file the file to load the save game from
+     */
+    private void loadGameFromFile(File file) {
         try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file)))
         {
             spiel = (Spiel) inputStream.readObject();

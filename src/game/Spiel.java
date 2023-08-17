@@ -12,8 +12,8 @@ public class Spiel implements Serializable, Cloneable
 {
     public Spielfeld setSpielfeld;
     private List<Team> teams;
-    private boolean gameIsRunning = true;
-    private Random random = new Random();
+    private boolean gameIsRunning;
+    private final Random random = new Random();
     private Team currentlyPlaying = null;
     private Integer lastDiceRoll;
     private Spielfeld spielfeld;
@@ -42,6 +42,13 @@ public class Spiel implements Serializable, Cloneable
 
     }
 
+    /**
+     * Creates a new Team for every provided client with one of the provided colors.
+     * @param spielfeld The play field object.
+     * @param clients List of the playing clients.
+     * @param colors Array of available colors.
+     * @param isSaveGame boolean that tells if it's a new game or a loaded save game.
+     */
     private void giveEachClientTheirTeam(Spielfeld spielfeld, List<ClientHandler> clients, Color[] colors, boolean isSaveGame) {
         System.out.println("GAME:\t\tGiving each client their team...");
         for(int i = 0; i < clients.size(); i++){
@@ -59,7 +66,11 @@ public class Spiel implements Serializable, Cloneable
         System.out.println("SERVER:\t\tTeam Size of clients: " + teams.size());
     }
 
-
+    /**
+     * Gets the Team in the queue after the provided team.
+     * @param team the currently playing team
+     * @return the next team in the play queue
+     */
     private Team getNextToPlay(Team team)
     {
         return teams.get(((teams.indexOf(team) + 1) % teams.size()));
@@ -136,7 +147,12 @@ public class Spiel implements Serializable, Cloneable
                 && checkIfSpawnIsOccupiedBySameTeam(team));
     }
 
-    //Checks if the spawn is occupied by a piece of the same color
+    /**
+     * Gets the spawn field of the provided team and checks
+     * if the spawn is occupied by another piece of the same team
+     * @param team the team to be checked
+     * @return {@code true} if the spawn of the team is occupied by one of their own pieces. Otherwise {@code false}
+     */
     private boolean checkIfSpawnIsOccupiedBySameTeam(Team team) {
         Feld spawn = spielfeld.getFeld(team.getStartField());
         return spawn.getIsOccupied() && spawn.getOccupier().getColor() == team.getColor();
@@ -151,6 +167,12 @@ public class Spiel implements Serializable, Cloneable
         return movableSpielsteine.size() != oldSize;
     }
 
+    /**
+     * Tries to move a piece out of the teams spawn. If the spawn is occupied by another piece of the own team
+     * this function will move the blocking piece away first. Blocking pieces of another team will be kicked.
+     * @param team the team that wants to move a piece out of their spawn.
+     * @return the piece that got moved out of spawn
+     */
     private Spielstein movePieceOutOfSpawn(Team team) {
         System.out.println("game.Spielstein aus Spawn bewegen");
 
@@ -173,9 +195,6 @@ public class Spiel implements Serializable, Cloneable
         }
 
         currentSpielstein.setFieldId(team.getStartField());
-
-
-
         spielfeld.getFeld(team.getStartField()).setOccupier(currentSpielstein);
 
         return currentSpielstein;
@@ -308,10 +327,10 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Bewegt einen Spielstein von den normalen Feldern in eines der Zielfelder.
-     * @param team Das Team, welches am Zug ist.
-     * @param diceRoll Die gewürfelte Zahl, um welche der Spielstein gerückt wird.
-     * @param spielstein Der zu rückende Spielstein
+     * Moves a piece from the normal fields to one of the teams goal fields.
+     * @param team the team that is moving.
+     * @param diceRoll the rolled number.
+     * @param spielstein the piece that is being moved.
      */
     private void moveSpielsteinToGoal(Team team, int diceRoll, Spielstein spielstein) {
         System.out.println("game.Spielstein ist auf dem Weg ins Ziel");
@@ -332,7 +351,7 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Speichert den Spielstand in einer Datei ab.
+     * Saves the game into a file in a persistent game directory.
      */
     public void saveGame()
     {
@@ -386,28 +405,9 @@ public class Spiel implements Serializable, Cloneable
         }
     }
 
-    void askForSave()
-    {
-        Character input = null;
-        System.out.println("Do you want to save a game? (y/n)");
-
-        try
-        {
-            input = (char) System.in.read();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            return;
-        }
-
-        if(input == 'y')
-        {
-            saveGame();
-        }
-    }
-
-
+    /**
+     * @return the last number rolled
+     */
     public Integer getLastDiceRoll() {
         return lastDiceRoll;
     }
@@ -416,10 +416,18 @@ public class Spiel implements Serializable, Cloneable
         this.lastDiceRoll = lastDiceRoll;
     }
 
+    /**
+     * @return the currently playing team
+     */
     public Team getCurrentlyPlaying() {
         return currentlyPlaying;
     }
 
+    /**
+     * Gets a Team by the provided color.
+     * @param teamColor the color of the target team
+     * @return the team with the specified color
+     */
     public Team getTeamByColor(Color teamColor) {
         for(Team team : teams){
             if(team.getColor() == teamColor){
@@ -429,14 +437,26 @@ public class Spiel implements Serializable, Cloneable
         return null;
     }
 
+    /**
+     * Sets the currently playing team.
+     * @param team the team that will be set as the currently playing team.
+     */
     public void setCurrentlyPlaying(Team team) {
         this.currentlyPlaying = team;
     }
 
+    /**
+     * Gets all teams in the Game
+     * @return A list of Teams
+     */
     public List<Team> getTeams() {
         return teams;
     }
 
+    /**
+     * Gets the playing field
+     * @return the play field
+     */
     public Spielfeld getSpielfeld() {
         return spielfeld;
     }
@@ -459,30 +479,53 @@ public class Spiel implements Serializable, Cloneable
         return clone;
     }
 
+    /**
+     * Checks if the game is running.
+     * @return {@code true} if the game is running. Otherwise {@code true}.
+     */
     public boolean isGameIsRunning() {
-        return gameIsRunning;
+        return this.gameIsRunning;
     }
 
-    public void setIsGameRunning(boolean b) {
-        gameIsRunning = b;
+
+    /**
+     * Sets the games status to either running or not running.
+     * @param isGameRunning the new status of the game.
+     */
+    public void setIsGameRunning(boolean isGameRunning) {
+        this.gameIsRunning = isGameRunning;
     }
 
-    public void setSetSpielfeld(Spielfeld setSpielfeld) {
-        this.setSpielfeld = setSpielfeld;
-    }
-
+    /**
+     * Public wrapper function for "giveEachClientTheirTeam"
+     * @param clients List of the playing clients.
+     * @param colors Array of available colors.
+     * @param isSavedGame boolean that tells if it's a new game or a loaded save game.
+     */
     public void setClients(List<ClientHandler> clients, Color[] colors, boolean isSavedGame) {
         giveEachClientTheirTeam(this.getSpielfeld(), clients, colors, isSavedGame);
     }
 
+    /**
+     * Gets the amount of Bots in the Game.
+     * @return the number of Bots.
+     */
     public int getNumBots() {
         return numBots;
     }
 
+    /**
+     * Gets the amount of Players in the Game.
+     * @return the number of Players.
+     */
     public int getNumPlayers() {
         return numPlayers;
     }
 
+    /**
+     * Gets the games difficulty.
+     * @return the games' difficulty.
+     */
     public int getDifficulty() {
         return difficulty;
     }

@@ -5,11 +5,9 @@ import java.io.Serializable;
 public class Feld implements Serializable, Cloneable {
     private float priority;
     private Spielstein occupier;
-    private int number;
     private boolean isOccupied;
 
-    public Feld(int number) {
-        this.number = number;
+    public Feld() {
         isOccupied = false;
         occupier = null;
     }
@@ -32,14 +30,6 @@ public class Feld implements Serializable, Cloneable {
         }
         isOccupied = true;
         this.occupier = occupier;
-    }
-
-    public int getNumber() {
-        return number;
-    }
-
-    public void setNumber(int number) {
-        this.number = number;
     }
 
     /**
@@ -67,16 +57,6 @@ public class Feld implements Serializable, Cloneable {
     }
 
     @Override
-    public String toString() {
-        String output = "";
-        output += "Feld " + number + ":\t" + isOccupied;
-        if(occupier != null) {
-            output += "\t" + occupier.getColor();
-        }
-        return output;
-    }
-
-    @Override
     public Feld clone() throws CloneNotSupportedException {
         Feld clone = (Feld) super.clone();
         if(occupier != null) {
@@ -84,7 +64,6 @@ public class Feld implements Serializable, Cloneable {
         }else {
             clone.occupier = null;
         }
-        clone.number = number;
         clone.isOccupied = isOccupied;
         clone.priority = priority;
         return clone;
