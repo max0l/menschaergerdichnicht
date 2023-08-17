@@ -28,7 +28,7 @@ public class Team implements Serializable, Cloneable {
         this.color = color;
         spielsteine = new ArrayList<>();
         for(int i = 0; i<4;i++) {
-            spielsteine.add(new Spielstein(this, i));
+            spielsteine.add(new Spielstein(this));
             finishFields[i] = new Feld();
         }
         this.spielfeld = spielfeld;
@@ -87,7 +87,11 @@ public class Team implements Serializable, Cloneable {
         }
     }
 
-    //
+    /**
+     * Gets all the pieces which the player could use to move.
+     * @param diceRoll the rolled number
+     * @return a List of pieces that the player could use in his turn.
+     */
     List<Spielstein> getMovableSpielsteine(int diceRoll)
     {
         List<Spielstein> movableSpielsteine = new ArrayList<>();
@@ -114,6 +118,10 @@ public class Team implements Serializable, Cloneable {
         spielfeld.getFeld(startField).setOccupier(spielstein);
     }
 
+    /**
+     * Moves a piece back to one of the teams home fields.
+     * @param spielstein the piece that will be moved back to the home fields of the team.
+     */
     public void pieceFromFieldToHome(Spielstein spielstein) {
         spielfeld.getFeld(spielstein.getFieldId()).setOccupier(null);
         spielstein.setFieldId(-1);
@@ -122,7 +130,10 @@ public class Team implements Serializable, Cloneable {
         spielstein.setState(SpielsteinState.STATE_HOME);
     }
 
-
+    /**
+     * Adds a piece to one of the empty home fields.
+     * @param spielstein the piece to be moved.
+     */
     private void addToHome(Spielstein spielstein) {
         for(int i = 0; i<4;i++) {
             if(homeFields[i] == null) {
@@ -132,13 +143,12 @@ public class Team implements Serializable, Cloneable {
         }
     }
 
-
+    /**
+     * Gets the starting field index of the team.
+     * @return the index of the teams start field.
+     */
     public int getStartField() {
         return startField;
-    }
-
-    public int getEndField() {
-        return finishField;
     }
 
     public boolean getIsFinished() {
@@ -192,18 +202,35 @@ public class Team implements Serializable, Cloneable {
         printFinishFields();
     }
 
+    /**
+     * Gets the teams ClientHandler.
+     * @return the ClientHandler of the Team.
+     */
     public ClientHandler getClient() {
-        return client;
+        return this.client;
     }
 
-    public void setIsBot(boolean b) {
-        isBot = b;
+    /**
+     * Sets the isBot member variable to either {@code true} or {@code false}.
+     * @param isBot the boolean that will be set.
+     */
+    public void setIsBot(boolean isBot) {
+        this.isBot = isBot;
     }
 
+    /**
+     * Sets the spielsteine List.
+     * @param spielsteine the List that will be set.
+     */
     public void setSpielsteine(List<Spielstein> spielsteine) {
         this.spielsteine = spielsteine;
     }
 
+    /**
+     * Clones the Team object.
+     * @return the cloned object.
+     * @throws CloneNotSupportedException
+     */
     @Override
     public Object clone() throws CloneNotSupportedException {
         Team team = (Team) super.clone();
@@ -229,6 +256,10 @@ public class Team implements Serializable, Cloneable {
         return team;
     }
 
+    /**
+     * provided a way to print out the Team information.
+     * @return the string with the teams' information.
+     */
     @Override
     public String toString() {
         return "game.Team{" +

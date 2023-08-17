@@ -76,20 +76,17 @@ public class Spiel implements Serializable, Cloneable
         return teams.get(((teams.indexOf(team) + 1) % teams.size()));
     }
 
+    /**
+     * Performs actual checks on what pieces the player could actually move.
+     * @param team the team that has the turn.
+     * @param diceRoll the number the team rolled.
+     * @return A List of all pieces the player could move.
+     */
     public List<Spielstein> selectPiece(Team team, int diceRoll) {
         List<Spielstein> movableSpielsteine = team.getMovableSpielsteine(diceRoll);
 
         removePiecesThatWouldOverRun(movableSpielsteine, team, diceRoll);
         removePiecesThatWouldLandOnOwnPiece(team, movableSpielsteine, diceRoll);
-
-
-//        if (movableSpielsteine.size() == 1) {
-//            moveSpielstein(movableSpielsteine.get(0), diceRoll, team);
-//            return movableSpielsteine;
-//        }
-
-
-
 
         //This else if case checks if there is a piece on the spawn and if there is one, it will be moved from the spawn
         //Because You have to move out of spawn if you rolled a 6
@@ -201,8 +198,8 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Wirft einen Spielstein und setzt diesen wieder zurück in das Startfeld des jeweiligen Spielers.
-     * @param occupier Der zu werfende Spielstein.
+     * Kicks the provided piece and sets it back to the home field of its team.
+     * @param occupier the piece that will be kicked.
      */
     private void kickSpielstein(Spielstein occupier) {
         System.out.println("game.Spielstein von " + occupier.getColor() + " wird gekickt");
@@ -210,9 +207,8 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Lässt das betroffene Team dreimal würfel. Sollte dabei eine 6 gewürfelt werden
-     * wird ein Spielstein des Teams aus dem Start heraus gerückt.
-     * @param team Das Team welches an der Reihe ist.
+     * Lets the team roll 3 times to try and get it out of spawn.
+     * @param team The team that is rolling the dice.
      */
     public void tryToGetOutOfSpawn(Team team) {
         System.out.println("Versuche aus dem Spawn zu kommen");
@@ -227,8 +223,8 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Würfelt eine zufällige Zahl
-     * @return Gibt die gewürfelte Zahl zurück.
+     * Rolls a random number from 1 to 6 and sets the lastDiceRoll member.
+     * @return the rolled number.
      */
     public int rollDice() {
         int rand = random.nextInt(6) + 1;
@@ -238,9 +234,8 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Iteriert durch alle Teams und überprüft, ob das Team fertig ist.
-     * @return Gibt {@code true} zurück, wenn das Spiel beendet ist.
-     * Ansonsten wird entsprechend {@code false} zurückgegeben.
+     * Checks if the game is finished by checking all the teams.
+     * @return {@code true} if the game is finished. Otherwise {@code false}.
      */
     public boolean checkIfGameIsFinished()
     {
@@ -406,17 +401,23 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
+     * Gets the last number that has been rolled.
      * @return the last number rolled
      */
     public Integer getLastDiceRoll() {
         return lastDiceRoll;
     }
 
+    /**
+     * Sets the lastDiceRoll member to a provided number.
+     * @param lastDiceRoll the number to be set.
+     */
     public void setLastDiceRoll(Integer lastDiceRoll) {
         this.lastDiceRoll = lastDiceRoll;
     }
 
     /**
+     * Gets the team that is currently playing.
      * @return the currently playing team
      */
     public Team getCurrentlyPlaying() {
@@ -461,6 +462,11 @@ public class Spiel implements Serializable, Cloneable
         return spielfeld;
     }
 
+    /**
+     * Creates a clone of the Spiel object.
+     * @return the clone.
+     * @throws CloneNotSupportedException
+     */
     @Override
     public Object clone() throws CloneNotSupportedException {
         Spiel clone = (Spiel) super.clone();

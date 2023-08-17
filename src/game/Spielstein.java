@@ -10,7 +10,7 @@ public class Spielstein implements Serializable, Cloneable {
     private int walkedFields;
     private Team team;
 
-    public Spielstein(Team team, int steinID) {
+    public Spielstein(Team team) {
         this.team = team;
         color = team.getColor();
         state = SpielsteinState.STATE_HOME;

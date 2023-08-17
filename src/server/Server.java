@@ -35,14 +35,6 @@ public class Server implements Runnable{
             this.difficulty = spiel.getDifficulty();
             isSavedGame = true;
         }
-
-
-
-//        if(!(numPlayers < 4 && numPlayers >= 1)){
-//            throw new IllegalArgumentException("Number of players must be between 1 and 4");
-//        }
-
-
     }
 
     @Override
@@ -79,12 +71,8 @@ public class Server implements Runnable{
                 System.out.println(team.toString());
             }
 
-
             Thread.sleep(2000);
-
             startGame();
-
-
 
         } catch (Exception e) {
             System.out.println("SERVER:\t\tServer could not be started!");
@@ -97,7 +85,6 @@ public class Server implements Runnable{
         for(Team team : spiel.getTeams()) {
             System.out.println(team.getColor());
         }
-
 
         if(isSavedGame) {
             System.out.println("SERVER:\t\tGame is saved. Continuing...");
@@ -123,8 +110,6 @@ public class Server implements Runnable{
                 }
             }
         }
-
-
     }
 
     private void play(Team team) {
@@ -157,33 +142,24 @@ public class Server implements Runnable{
 
             if(team.getIsBot())
             {
-                List<Spielstein> movablePieces = new ArrayList<>();
+                List<Spielstein> movablePieces;
                 movablePieces = spiel.selectPiece(team, spiel.getLastDiceRoll());
                 selection = movablePieces.indexOf(botSelection(movablePieces));
                 spiel.moveSpielstein(botSelection(movablePieces), spiel.getLastDiceRoll(), team);
             } else {
                 System.out.println("SERVER:\t\tTeam is a Player; Waiting for client to select stone");
-                //doBroadcastToAllClients(spiel);
-                int recivedSpielsteinNumber = clientsSelectStone(team.getClient(), team);
-                if(checkIfSelectionIsValid(recivedSpielsteinNumber, team)) {
-                    selection = recivedSpielsteinNumber;
-                    if (recivedSpielsteinNumber != -1) {
-                        System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(recivedSpielsteinNumber).getFieldId() + "; " +
-                                "Walked fields pf spielstein: " + team.getSpielsteine().get(recivedSpielsteinNumber).getWalkedFields());
-                        spiel.moveSpielstein(team.getSpielsteine().get(recivedSpielsteinNumber), spiel.getLastDiceRoll(), team);
+                int receivedSpielsteinNumber = clientsSelectStone(team.getClient(), team);
+                if(checkIfSelectionIsValid(receivedSpielsteinNumber, team)) {
+                    selection = receivedSpielsteinNumber;
+                    if (receivedSpielsteinNumber != -1) {
+                        System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(receivedSpielsteinNumber).getFieldId() + "; " +
+                                "Walked fields pf spielstein: " + team.getSpielsteine().get(receivedSpielsteinNumber).getWalkedFields());
+                        spiel.moveSpielstein(team.getSpielsteine().get(receivedSpielsteinNumber), spiel.getLastDiceRoll(), team);
                     }
                 }
             }
 
             doBroadcastToAllClientsPieceSelection(selection);
-
-            /*
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-             */
 
             if(spiel.checkIfGameIsFinished())
             {
@@ -223,8 +199,6 @@ public class Server implements Runnable{
             }
         }
         System.out.println("SERVER:\t\tBroadcasted Selection to all clients\n");
-
-        //Now wait untill server recieves a confirmation (bool = true) from each client:
         getConfirmationFromAllClients();
     }
 
@@ -253,8 +227,7 @@ public class Server implements Runnable{
 
     /**
      * Sends the game to all connected clients
-     *
-     * @param spiel   the game to be sent
+     * @param spiel the game to be sent
      */
     private void doBroadcastToAllClients(Spiel spiel) {
         for(ClientHandler client : this.clients) {
@@ -275,11 +248,12 @@ public class Server implements Runnable{
             }
         }
         System.out.println("SERVER:\t\tBroadcasted to all clients\n");
-
-        //Now wait untill server recieves a confirmation (bool = true) from each client:
         getConfirmationFromAllClients();
     }
 
+    /**
+     * Checks if the Server can receive a confirmation from all connected clients.
+     */
     private void getConfirmationFromAllClients() {
         for(ClientHandler client : clients) {
             try {
@@ -293,6 +267,12 @@ public class Server implements Runnable{
         System.out.println("SERVER:\t\tGot confirmation from all CLients\n");
     }
 
+    /**
+     * Lets the Server wait for a client to select the piece to move with.
+     * @param client the client that needs to move.
+     * @param currentTeam the clients team.
+     * @return the index of the selected piece.
+     */
     private int clientsSelectStone(ClientHandler client, Team currentTeam) {
         System.out.println("SERVER:\t\tWaiting for client to select stone");
         try {
@@ -300,10 +280,15 @@ public class Server implements Runnable{
         } catch (Exception e) {
             System.out.println("SERVER:\t\tCould not recive object from client!");
             currentTeam.setIsBot(true);
-            return 0;
+            return -1;
         }
     }
 
+    /**
+     * Lets the Bot select a piece to play with.
+     * @param spielsteine List of pieces that could be moved.
+     * @return the piece that got selected.
+     */
     private Spielstein botSelection(List<Spielstein> spielsteine) {
         if(spielsteine == null){
             System.out.println("SERVER:\t\tBot selection is null");
@@ -317,6 +302,11 @@ public class Server implements Runnable{
         }
     }
 
+    /**
+     * Selects a piece based on the Bot difficulty.
+     * @param spielsteine List of pieces that could be moved.
+     * @return the piece that got selected.
+     */
     private Spielstein selectPieceOnDifficulty(List<Spielstein> spielsteine) {
         Spielstein walkingLeast = null;
         switch(difficulty){
@@ -343,6 +333,4 @@ public class Server implements Runnable{
 
         }
     }
-
-
 }
