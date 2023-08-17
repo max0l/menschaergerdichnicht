@@ -279,7 +279,7 @@ public class Server implements Runnable{
     private int clientsSelectStone(ClientHandler client, Team currentTeam) {
         System.out.println("SERVER:\t\tWaiting for client to select stone");
         try {
-            return client.receiveSpielstein();
+            return client.receivePiece();
         } catch (Exception e) {
             System.out.println("SERVER:\t\tCould not recive object from client!");
             currentTeam.setIsBot(true);

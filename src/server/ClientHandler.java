@@ -61,7 +61,7 @@ public class ClientHandler {
         System.out.println("SERVER:\tObject sent");
     }
 
-    public int receiveSpielstein() throws IOException {
+    public int receivePiece() throws IOException {
         int spielsteinNumber = inputStream.readInt();
         System.out.println("SERVER:\tSpielstein recived");
         return spielsteinNumber;
