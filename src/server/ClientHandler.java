@@ -94,4 +94,13 @@ public class ClientHandler {
             System.out.println("SERVER:\t\t________________________________________________Client would recieve wrong data________________________________________________");
         }
     }
+
+    public void sendSelectionToClient(int selection) {
+        try {
+            outputStream.writeInt(selection);
+            outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

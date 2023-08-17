@@ -154,15 +154,20 @@ public class Server implements Runnable{
             spiel.setCurrentlyPlaying(team);
             spiel.setLastDiceRoll(diceRoll);
             doBroadcastToAllClients(spiel);
+            int selection = -1;
 
-            if(team.getClient() == null)
+            if(team.getIsBot())
             {
-                spiel.moveSpielstein(botSelection(spiel.selectPiece(team, spiel.getLastDiceRoll())), spiel.getLastDiceRoll(), team);
+                List<Spielstein> movablePieces = new ArrayList<>();
+                movablePieces = spiel.selectPiece(team, spiel.getLastDiceRoll());
+                selection = movablePieces.indexOf(botSelection(movablePieces));
+                spiel.moveSpielstein(botSelection(movablePieces), spiel.getLastDiceRoll(), team);
             } else {
                 System.out.println("SERVER:\t\tTeam is a Player; Waiting for client to select stone");
                 //doBroadcastToAllClients(spiel);
                 int recivedSpielsteinNumber = clientsSelectStone(team.getClient(), team);
                 if(checkIfSelctionIsValid(recivedSpielsteinNumber, team)) {
+                    selection = recivedSpielsteinNumber;
                     if (recivedSpielsteinNumber != -1) {
                         System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(recivedSpielsteinNumber).getFieldId() + "; " +
                                 "Walked fields pf spielstein: " + team.getSpielsteine().get(recivedSpielsteinNumber).getWalkedFields());
@@ -170,6 +175,8 @@ public class Server implements Runnable{
                     }
                 }
             }
+
+            doBroadcastToAllClientsPieceSelection(selection);
 
             /*
             try {
@@ -194,6 +201,23 @@ public class Server implements Runnable{
         }
 
         spiel.setLastDiceRoll(null);
+    }
+
+    private void doBroadcastToAllClientsPieceSelection(int selection) {
+        for(ClientHandler client : clients) {
+            try {
+                client.sendSelectionToClient(selection);
+            } catch (Exception e) {
+                System.out.println("Could not send object to client!");
+                e.printStackTrace();
+                client.getTeam().setIsBot(true);
+                clients.remove(client);
+            }
+        }
+        System.out.println("SERVER:\t\tBroadcasted Selection to all clients\n");
+
+        //Now wait untill server recieves a confirmation (bool = true) from each client:
+        getConfirmationFromAllClients();
     }
 
     private boolean checkIfSelctionIsValid(int recivedSpielsteinNumber, Team team) {
@@ -227,6 +251,10 @@ public class Server implements Runnable{
         System.out.println("SERVER:\t\tBroadcasted to all clients\n");
 
         //Now wait untill server recieves a confirmation (bool = true) from each client:
+        getConfirmationFromAllClients();
+    }
+
+    private void getConfirmationFromAllClients() {
         for(ClientHandler client : clients) {
             try {
                 boolean confirmation = (boolean) client.getInputStream().readObject();

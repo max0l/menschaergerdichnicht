@@ -86,6 +86,23 @@ public class Client implements Runnable{
                         System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
                         System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
                     }
+
+                    //TODO: If all clients are still in spawn, just say that each client (including yourself)
+                    //Tries to get out of spawn --> This is automatic
+
+                    //get confirmation from server for collection nervertheless of which client, You'll get it from all
+                    int seletion = inputStream.readInt();
+                    System.out.println("CLIENT:\t\tServer confirmed selection: " + seletion);
+
+
+                    //movePiece(selection) -> Selction is int, so you have to convert it to a Spielstein from spiel.selectPiece()
+                    //which well return a list of Spielstein, so you have to get the right one from the list
+                    //if selection == -1 -> no piece can be moved
+
+                    //send confirmation to server
+                    //Send the confirmation only after the selection has been made and the stepByStep has been made
+                    outputStream.writeObject(Boolean.TRUE);
+
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                     teamColor = null;
