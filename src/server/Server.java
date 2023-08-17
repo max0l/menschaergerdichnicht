@@ -18,6 +18,15 @@ public class Server implements Runnable{
     private boolean isSavedGame = false;
     private final Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
     private final transient List<ClientHandler> clients = new ArrayList<>();
+
+    /**
+     * The Constructor of the Server class. Initialized member variables.
+     * @param spiel the game object.
+     * @param numPlayers the number of players.
+     * @param numBots the number of bots.
+     * @param difficulty the difficulty of bots.
+     * @param port the port the game uses.
+     */
     public Server(Spiel spiel, int numPlayers, int numBots, int difficulty, int port) {
         if(spiel == null){
             this.numPlayers = numPlayers;
@@ -37,6 +46,10 @@ public class Server implements Runnable{
         }
     }
 
+    /**
+     * Starts up the server and waits for clients to connect.
+     * If all clients are connected, the game will be set up and started.
+     */
     @Override
     public void run()  {
         try {
@@ -47,7 +60,7 @@ public class Server implements Runnable{
             while(clients.size() < numPlayers){
                 System.out.println("SERVER:\t\tWaiting for clients...");
                 System.out.println("SERVER:\t\tClients connected: " + clients.size() + "/" + numPlayers);
-                clients.add(new ClientHandler(server.accept(), server));
+                clients.add(new ClientHandler(server.accept()));
                 System.out.println("SERVER:\t\tA client connected.");
             }
 
@@ -80,6 +93,10 @@ public class Server implements Runnable{
         }
     }
 
+    /**
+     * Starts the Game on the Server.
+     * @throws InterruptedException
+     */
     private void startGame() throws InterruptedException {
         System.out.println("SERVER:\t\tTeams:");
         for(Team team : spiel.getTeams()) {
@@ -112,6 +129,10 @@ public class Server implements Runnable{
         }
     }
 
+    /**
+     * Lets a team play their move.
+     * @param team the playing team.
+     */
     private void play(Team team) {
         int diceRoll;
         spiel.setCurrentlyPlaying(team);
@@ -179,6 +200,11 @@ public class Server implements Runnable{
 
     }
 
+    /**
+     * Sends a piece selection message to all players. If a player does not
+     * respond, he will be replaced with a bot.
+     * @param selection
+     */
     private void doBroadcastToAllClientsPieceSelection(int selection) {
         for(ClientHandler client : clients) {
             try {
@@ -203,10 +229,10 @@ public class Server implements Runnable{
     }
 
     /**
-     *
-     * @param receivedSpielsteinNumber
-     * @param team
-     * @return
+     * Checks whether the piece the client has selected for his turn is valid.
+     * @param receivedSpielsteinNumber the index of the piece that was selected.
+     * @param team the team the piece will be checked for.
+     * @return {@code true} if the selection was valid. Otherwise {@code false}.
      */
     private boolean checkIfSelectionIsValid(int receivedSpielsteinNumber, Team team) {
         List<Spielstein> movablePieces = spiel.selectPiece(team, spiel.getLastDiceRoll());

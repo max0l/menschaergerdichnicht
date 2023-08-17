@@ -34,6 +34,10 @@ public class Spielfeld implements Serializable, Cloneable
         return spielfeld[index];
     }
 
+    /**
+     * Provides a way to print out information if the play field with one simple function.
+     * @return A string that contains the play field information.
+     */
     @Override
     public String toString() {
         String output = "";

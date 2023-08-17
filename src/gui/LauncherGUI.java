@@ -305,15 +305,7 @@ public class LauncherGUI extends JFrame {
                 }
             }
         }
-
-        // Start singleplayer game with the selected player count
-        /*
-        if(playerCount < 1 || playerCount > 4) {
-            throw new IllegalArgumentException("Number of players must be between 1 and 4");
-        }*/
-
         return true;
-
     }
 
 
@@ -379,13 +371,4 @@ public class LauncherGUI extends JFrame {
             selectedFileLabel.setText("Error loading file!, Try again or start without");
         }
     }
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new LauncherGUI().setVisible(true);
-            }
-        });
-    }
-
 }

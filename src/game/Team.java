@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Team implements Serializable, Cloneable {
-    //Only Startfield, the fields can be calaculated
-
     private final Spielstein[] homeFields = new Spielstein[4];
     private final Feld[] finishFields = new Feld[4];
     private int startField;
@@ -22,6 +20,14 @@ public class Team implements Serializable, Cloneable {
     private final Spielfeld spielfeld;
     private final transient ClientHandler client;
 
+    /**
+     * Constructor of the Team class. Initializes member variables.
+     * @param color the color the team will get.
+     * @param startField the index of the games starting field.
+     * @param spielfeld the play field.
+     * @param isBot decided whether this team is played by a bot.
+     * @param clientHandler the ClientHandler for Team.
+     */
     public Team(Color color, int startField, Spielfeld spielfeld, boolean isBot, ClientHandler clientHandler) {
         this.startField = startField;
         this.finishField = (startField + 39) %40;
@@ -36,15 +42,27 @@ public class Team implements Serializable, Cloneable {
         this.isBot = isBot;
     }
 
+    /**
+     * Gets the Teams Color
+     * @return the Color of the Team.
+     */
     public Color getColor() {
         return color;
     }
 
+    /**
+     * Retrieves whether the team is played by a bot.
+     * @return {@code true} if the team is played by a bot. Otherwise {@code false}.
+     */
     public boolean getIsBot() {
         return isBot;
     }
 
 
+    /**
+     * Checks if all pieces of the team are placed in the home fields.
+     * @return {@code true} if all pieces are at home. Otherwise {@code false}.
+     */
     public boolean checkIfAllPiecesAreInStart() {
         for(Spielstein spielstein : spielsteine) {
             if(spielstein.getState() != SpielsteinState.STATE_HOME) {
@@ -54,6 +72,10 @@ public class Team implements Serializable, Cloneable {
         return true;
     }
 
+    /**
+     * Checks if all pieces of the team are placed in the finish fields and
+     * sets isFinished to true if this case is met.
+     */
     public void checkIfAllPiecesAreInFinish() {
         for(Spielstein spielstein : spielsteine) {
             if(spielstein.getState() != SpielsteinState.STATE_FINISH) {
@@ -62,29 +84,6 @@ public class Team implements Serializable, Cloneable {
         }
         System.out.println("game.Team " + name + " Farbe: "+ color + " hat gewonnen!");
         isFinished = true;
-    }
-
-    public boolean checkIfPieceIsCorrectInFinish() {
-        int amountOfPiecesInFinish = 0;
-        int indezes = 0;
-
-        for(int i = 0; i<4;i++){
-            if(finishFields[i].getIsOccupied()) {
-                amountOfPiecesInFinish++;
-                indezes = indezes + i + 1;
-            }
-        }
-
-        if(amountOfPiecesInFinish == 0 ||
-                indezes == 4 ||
-                indezes == 7 ||
-                indezes == 9 ||
-                indezes == 10) {
-            return true;
-        } else {
-            return false;
-
-        }
     }
 
     /**
@@ -107,10 +106,18 @@ public class Team implements Serializable, Cloneable {
         return movableSpielsteine;
     }
 
+    /**
+     * Retrieves the team pieces.
+     * @return the teams list of pieces.
+     */
     public List<Spielstein> getSpielsteine() {
         return spielsteine;
     }
 
+    /**
+     * Moves a piece from the teams home fields to the teams start field.
+     * @param spielstein the piece to be moved.
+     */
     public void pieceFromHomeToField(Spielstein spielstein) {
         System.out.println("Bewege game.Spielstein von Home aufs game.Feld");
         spielstein.setFieldId(startField);
@@ -151,10 +158,18 @@ public class Team implements Serializable, Cloneable {
         return startField;
     }
 
+    /**
+     * Retrieves whether the team is finished.
+     * @return {@code true} if the team is finished, {@code false} otherwise.
+     */
     public boolean getIsFinished() {
         return isFinished;
     }
 
+    /**
+     * Gets a piece from the teams home fields.
+     * @return the selected piece.
+     */
     public Spielstein getSpielsteinFromHome() {
         for(Spielstein spielstein : spielsteine) {
             if(spielstein.getState() == SpielsteinState.STATE_HOME) {
@@ -164,12 +179,20 @@ public class Team implements Serializable, Cloneable {
         return null;
     }
 
+    /**
+     * Prints out the finish fields of the team, and whether they are occupied or not.
+     */
     public void printFinishFields() {
         for(int i = 0; i<4;i++) {
             System.out.println("FinishField " + i + ": " + finishFields[i].getIsOccupied());
         }
     }
 
+    /**
+     * Gets the finish field index of a particular piece.
+     * @param spielstein the piece we want the index of.
+     * @return {@code -1} if the piece could not be found in the finish fields. Otherwise, the index of the piece.
+     */
     public int getSpielFeldIntOfSpielsteinInFinish(Spielstein spielstein) {
         for(int i = 0; i<4;i++) {
             if(finishFields[i].getOccupier() == spielstein) {
@@ -178,14 +201,27 @@ public class Team implements Serializable, Cloneable {
         }
         return -1;
     }
+
+    /**
+     * Checks if a particular finish field is occupied.
+     * @param index the index if the field that will be checked.
+     * @return {@code true} if the field is occupied. Otherwise {@code false}.
+     */
     public boolean getIsOccupiedInFinish(int index) {
         System.out.println("Check if Occupied in finish: " + index);
         return finishFields[index].getIsOccupied();
     }
 
-    public void moveSpielsteinToFinish(Spielstein spielstein, int goalField) {
+    /**
+     * Moves a piece from the normal game fields to one of the teams finish fields.
+     * @param spielstein the piece to be moved.
+     * @param goalField the index of the goal field where the piece will be moved.
+     */
+    public void moveSpielsteinToFinish(Spielstein spielstein, int goalField)
+    {
         System.out.println("Bewege game.Spielstein ins Ziel");
         System.out.println("GoalField: " + goalField);
+
         spielstein.setFieldId(goalField);
         spielstein.setState(SpielsteinState.STATE_FINISH);
         printFinishFields();
@@ -194,6 +230,12 @@ public class Team implements Serializable, Cloneable {
         printFinishFields();
     }
 
+    /**
+     * Moves a piece from one finish field to another finish field.
+     * @param spielstein the piece that will be moved.
+     * @param currentField the current field of the piece.
+     * @param goalField the new finish field of the piece.
+     */
     public void moveSpielsteinAroundFinish(Spielstein spielstein, int currentField, int goalField) {
         System.out.println("Bewege game.Spielstein ums Ziel");
         spielstein.setFieldId(goalField);

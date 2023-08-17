@@ -1,15 +1,12 @@
 package client;
 
 import game.Spiel;
-import game.Spielfeld;
 import game.Spielstein;
 import game.Team;
 
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -29,6 +26,11 @@ public class Client implements Runnable{
         this.port = port;
     }
 
+    /**
+     * The main client loop. The client tries to connect to the
+     * provided address and port. If the connection was successful, this function runs until
+     * the game is finished or either the client or the server closes the connection.
+     */
     @Override
     public void run() {
         boolean gameIsFinished = false;
@@ -83,7 +85,7 @@ public class Client implements Runnable{
 
                     if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
                         System.out.println("CLIENT:\t\tIt's your turn!");
-                        sendSelectionToServer(spiel, teamColor, socket, outputStream);
+                        sendSelectionToServer(spiel, teamColor, outputStream);
                         askForSave();
                     }else{
                         System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
@@ -127,7 +129,13 @@ public class Client implements Runnable{
 
     }
 
-    private void sendSelectionToServer(Spiel spiel, Color teamColor, Socket socket, ObjectOutputStream out) {
+    /**
+     * Sends the index of the piece that the client wants to move to the server.
+     * @param spiel the game object.
+     * @param teamColor the clients team color.
+     * @param out the output stream.
+     */
+    private void sendSelectionToServer(Spiel spiel, Color teamColor, ObjectOutputStream out) {
         Team team = spiel.getTeamByColor(teamColor);
         if(team == null){
             System.out.println("CLIENT:\t\tTeam is null");
@@ -174,7 +182,7 @@ public class Client implements Runnable{
             }
         }
 
-        System.out.printf("YCLIENT:\t\tou entered: %d\n", userInput);
+        System.out.printf("CLIENT:\t\tou entered: %d\n", userInput);
         //Send selection to server
 
         try {
@@ -184,7 +192,6 @@ public class Client implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -242,6 +249,9 @@ public class Client implements Runnable{
         }
     }
 
+    /**
+     * Asks if the game should be saved
+     */
     void askForSave()
     {
         Character input = null;
