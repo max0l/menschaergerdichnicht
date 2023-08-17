@@ -90,12 +90,8 @@ public class ClientHandler {
         }
     }
 
-    public void sendSelectionToClient(int selection) {
-        try {
-            outputStream.writeInt(selection);
-            outputStream.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void sendSelectionToClient(int selection) throws IOException {
+        outputStream.writeInt(selection);
+        outputStream.flush();
     }
 }

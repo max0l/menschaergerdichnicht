@@ -160,7 +160,6 @@ public class LauncherGUI extends JFrame {
                 connectButton.setEnabled(true);
                 hostOnlyButton.setEnabled(true);
                 hostButton.setEnabled(true);
-                playerCountComboBox.setEnabled(true);
             }
         });
 
@@ -258,8 +257,10 @@ public class LauncherGUI extends JFrame {
 
                 clientThread.start();
             } else if (multiplayerButton.isSelected()) {
-
-
+                if(!hostButton.isSelected() && !connectButton.isSelected() && !hostOnlyButton.isSelected()){
+                    JOptionPane.showMessageDialog(null, "Please select a Multiplayer mode!");
+                    return false;
+                }
                 if (hostButton.isSelected()) {
 
                     if(checkIfPortIsOccupied(port)){

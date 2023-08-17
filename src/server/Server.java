@@ -16,7 +16,7 @@ public class Server implements Runnable{
     private final int difficulty;
     private boolean isSavedGame = false;
     private final Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
-    private transient List<ClientHandler> clients = new ArrayList<>();
+    private final transient List<ClientHandler> clients = new ArrayList<>();
     public Server(Spiel spiel, int numPlayers, int numBots, int difficulty, int port) {
         if(spiel == null){
             this.numPlayers = numPlayers;
@@ -131,7 +131,6 @@ public class Server implements Runnable{
         spiel.setCurrentlyPlaying(team);
         if (team.checkIfAllPiecesAreInStart())
         {
-            //doBroadcastToAllClients(spiel);
             spiel.tryToGetOutOfSpawn(team);
             return;
         }
@@ -200,6 +199,7 @@ public class Server implements Runnable{
         }
 
         spiel.setLastDiceRoll(null);
+
     }
 
     private void doBroadcastToAllClientsPieceSelection(int selection) {
@@ -209,8 +209,16 @@ public class Server implements Runnable{
             } catch (Exception e) {
                 System.out.println("Could not send object to client!");
                 e.printStackTrace();
+
                 client.getTeam().setIsBot(true);
                 clients.remove(client);
+                try{
+                    client.getClient().close();
+                    return;
+                } catch (Exception ex) {
+                    System.out.println("Could not close client socket!");
+                    ex.printStackTrace();
+                }
             }
         }
         System.out.println("SERVER:\t\tBroadcasted Selection to all clients\n");
@@ -244,17 +252,25 @@ public class Server implements Runnable{
 
     /**
      * Sends the game to all connected clients
-     * @param spiel the game to be sent
+     *
+     * @param spiel   the game to be sent
      */
     private void doBroadcastToAllClients(Spiel spiel) {
-        for(ClientHandler client : clients) {
+        for(ClientHandler client : this.clients) {
             try {
                 client.sendToClient(spiel);
             } catch (Exception e) {
                 System.out.println("Could not send object to client!");
                 e.printStackTrace();
-//                client.getTeam().setIsBot(true);
-//                clients.remove(client);
+                client.getTeam().setIsBot(true);
+                clients.remove(client);
+                try{
+                    client.getClient().close();
+                    return;
+                } catch (Exception ex) {
+                    System.out.println("Could not close client socket!");
+                    ex.printStackTrace();
+                }
             }
         }
         System.out.println("SERVER:\t\tBroadcasted to all clients\n");
