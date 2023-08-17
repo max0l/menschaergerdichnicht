@@ -168,6 +168,7 @@ public class LauncherGUI extends JFrame {
                 playerCountComboBox.setEnabled(false);
                 botCountComboBox.setEnabled(false);
                 difficultyComboBox.setEnabled(false);
+                playerCountComboBox.setEnabled(false);
             }
         });
 
