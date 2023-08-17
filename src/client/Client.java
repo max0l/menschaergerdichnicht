@@ -15,9 +15,15 @@ import java.util.Scanner;
 
 public class Client implements Runnable{
     private volatile Spiel spiel;
-    private String address;
-    private int port;
+    private final String address;
+    private final int port;
 
+    /**
+     * Constructor of the Client class.
+     * Sets member variables to its arguments
+     * @param address the address the client will connect to
+     * @param port the port the client will connect on
+     */
     public Client(String address, int port) {
         this.address = address;
         this.port = port;
@@ -39,9 +45,6 @@ public class Client implements Runnable{
 
             teamColor = (Color) inputStream.readObject();
             System.out.println("CLIENT:\t\tTeam color: " + teamColor);
-
-
-
 
             while (!gameIsFinished) {
                 try {
@@ -86,6 +89,23 @@ public class Client implements Runnable{
                         System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
                         System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
                     }
+
+                    //TODO: If all clients are still in spawn, just say that each client (including yourself)
+                    //Tries to get out of spawn --> This is automatic
+
+                    //get confirmation from server for collection nervertheless of which client, You'll get it from all
+                    int seletion = inputStream.readInt();
+                    System.out.println("CLIENT:\t\tServer confirmed selection: " + seletion);
+
+
+                    //movePiece(selection) -> Selction is int, so you have to convert it to a Spielstein from spiel.selectPiece()
+                    //which well return a list of Spielstein, so you have to get the right one from the list
+                    //if selection == -1 -> no piece can be moved
+
+                    //send confirmation to server
+                    //Send the confirmation only after the selection has been made and the stepByStep has been made
+                    outputStream.writeObject(Boolean.TRUE);
+
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                     teamColor = null;
@@ -98,8 +118,6 @@ public class Client implements Runnable{
             System.out.println("CLIENT:\t\tCould not connect to server!");
             return;
         }
-
-
 
         try {
             socket.close();
@@ -168,6 +186,10 @@ public class Client implements Runnable{
         }
 
     }
+
+    /**
+     * Saves the game to a persistent directory
+     */
     public void saveGame()
     {
         String userHome = System.getProperty("user.home");

@@ -27,10 +27,9 @@ public class LauncherGUI extends JFrame {
     private final JTextField portField;
     private final JButton startButton;
 
-    private JButton loadButton; // Added load button
-    private JLabel selectedFileLabel; // Added label to display selected file name
+    private final JLabel selectedFileLabel; // Added label to display selected file name
 
-    private JFileChooser fileChooser;
+    private final JFileChooser fileChooser;
     private Spiel spiel = null;
 
     /**
@@ -109,7 +108,7 @@ public class LauncherGUI extends JFrame {
         add(portPanel);
 
         JPanel loadPanel = new JPanel();
-        loadButton = new JButton("Load Savegame (Optional)");
+        JButton loadButton = new JButton("Load Savegame (Optional)");
         loadPanel.add(loadButton);
         add(loadPanel);
 
@@ -147,6 +146,8 @@ public class LauncherGUI extends JFrame {
                 hostButton.setEnabled(false);
                 hostOnlyButton.setEnabled(false);
                 connectButton.setEnabled(false);
+                playerCountComboBox.setEnabled(false);
+                playerCountComboBox.setSelectedIndex(1);
             }
         });
 
@@ -159,6 +160,7 @@ public class LauncherGUI extends JFrame {
                 connectButton.setEnabled(true);
                 hostOnlyButton.setEnabled(true);
                 hostButton.setEnabled(true);
+                playerCountComboBox.setEnabled(true);
             }
         });
 
@@ -170,6 +172,7 @@ public class LauncherGUI extends JFrame {
                 playerCountComboBox.setEnabled(false);
                 botCountComboBox.setEnabled(false);
                 difficultyComboBox.setEnabled(false);
+                playerCountComboBox.setEnabled(false);
             }
         });
 
@@ -239,7 +242,7 @@ public class LauncherGUI extends JFrame {
 
             if (singleplayerButton.isSelected()) {
 
-                if(!checkIfPortIsAvailable(port)){
+                if(checkIfPortIsOccupied(port)){
                     JOptionPane.showMessageDialog(null, "Port is already in use!");
                     return false;
                 }
@@ -259,7 +262,7 @@ public class LauncherGUI extends JFrame {
 
                 if (hostButton.isSelected()) {
 
-                    if(!checkIfPortIsAvailable(port)){
+                    if(checkIfPortIsOccupied(port)){
                         JOptionPane.showMessageDialog(null, "Port is already in use!");
                         return false;
                     }
@@ -288,7 +291,7 @@ public class LauncherGUI extends JFrame {
                     clientThread.start();
                 } else if(hostOnlyButton.isSelected()) {
 
-                    if(!checkIfPortIsAvailable(port)){
+                    if(checkIfPortIsOccupied(port)){
                         JOptionPane.showMessageDialog(null, "Port is already in use!");
                         return false;
                     }
@@ -317,15 +320,15 @@ public class LauncherGUI extends JFrame {
      * Tries to create a ServerSocket on the specified port to check if the given
      * port is available or if it's already in use.
      * @param port the port to be checked
-     * @return {@code true} if the port is available and {@code false} if it's already used.
+     * @return {@code true} if the port is Occupied and {@code false} if it's not in use.
      */
-    private boolean checkIfPortIsAvailable(int port) {
+    private boolean checkIfPortIsOccupied(int port) {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
             serverSocket.close();
-            return true; // Port is free
+            return false; // Port is free
         } catch (IOException e) {
-            return false; // Port is not free
+            return true; // Port is not free
         }
     }
 

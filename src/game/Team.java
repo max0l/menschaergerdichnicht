@@ -10,22 +10,17 @@ import java.util.List;
 public class Team implements Serializable, Cloneable {
     //Only Startfield, the fields can be calaculated
 
-    private Spielstein[] homeFields = new Spielstein[4];
-    private Feld[] finishFields = new Feld[4];
+    private final Spielstein[] homeFields = new Spielstein[4];
+    private final Feld[] finishFields = new Feld[4];
     private int startField;
     private int finishField;
-
     private List<Spielstein> spielsteine;
-
     private Color color;
-
     private boolean isBot;
     private String name;
     private boolean isFinished;
-
-    private Spielfeld spielfeld;
-    
-    private transient ClientHandler client;
+    private final Spielfeld spielfeld;
+    private final transient ClientHandler client;
 
     public Team(Color color, int startField, Spielfeld spielfeld, boolean isBot, ClientHandler clientHandler) {
         this.startField = startField;
