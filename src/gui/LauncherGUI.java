@@ -27,10 +27,9 @@ public class LauncherGUI extends JFrame {
     private final JTextField portField;
     private final JButton startButton;
 
-    private JButton loadButton; // Added load button
-    private JLabel selectedFileLabel; // Added label to display selected file name
+    private final JLabel selectedFileLabel; // Added label to display selected file name
 
-    private JFileChooser fileChooser;
+    private final JFileChooser fileChooser;
     private Spiel spiel = null;
 
     public LauncherGUI() {
@@ -105,7 +104,7 @@ public class LauncherGUI extends JFrame {
         add(portPanel);
 
         JPanel loadPanel = new JPanel();
-        loadButton = new JButton("Load Savegame (Optional)");
+        JButton loadButton = new JButton("Load Savegame (Optional)");
         loadPanel.add(loadButton);
         add(loadPanel);
 
@@ -233,7 +232,7 @@ public class LauncherGUI extends JFrame {
 
             if (singleplayerButton.isSelected()) {
 
-                if(!checkIfPortIsAvailable(port)){
+                if(checkIfPortIsOccupied(port)){
                     JOptionPane.showMessageDialog(null, "Port is already in use!");
                     return false;
                 }
@@ -253,7 +252,7 @@ public class LauncherGUI extends JFrame {
 
                 if (hostButton.isSelected()) {
 
-                    if(!checkIfPortIsAvailable(port)){
+                    if(checkIfPortIsOccupied(port)){
                         JOptionPane.showMessageDialog(null, "Port is already in use!");
                         return false;
                     }
@@ -282,7 +281,7 @@ public class LauncherGUI extends JFrame {
                     clientThread.start();
                 } else if(hostOnlyButton.isSelected()) {
 
-                    if(!checkIfPortIsAvailable(port)){
+                    if(checkIfPortIsOccupied(port)){
                         JOptionPane.showMessageDialog(null, "Port is already in use!");
                         return false;
                     }
@@ -296,25 +295,19 @@ public class LauncherGUI extends JFrame {
             }
         }
 
-        // Start singleplayer game with the selected player count
-        /*
-        if(playerCount < 1 || playerCount > 4) {
-            throw new IllegalArgumentException("Number of players must be between 1 and 4");
-        }*/
-
         return true;
 
     }
 
 
 
-    private boolean checkIfPortIsAvailable(int port) {
+    private boolean checkIfPortIsOccupied(int port) {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
             serverSocket.close();
-            return true; // Port is free
+            return false; // Port is free
         } catch (IOException e) {
-            return false; // Port is not free
+            return true; // Port is not free
         }
     }
 
