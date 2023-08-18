@@ -34,7 +34,6 @@ public class Client implements Runnable{
     @Override
     public void run() {
         boolean gameIsFinished = false;
-        boolean doBroadcast = false;
 
         Color teamColor = null;
         Socket socket = null;
@@ -55,7 +54,7 @@ public class Client implements Runnable{
                     spiel = (Spiel) inputStream.readObject();
                     System.out.println("CLIENT:\t\tSpiel recived");
                     //Sending confirmation:
-                    outputStream.writeObject(Boolean.TRUE);
+                    outputStream.writeBoolean(true);
                     outputStream.flush();
                     System.out.println("CLIENT:\t\tConfirmation sent");
 
@@ -106,7 +105,7 @@ public class Client implements Runnable{
 
                     //send confirmation to server
                     //Send the confirmation only after the selection has been made and the stepByStep has been made
-                    outputStream.writeObject(Boolean.TRUE);
+                    outputStream.writeBoolean(true);
 
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
