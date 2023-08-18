@@ -84,7 +84,6 @@ public class Server implements Runnable{
                 System.out.println(team.toString());
             }
 
-            Thread.sleep(2000);
             startGame();
 
         } catch (Exception e) {
@@ -106,7 +105,6 @@ public class Server implements Runnable{
         if(isSavedGame) {
             System.out.println("SERVER:\t\tGame is saved. Continuing...");
             System.out.println("SERVER:\t\tCurrently playing: " + spiel.getCurrentlyPlaying().getColor());
-            Thread.sleep(2000);
             int i = spiel.getTeams().indexOf(spiel.getCurrentlyPlaying());
             if(i != -1){
                 decideHowManyDiceRolls(spiel.getTeams().get(i));
@@ -118,7 +116,6 @@ public class Server implements Runnable{
 
                 System.out.println("SERVER:\t\tTeam " + spiel.getTeams().get(i).getColor() + " ist am Zug! Nr.: " + i);
                 decideHowManyDiceRolls(spiel.getTeams().get(i));
-                Thread.sleep(2000);
                 if(!spiel.isGameIsRunning()){
                     break;
                 }
@@ -206,6 +203,7 @@ public class Server implements Runnable{
 
             if (diceRoll == 6)
             {
+                spiel.setLastDiceRoll(null);
                 play(team);
             }
         }

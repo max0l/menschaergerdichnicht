@@ -85,7 +85,7 @@ public class Client implements Runnable{
                     if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
                         System.out.println("CLIENT:\t\tIt's your turn!");
                         sendSelectionToServer(spiel, teamColor, outputStream);
-                        askForSave();
+                        //askForSave();
                     }else{
                         System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
                         System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
@@ -106,6 +106,7 @@ public class Client implements Runnable{
                     //send confirmation to server
                     //Send the confirmation only after the selection has been made and the stepByStep has been made
                     outputStream.writeBoolean(true);
+                    outputStream.flush();
 
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
