@@ -235,22 +235,6 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Lets the team roll 3 times to try and get it out of spawn.
-     * @param team The team that is rolling the dice.
-     */
-    public void tryToGetOutOfSpawn(Team team) {
-        System.out.println("Versuche aus dem Spawn zu kommen");
-        for (int j = 0; j < 3; j++) {
-            if (rollDice() == 6) {
-                System.out.println("6 gewürfelt, spieler kommt aus dem Spawn");
-                moveSpielstein(movePieceOutOfSpawn(team), rollDice(), team);
-                break;
-            }
-        }
-
-    }
-
-    /**
      * Rolls a random number from 1 to 6 and sets the lastDiceRoll member.
      * @return the rolled number.
      */

@@ -109,10 +109,7 @@ public class Server implements Runnable{
             Thread.sleep(2000);
             int i = spiel.getTeams().indexOf(spiel.getCurrentlyPlaying());
             if(i != -1){
-                for(int j = i; j < spiel.getTeams().size(); j++){
-                    Thread.sleep(2000);
-                    play(spiel.getTeams().get(j));
-                }
+                decideHowManyDiceRolls(spiel.getTeams().get(i));
             }
         }
 
@@ -120,7 +117,7 @@ public class Server implements Runnable{
             for(int i = 0; i < spiel.getTeams().size(); i++){
 
                 System.out.println("SERVER:\t\tTeam " + spiel.getTeams().get(i).getColor() + " ist am Zug! Nr.: " + i);
-                play(spiel.getTeams().get(i));
+                decideHowManyDiceRolls(spiel.getTeams().get(i));
                 Thread.sleep(2000);
                 if(!spiel.isGameIsRunning()){
                     break;
@@ -130,17 +127,32 @@ public class Server implements Runnable{
     }
 
     /**
+     * Decides how many dice rolls a team gets. If all pieces are in start, the team gets 3 rolls.
+     * @param team the playing team.
+     */
+    private void decideHowManyDiceRolls(Team team) {
+        if(team.checkIfAllPiecesAreInStart()) {
+            for(int k = 0; k<3;k++) {
+                spiel.setLastDiceRoll(spiel.rollDice());
+                if(spiel.getLastDiceRoll() == 6) {
+                    play(team);
+                    break;
+                } else {
+                    play(team);
+                }
+
+            }
+        } else {
+            play(team);
+        }
+    }
+
+    /**
      * Lets a team play their move.
      * @param team the playing team.
      */
     private void play(Team team) {
         int diceRoll;
-        spiel.setCurrentlyPlaying(team);
-        if (team.checkIfAllPiecesAreInStart())
-        {
-            spiel.tryToGetOutOfSpawn(team);
-            return;
-        }
         spiel.setCurrentlyPlaying(team);
         if (!team.getIsFinished())
         {
@@ -165,7 +177,9 @@ public class Server implements Runnable{
             {
                 List<Spielstein> movablePieces;
                 movablePieces = spiel.selectPiece(team, spiel.getLastDiceRoll());
-                selection = movablePieces.indexOf(botSelection(movablePieces));
+                if(movablePieces != null) {
+                    selection = movablePieces.indexOf(botSelection(movablePieces));
+                }
                 spiel.moveSpielstein(botSelection(movablePieces), spiel.getLastDiceRoll(), team);
             } else {
                 System.out.println("SERVER:\t\tTeam is a Player; Waiting for client to select stone");
@@ -250,27 +264,13 @@ public class Server implements Runnable{
             return false;
         }
     }
-
-    /**
-     * Sends the game to all connected clients
-     * @param spiel the game to be sent
-     */
     private void doBroadcastToAllClients(Spiel spiel) {
         for(ClientHandler client : this.clients) {
             try {
                 client.sendToClient(spiel);
             } catch (Exception e) {
                 System.out.println("Could not send object to client!");
-                e.printStackTrace();
-                client.getTeam().setIsBot(true);
-                clients.remove(client);
-                try{
-                    client.getClient().close();
-                    return;
-                } catch (Exception ex) {
-                    System.out.println("Could not close client socket!");
-                    ex.printStackTrace();
-                }
+                clientConfirmationErrorHandler(client, e);
             }
         }
         System.out.println("SERVER:\t\tBroadcasted to all clients\n");
@@ -281,16 +281,35 @@ public class Server implements Runnable{
      * Checks if the Server can receive a confirmation from all connected clients.
      */
     private void getConfirmationFromAllClients() {
+        System.out.println("SERVER:\t\tWaiting for confirmation from all clients");
         for(ClientHandler client : clients) {
             try {
-                boolean confirmation = (boolean) client.getInputStream().readObject();
+                boolean confirmation = client.getInputStream().readBoolean();
                 System.out.println("SERVER:\t\tRecived confirmation from client: " + confirmation);
             } catch (Exception e) {
-                System.out.println("SERVER:\t\tCould not recive confirmation from client!");
-                e.printStackTrace();
+                System.out.println("Could not get confirmation from client!");
+                clientConfirmationErrorHandler(client, e);
             }
         }
         System.out.println("SERVER:\t\tGot confirmation from all CLients\n");
+    }
+
+    /**
+     * Handles the error that occurs when a client does not respond. The client will be replaced with a bot.
+     * @param client the client that did not respond.
+     * @param e the exception that was thrown.
+     */
+    private void clientConfirmationErrorHandler(ClientHandler client, Exception e) {
+        e.printStackTrace();
+        client.getTeam().setIsBot(true);
+        clients.remove(client);
+        try {
+            client.getClient().close();
+            return;
+        } catch (Exception ex) {
+            System.out.println("Could not close client socket!");
+            ex.printStackTrace();
+        }
     }
 
     /**

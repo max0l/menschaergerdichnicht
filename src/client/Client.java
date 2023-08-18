@@ -111,6 +111,9 @@ public class Client implements Runnable{
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                     teamColor = null;
+                    socket.close();
+                    System.out.println("CLIENT:\t\tConnection to server lost!");
+                    System.exit(0);
                 }
 
             }
