@@ -95,7 +95,7 @@ public class Server implements Runnable{
 
     /**
      * Starts the Game on the Server.
-     * @throws InterruptedException
+     * @throws InterruptedException if the thread is interrupted.
      */
     private void startGame() throws InterruptedException {
         System.out.println("SERVER:\t\tTeams:");
@@ -251,18 +251,10 @@ public class Server implements Runnable{
     private boolean checkIfSelectionIsValid(int receivedSpielsteinNumber, Team team) {
         List<Spielstein> movablePieces = spiel.selectPiece(team, spiel.getLastDiceRoll());
         if(movablePieces == null){
-            if(receivedSpielsteinNumber == -1){
-                return true;
-            } else {
-                return false;
-            }
+            return receivedSpielsteinNumber == -1;
         }
 
-        if(receivedSpielsteinNumber <= movablePieces.size()){
-            return true;
-        } else {
-            return false;
-        }
+        return receivedSpielsteinNumber <= movablePieces.size();
     }
     private void doBroadcastToAllClients(Spiel spiel) {
         for(ClientHandler client : this.clients) {
@@ -305,7 +297,6 @@ public class Server implements Runnable{
         clients.remove(client);
         try {
             client.getClient().close();
-            return;
         } catch (Exception ex) {
             System.out.println("Could not close client socket!");
             ex.printStackTrace();
@@ -338,7 +329,7 @@ public class Server implements Runnable{
         if(spielsteine == null){
             System.out.println("SERVER:\t\tBot selection is null");
             return null;
-        } else if(spielsteine.size() == 1) {;
+        } else if(spielsteine.size() == 1) {
             return spielsteine.get(0);
         } else if(spielsteine.size() > 1) {
             return selectPieceOnDifficulty(spielsteine);
