@@ -21,6 +21,15 @@ public class Spiel implements Serializable, Cloneable
     private int numBots;
     private int numPlayers;
     private int difficulty;
+
+    /**
+     * The Constructor of the Game class. Initializes member variables and creates Teams.
+     * @param numPlayers the number of players in the game.
+     * @param numBots the number of bots in the game.
+     * @param clients a list of all clients.
+     * @param colors an array of available colors.
+     * @param difficulty the games bot difficulty.
+     */
     public Spiel(int numPlayers, int numBots, List<ClientHandler> clients, Color[] colors, int difficulty) {
         this.numPlayers = numPlayers;
         this.numBots = numBots;
@@ -76,20 +85,17 @@ public class Spiel implements Serializable, Cloneable
         return teams.get(((teams.indexOf(team) + 1) % teams.size()));
     }
 
+    /**
+     * Performs actual checks on what pieces the player could actually move.
+     * @param team the team that has the turn.
+     * @param diceRoll the number the team rolled.
+     * @return A List of all pieces the player could move.
+     */
     public List<Spielstein> selectPiece(Team team, int diceRoll) {
         List<Spielstein> movableSpielsteine = team.getMovableSpielsteine(diceRoll);
 
         removePiecesThatWouldOverRun(movableSpielsteine, team, diceRoll);
         removePiecesThatWouldLandOnOwnPiece(team, movableSpielsteine, diceRoll);
-
-
-//        if (movableSpielsteine.size() == 1) {
-//            moveSpielstein(movableSpielsteine.get(0), diceRoll, team);
-//            return movableSpielsteine;
-//        }
-
-
-
 
         //This else if case checks if there is a piece on the spawn and if there is one, it will be moved from the spawn
         //Because You have to move out of spawn if you rolled a 6
@@ -119,6 +125,12 @@ public class Spiel implements Serializable, Cloneable
         return movableSpielsteine;
     }
 
+    /**
+     * Removes game pieces from the List that would run another round because they can't move into the finish fields.
+     * @param movableSpielsteine a list of movable game pieces from the specified team.
+     * @param team the team to which the game pieces belong to.
+     * @param diceRoll the outcome of the dice roll, representing the number of positions to move.
+     */
     private void removePiecesThatWouldOverRun(List<Spielstein> movableSpielsteine, Team team, int diceRoll) {
         movableSpielsteine.removeIf(spielstein -> spielstein.getState() == SpielsteinState.STATE_PLAYING
                 && spielstein.getWalkedFields() + diceRoll >= 44 );
@@ -127,6 +139,12 @@ public class Spiel implements Serializable, Cloneable
                 && diceRoll + team.getSpielFeldIntOfSpielsteinInFinish(spielstein) > 4);
     }
 
+    /**
+     * Removes game pieces that would land on their own pieces after a move.
+     * @param team the team to which the game pieces belong to.
+     * @param movableSpielsteine a list of movable game pieces from the specified team.
+     * @param diceRoll the outcome of the dice roll, representing the number of positions to move.
+     */
     private void removePiecesThatWouldLandOnOwnPiece(Team team, List<Spielstein> movableSpielsteine, int diceRoll) {
         movableSpielsteine.removeIf(spielstein -> {
             Feld nextFeld = spielfeld.getFeld((spielstein.getFieldId() + diceRoll) % 40);
@@ -158,6 +176,13 @@ public class Spiel implements Serializable, Cloneable
         return spawn.getIsOccupied() && spawn.getOccupier().getColor() == team.getColor();
     }
 
+    /**
+     * * Checks if a piece from the given team can kick another piece based on the dice roll.
+     * @param team the team to which the game piece belongs.
+     * @param diceRoll the outcome of the dice roll, representing the number of positions to move.
+     * @param movableSpielsteine a list of movable game pieces from the specified team.
+     * @return {@code true} if a piece can perform a kick action, otherwise {@code false}.
+     */
     private boolean checkIfPieceCanKickOtherPiece(Team team, int diceRoll, List<Spielstein> movableSpielsteine) {
         int oldSize = movableSpielsteine.size();
         movableSpielsteine.removeIf(spielstein -> {
@@ -201,8 +226,8 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Wirft einen Spielstein und setzt diesen wieder zurück in das Startfeld des jeweiligen Spielers.
-     * @param occupier Der zu werfende Spielstein.
+     * Kicks the provided piece and sets it back to the home field of its team.
+     * @param occupier the piece that will be kicked.
      */
     private void kickSpielstein(Spielstein occupier) {
         System.out.println("game.Spielstein von " + occupier.getColor() + " wird gekickt");
@@ -210,25 +235,8 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Lässt das betroffene Team dreimal würfel. Sollte dabei eine 6 gewürfelt werden
-     * wird ein Spielstein des Teams aus dem Start heraus gerückt.
-     * @param team Das Team welches an der Reihe ist.
-     */
-    public void tryToGetOutOfSpawn(Team team) {
-        System.out.println("Versuche aus dem Spawn zu kommen");
-        for (int j = 0; j < 3; j++) {
-            if (rollDice() == 6) {
-                System.out.println("6 gewürfelt, spieler kommt aus dem Spawn");
-                moveSpielstein(movePieceOutOfSpawn(team), rollDice(), team);
-                break;
-            }
-        }
-
-    }
-
-    /**
-     * Würfelt eine zufällige Zahl
-     * @return Gibt die gewürfelte Zahl zurück.
+     * Rolls a random number from 1 to 6 and sets the lastDiceRoll member.
+     * @return the rolled number.
      */
     public int rollDice() {
         int rand = random.nextInt(6) + 1;
@@ -238,9 +246,8 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Iteriert durch alle Teams und überprüft, ob das Team fertig ist.
-     * @return Gibt {@code true} zurück, wenn das Spiel beendet ist.
-     * Ansonsten wird entsprechend {@code false} zurückgegeben.
+     * Checks if the game is finished by checking all the teams.
+     * @return {@code true} if the game is finished. Otherwise {@code false}.
      */
     public boolean checkIfGameIsFinished()
     {
@@ -301,6 +308,13 @@ public class Spiel implements Serializable, Cloneable
 
     }
 
+    /**
+     * Moves a piece field by field to its destination.
+     * @param nextSpielFeld the field to move the piece to.
+     * @param spielstein the piece that will be moved.
+     * @param currentSpielFeld the current field the piece is on.
+     * @param diceRoll the number that has been rolled.
+     */
     private void moveSpielsteinStepByStep(int nextSpielFeld, Spielstein spielstein, int currentSpielFeld, int diceRoll) {
 
         while(spielstein.getFieldId() != nextSpielFeld){
@@ -309,13 +323,18 @@ public class Spiel implements Serializable, Cloneable
             spielfeld.getFeld(currentSpielFeld).setOccupier(null);
             spielfeld.getFeld(spielstein.getFieldId()).setOccupier(spielstein);
             currentSpielFeld = spielstein.getFieldId();
-
         }
 
         System.out.println("game.Spielstein ist auf game.Feld " + spielstein.getFieldId());
         spielstein.addWalkedFields(diceRoll);
     }
 
+    /**
+     * Moves a piece to another finish field.
+     * @param team the team that is moving.
+     * @param diceRoll the number that has been rolled.
+     * @param spielstein the piece that is moving.
+     */
     private void moveSpielsteinInGoalAround(Team team, int diceRoll, Spielstein spielstein) {
         System.out.println("game.Spielstein ist im Ziel");
         int currentField = spielstein.getFieldId();
@@ -327,7 +346,7 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
-     * Moves a piece from the normal fields to one of the teams goal fields.
+     * Moves a piece from the normal fields to one of the team goal fields.
      * @param team the team that is moving.
      * @param diceRoll the rolled number.
      * @param spielstein the piece that is being moved.
@@ -346,8 +365,6 @@ public class Spiel implements Serializable, Cloneable
         team.checkIfAllPiecesAreInFinish();
 
         System.out.println("NEXT: " + this.getNextToPlay(team).getColor());
-        //askForSave();
-
     }
 
     /**
@@ -406,17 +423,23 @@ public class Spiel implements Serializable, Cloneable
     }
 
     /**
+     * Gets the last number that has been rolled.
      * @return the last number rolled
      */
     public Integer getLastDiceRoll() {
         return lastDiceRoll;
     }
 
+    /**
+     * Sets the lastDiceRoll member to a provided number.
+     * @param lastDiceRoll the number to be set.
+     */
     public void setLastDiceRoll(Integer lastDiceRoll) {
         this.lastDiceRoll = lastDiceRoll;
     }
 
     /**
+     * Gets the team that is currently playing.
      * @return the currently playing team
      */
     public Team getCurrentlyPlaying() {
@@ -461,6 +484,11 @@ public class Spiel implements Serializable, Cloneable
         return spielfeld;
     }
 
+    /**
+     * Creates a clone of the Spiel object.
+     * @return the clone.
+     * @throws CloneNotSupportedException
+     */
     @Override
     public Object clone() throws CloneNotSupportedException {
         Spiel clone = (Spiel) super.clone();
@@ -489,7 +517,7 @@ public class Spiel implements Serializable, Cloneable
 
 
     /**
-     * Sets the games status to either running or not running.
+     * Sets the game status to either running or not running.
      * @param isGameRunning the new status of the game.
      */
     public void setIsGameRunning(boolean isGameRunning) {

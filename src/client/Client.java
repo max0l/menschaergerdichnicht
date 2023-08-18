@@ -39,10 +39,17 @@ public class Client implements Runnable{
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
     }
+
+    /**
+     * The main client loop. The client tries to connect to the
+     * provided address and port. If the connection was successful, this function runs until
+     * the game is finished or either the client or the server closes the connection.
+     */
     @Override
     public void run() {
         boolean gameIsFinished = false;
         boolean doBroadcast = false;
+
         Color teamColor = null;
         Socket socket = null;
         try {
@@ -97,15 +104,9 @@ public class Client implements Runnable{
 
                     if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
                         System.out.println("CLIENT:\t\tIt's your turn!");
-
-                        // Receive the selected field number from the server
-                        int selectedFieldNumber = inputStream.readInt();
-
-                        // Call the sendSelectionToServer method with the received field number
-                        sendSelectionToServer(spiel, teamColor, socket, outputStream, selectedFieldNumber);
-
+                        sendSelectionToServer(spiel, teamColor, outputStream);
                         askForSave();
-                    } else {
+                    }else{
                         System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
                         System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
                     }
@@ -129,6 +130,9 @@ public class Client implements Runnable{
                 } catch (ClassNotFoundException | IOException e) {
                     e.printStackTrace();
                     teamColor = null;
+                    socket.close();
+                    System.out.println("CLIENT:\t\tConnection to server lost!");
+                    System.exit(0);
                 }
 
             }
@@ -147,16 +151,22 @@ public class Client implements Runnable{
 
     }
 
-    private void sendSelectionToServer(Spiel spiel, Color teamColor, Socket socket, ObjectOutputStream out, int selectedFieldNumber) {
+    /**
+     * Sends the index of the piece that the client wants to move to the server.
+     * @param spiel the game object.
+     * @param teamColor the clients team color.
+     * @param out the output stream.
+     */
+    private void sendSelectionToServer(Spiel spiel, Color teamColor, ObjectOutputStream out) {
         Team team = spiel.getTeamByColor(teamColor);
-        if (team == null) {
+        if(team == null){
             System.out.println("CLIENT:\t\tTeam is null");
             return;
         }
 
         List<Spielstein> movableStones = spiel.selectPiece(team, spiel.getLastDiceRoll());
 
-        if (movableStones == null) {
+        if(movableStones == null){
             System.out.println("CLIENT:\t\tmovableStones is null");
             try {
                 out.writeInt(-1);
@@ -196,7 +206,7 @@ public class Client implements Runnable{
             }
         }
 
-        System.out.printf("YCLIENT:\t\tou entered: %d\n", userInput);
+        System.out.printf("CLIENT:\t\tou entered: %d\n", userInput);
         //Send selection to server
 
         try {
@@ -206,14 +216,12 @@ public class Client implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     /**
      * Saves the game to a persistent directory
      */
-
-
-
     public void saveGame()
     {
         String userHome = System.getProperty("user.home");
@@ -252,7 +260,9 @@ public class Client implements Runnable{
             i++;
             String newFileName = fileName + i;
             filePath = persistentDirPath + File.separator + newFileName;
+
         }
+
         try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath)))
         {
             outputStream.writeObject(spiel);
@@ -264,6 +274,9 @@ public class Client implements Runnable{
         }
     }
 
+    /**
+     * Asks if the game should be saved
+     */
     void askForSave()
     {
         Character input = null;

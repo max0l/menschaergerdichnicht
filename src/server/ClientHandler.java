@@ -15,59 +15,65 @@ public class ClientHandler {
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
     private volatile Team team;
-    public ClientHandler(Socket client, ServerSocket server) throws IOException {
+
+    /**
+     * The Constructor of the ClientHandler class.
+     * @param client the client's socket.
+     * @throws IOException
+     */
+    public ClientHandler(Socket client) throws IOException {
         System.out.println("Trying to creade a new client handler");
         this.client = client;
         this.outputStream = new ObjectOutputStream(client.getOutputStream());
         this.inputStream = new ObjectInputStream(client.getInputStream());
         System.out.println("Done");
-
     }
 
+    /**
+     * Gets the client of the ClientHandler.
+     * @return the client's socket.
+     */
     public Socket getClient() {
         return client;
     }
 
-    public ObjectOutputStream getOutputStream() {
-        return outputStream;
-    }
-
+    /**
+     * Gets the input stream of the ClientHandler.
+     * @return the inputStream member variable.
+     */
     public ObjectInputStream getInputStream() {
         return inputStream;
     }
 
 
-    //will recive a number from the client and return it
-    public int reciveNumber() throws IOException {
-        int number = inputStream.readInt();
-        return number;
-    }
-
+    /**
+     * Sends a clone of the game object to the client.
+     * @param spiel the game object that will be cloned and sent.
+     * @throws IOException
+     * @throws CloneNotSupportedException
+     */
     public void sendToClient(Spiel spiel) throws IOException, CloneNotSupportedException {
         System.out.println("SERVER:\tSending object to client");
-        //System.out.println("SERVER:\t\t" + spiel.getSpielfeld().toString());
-           outputStream.writeObject((Spiel) spiel.clone());
-           /*
-           outputStream.writeObject((Spielfeld) spiel.getSpielfeld().clone());
-           for(int i = 0; i<spiel.getTeams().size(); i++) {
-               outputStream.writeObject((Team) spiel.getTeams().get(i).clone());
-               for(int j = 0; j<spiel.getTeams().get(i).getSpielsteine().size(); j++) {
-                   outputStream.writeObject((Spielstein) spiel.getTeams().get(i).getSpielsteine().get(j).clone());
-               }
-           }
-
-            */
-           outputStream.flush();
+        outputStream.writeObject(spiel.clone());
+        outputStream.flush();
         System.out.println("SERVER:\tObject sent");
     }
 
+    /**
+     * Receives the index of the piece the client has selected.
+     * @return the selected pieces index.
+     * @throws IOException
+     */
     public int receivePiece() throws IOException {
         int spielsteinNumber = inputStream.readInt();
         System.out.println("SERVER:\tSpielstein recived");
         return spielsteinNumber;
-
     }
 
+    /**
+     * Sets the Team for the ClientHandler. The Team will be played by a bot if this fails.
+     * @param team the team that will be set.
+     */
     public void setTeam(Team team) {
         this.team = team;
         try{
@@ -80,16 +86,19 @@ public class ClientHandler {
 
     }
 
+    /**
+     * Gets the team of the ClientHandler
+     * @return the Team.
+     */
     public Team getTeam() {
         return team;
     }
 
-    public void checkIfClientWouldRecieveCorrectData(Spiel spiel, Team currentTeam) {
-        if(spiel.getCurrentlyPlaying() != currentTeam){
-            System.out.println("SERVER:\t\t________________________________________________Client would recieve wrong data________________________________________________");
-        }
-    }
-
+    /**
+     * Sends the selected number to the output stream.
+     * @param selection
+     * @throws IOException
+     */
     public void sendSelectionToClient(int selection) throws IOException {
         outputStream.writeInt(selection);
         outputStream.flush();

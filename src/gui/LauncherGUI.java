@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -104,6 +106,22 @@ public class LauncherGUI extends JFrame {
         JPanel portPanel = new JPanel();
         portPanel.add(new JLabel("Port:"));
         portField = new JTextField(6);
+        portField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    startButton.doClick(); // Programmatically trigger the button click
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+        });;
         portPanel.add(portField);
         add(portPanel);
 
@@ -305,15 +323,7 @@ public class LauncherGUI extends JFrame {
                 }
             }
         }
-
-        // Start singleplayer game with the selected player count
-        /*
-        if(playerCount < 1 || playerCount > 4) {
-            throw new IllegalArgumentException("Number of players must be between 1 and 4");
-        }*/
-
         return true;
-
     }
 
 
@@ -379,13 +389,4 @@ public class LauncherGUI extends JFrame {
             selectedFileLabel.setText("Error loading file!, Try again or start without");
         }
     }
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new LauncherGUI().setVisible(true);
-            }
-        });
-    }
-
 }

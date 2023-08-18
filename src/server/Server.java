@@ -1,4 +1,5 @@
 package server;
+
 import game.*;
 
 import java.awt.*;
@@ -17,6 +18,15 @@ public class Server implements Runnable{
     private boolean isSavedGame = false;
     private final Color[] colors = {Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW};
     private final transient List<ClientHandler> clients = new ArrayList<>();
+
+    /**
+     * The Constructor of the Server class. Initialized member variables.
+     * @param spiel the game object.
+     * @param numPlayers the number of players.
+     * @param numBots the number of bots.
+     * @param difficulty the difficulty of bots.
+     * @param port the port the game uses.
+     */
     public Server(Spiel spiel, int numPlayers, int numBots, int difficulty, int port) {
         if(spiel == null){
             this.numPlayers = numPlayers;
@@ -34,16 +44,12 @@ public class Server implements Runnable{
             this.difficulty = spiel.getDifficulty();
             isSavedGame = true;
         }
-
-
-
-//        if(!(numPlayers < 4 && numPlayers >= 1)){
-//            throw new IllegalArgumentException("Number of players must be between 1 and 4");
-//        }
-
-
     }
 
+    /**
+     * Starts up the server and waits for clients to connect.
+     * If all clients are connected, the game will be set up and started.
+     */
     @Override
     public void run()  {
         try {
@@ -54,7 +60,7 @@ public class Server implements Runnable{
             while(clients.size() < numPlayers){
                 System.out.println("SERVER:\t\tWaiting for clients...");
                 System.out.println("SERVER:\t\tClients connected: " + clients.size() + "/" + numPlayers);
-                clients.add(new ClientHandler(server.accept(), server));
+                clients.add(new ClientHandler(server.accept()));
                 System.out.println("SERVER:\t\tA client connected.");
             }
 
@@ -78,12 +84,8 @@ public class Server implements Runnable{
                 System.out.println(team.toString());
             }
 
-
             Thread.sleep(2000);
-
             startGame();
-
-
 
         } catch (Exception e) {
             System.out.println("SERVER:\t\tServer could not be started!");
@@ -91,12 +93,15 @@ public class Server implements Runnable{
         }
     }
 
+    /**
+     * Starts the Game on the Server.
+     * @throws InterruptedException if the thread is interrupted.
+     */
     private void startGame() throws InterruptedException {
         System.out.println("SERVER:\t\tTeams:");
         for(Team team : spiel.getTeams()) {
             System.out.println(team.getColor());
         }
-
 
         if(isSavedGame) {
             System.out.println("SERVER:\t\tGame is saved. Continuing...");
@@ -104,10 +109,7 @@ public class Server implements Runnable{
             Thread.sleep(2000);
             int i = spiel.getTeams().indexOf(spiel.getCurrentlyPlaying());
             if(i != -1){
-                for(int j = i; j < spiel.getTeams().size(); j++){
-                    Thread.sleep(2000);
-                    play(spiel.getTeams().get(j));
-                }
+                decideHowManyDiceRolls(spiel.getTeams().get(i));
             }
         }
 
@@ -115,25 +117,42 @@ public class Server implements Runnable{
             for(int i = 0; i < spiel.getTeams().size(); i++){
 
                 System.out.println("SERVER:\t\tTeam " + spiel.getTeams().get(i).getColor() + " ist am Zug! Nr.: " + i);
-                play(spiel.getTeams().get(i));
+                decideHowManyDiceRolls(spiel.getTeams().get(i));
                 Thread.sleep(2000);
                 if(!spiel.isGameIsRunning()){
                     break;
                 }
             }
         }
-
-
     }
 
+    /**
+     * Decides how many dice rolls a team gets. If all pieces are in start, the team gets 3 rolls.
+     * @param team the playing team.
+     */
+    private void decideHowManyDiceRolls(Team team) {
+        if(team.checkIfAllPiecesAreInStart()) {
+            for(int k = 0; k<3;k++) {
+                spiel.setLastDiceRoll(spiel.rollDice());
+                if(spiel.getLastDiceRoll() == 6) {
+                    play(team);
+                    break;
+                } else {
+                    play(team);
+                }
+
+            }
+        } else {
+            play(team);
+        }
+    }
+
+    /**
+     * Lets a team play their move.
+     * @param team the playing team.
+     */
     private void play(Team team) {
         int diceRoll;
-        spiel.setCurrentlyPlaying(team);
-        if (team.checkIfAllPiecesAreInStart())
-        {
-            spiel.tryToGetOutOfSpawn(team);
-            return;
-        }
         spiel.setCurrentlyPlaying(team);
         if (!team.getIsFinished())
         {
@@ -156,33 +175,26 @@ public class Server implements Runnable{
 
             if(team.getIsBot())
             {
-                List<Spielstein> movablePieces = new ArrayList<>();
+                List<Spielstein> movablePieces;
                 movablePieces = spiel.selectPiece(team, spiel.getLastDiceRoll());
-                selection = movablePieces.indexOf(botSelection(movablePieces));
+                if(movablePieces != null) {
+                    selection = movablePieces.indexOf(botSelection(movablePieces));
+                }
                 spiel.moveSpielstein(botSelection(movablePieces), spiel.getLastDiceRoll(), team);
             } else {
                 System.out.println("SERVER:\t\tTeam is a Player; Waiting for client to select stone");
-                //doBroadcastToAllClients(spiel);
-                int recivedSpielsteinNumber = clientsSelectStone(team.getClient(), team);
-                if(checkIfSelectionIsValid(recivedSpielsteinNumber, team)) {
-                    selection = recivedSpielsteinNumber;
-                    if (recivedSpielsteinNumber != -1) {
-                        System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(recivedSpielsteinNumber).getFieldId() + "; " +
-                                "Walked fields pf spielstein: " + team.getSpielsteine().get(recivedSpielsteinNumber).getWalkedFields());
-                        spiel.moveSpielstein(team.getSpielsteine().get(recivedSpielsteinNumber), spiel.getLastDiceRoll(), team);
+                int receivedSpielsteinNumber = clientsSelectStone(team.getClient(), team);
+                if(checkIfSelectionIsValid(receivedSpielsteinNumber, team)) {
+                    selection = receivedSpielsteinNumber;
+                    if (receivedSpielsteinNumber != -1) {
+                        System.out.println("SERVER:\t\tSpielstein steht auf: "+ team.getSpielsteine().get(receivedSpielsteinNumber).getFieldId() + "; " +
+                                "Walked fields pf spielstein: " + team.getSpielsteine().get(receivedSpielsteinNumber).getWalkedFields());
+                        spiel.moveSpielstein(team.getSpielsteine().get(receivedSpielsteinNumber), spiel.getLastDiceRoll(), team);
                     }
                 }
             }
 
             doBroadcastToAllClientsPieceSelection(selection);
-
-            /*
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-             */
 
             if(spiel.checkIfGameIsFinished())
             {
@@ -202,6 +214,11 @@ public class Server implements Runnable{
 
     }
 
+    /**
+     * Sends a piece selection message to all players. If a player does not
+     * respond, he will be replaced with a bot.
+     * @param selection
+     */
     private void doBroadcastToAllClientsPieceSelection(int selection) {
         for(ClientHandler client : clients) {
             try {
@@ -222,76 +239,76 @@ public class Server implements Runnable{
             }
         }
         System.out.println("SERVER:\t\tBroadcasted Selection to all clients\n");
-
-        //Now wait untill server recieves a confirmation (bool = true) from each client:
         getConfirmationFromAllClients();
     }
 
     /**
-     *
-     * @param receivedSpielsteinNumber
-     * @param team
-     * @return
+     * Checks whether the piece the client has selected for his turn is valid.
+     * @param receivedSpielsteinNumber the index of the piece that was selected.
+     * @param team the team the piece will be checked for.
+     * @return {@code true} if the selection was valid. Otherwise {@code false}.
      */
     private boolean checkIfSelectionIsValid(int receivedSpielsteinNumber, Team team) {
         List<Spielstein> movablePieces = spiel.selectPiece(team, spiel.getLastDiceRoll());
         if(movablePieces == null){
-            if(receivedSpielsteinNumber == -1){
-                return true;
-            } else {
-                return false;
-            }
+            return receivedSpielsteinNumber == -1;
         }
 
-        if(receivedSpielsteinNumber <= movablePieces.size()){
-            return true;
-        } else {
-            return false;
-        }
+        return receivedSpielsteinNumber <= movablePieces.size();
     }
-
-    /**
-     * Sends the game to all connected clients
-     *
-     * @param spiel   the game to be sent
-     */
     private void doBroadcastToAllClients(Spiel spiel) {
         for(ClientHandler client : this.clients) {
             try {
                 client.sendToClient(spiel);
             } catch (Exception e) {
                 System.out.println("Could not send object to client!");
-                e.printStackTrace();
-                client.getTeam().setIsBot(true);
-                clients.remove(client);
-                try{
-                    client.getClient().close();
-                    return;
-                } catch (Exception ex) {
-                    System.out.println("Could not close client socket!");
-                    ex.printStackTrace();
-                }
+                clientConfirmationErrorHandler(client, e);
             }
         }
         System.out.println("SERVER:\t\tBroadcasted to all clients\n");
-
-        //Now wait untill server recieves a confirmation (bool = true) from each client:
         getConfirmationFromAllClients();
     }
 
+    /**
+     * Checks if the Server can receive a confirmation from all connected clients.
+     */
     private void getConfirmationFromAllClients() {
+        System.out.println("SERVER:\t\tWaiting for confirmation from all clients");
         for(ClientHandler client : clients) {
             try {
-                boolean confirmation = (boolean) client.getInputStream().readObject();
+                boolean confirmation = client.getInputStream().readBoolean();
                 System.out.println("SERVER:\t\tRecived confirmation from client: " + confirmation);
             } catch (Exception e) {
-                System.out.println("SERVER:\t\tCould not recive confirmation from client!");
-                e.printStackTrace();
+                System.out.println("Could not get confirmation from client!");
+                clientConfirmationErrorHandler(client, e);
             }
         }
         System.out.println("SERVER:\t\tGot confirmation from all CLients\n");
     }
 
+    /**
+     * Handles the error that occurs when a client does not respond. The client will be replaced with a bot.
+     * @param client the client that did not respond.
+     * @param e the exception that was thrown.
+     */
+    private void clientConfirmationErrorHandler(ClientHandler client, Exception e) {
+        e.printStackTrace();
+        client.getTeam().setIsBot(true);
+        clients.remove(client);
+        try {
+            client.getClient().close();
+        } catch (Exception ex) {
+            System.out.println("Could not close client socket!");
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Lets the Server wait for a client to select the piece to move with.
+     * @param client the client that needs to move.
+     * @param currentTeam the clients team.
+     * @return the index of the selected piece.
+     */
     private int clientsSelectStone(ClientHandler client, Team currentTeam) {
         System.out.println("SERVER:\t\tWaiting for client to select stone");
         try {
@@ -299,15 +316,20 @@ public class Server implements Runnable{
         } catch (Exception e) {
             System.out.println("SERVER:\t\tCould not recive object from client!");
             currentTeam.setIsBot(true);
-            return 0;
+            return -1;
         }
     }
 
+    /**
+     * Lets the Bot select a piece to play with.
+     * @param spielsteine List of pieces that could be moved.
+     * @return the piece that got selected.
+     */
     private Spielstein botSelection(List<Spielstein> spielsteine) {
         if(spielsteine == null){
             System.out.println("SERVER:\t\tBot selection is null");
             return null;
-        } else if(spielsteine.size() == 1) {;
+        } else if(spielsteine.size() == 1) {
             return spielsteine.get(0);
         } else if(spielsteine.size() > 1) {
             return selectPieceOnDifficulty(spielsteine);
@@ -316,6 +338,11 @@ public class Server implements Runnable{
         }
     }
 
+    /**
+     * Selects a piece based on the Bot difficulty.
+     * @param spielsteine List of pieces that could be moved.
+     * @return the piece that got selected.
+     */
     private Spielstein selectPieceOnDifficulty(List<Spielstein> spielsteine) {
         Spielstein walkingLeast = null;
         switch(difficulty){
@@ -342,6 +369,4 @@ public class Server implements Runnable{
 
         }
     }
-
-
 }

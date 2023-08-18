@@ -8,8 +8,8 @@ public class Spielfeld implements Serializable, Cloneable
     private Feld[] spielfeld = new Feld[40];
 
     /**
-     * Der Klassenkonstruktor initialisiert die
-     * Felder der "spielfeld" Array.
+     * The class constructor without any arguments.
+     * Initializes the spielfeld array.
      */
     public Spielfeld() {
         for (int i = 0; i < 40; i++) {
@@ -17,6 +17,10 @@ public class Spielfeld implements Serializable, Cloneable
         }
     }
 
+    /**
+     * Another variation of the class constructor that lets you provide an already existing Array of fields.
+     * @param spielfeld the already existing Array of fields that will be set as the Array that will be used.
+     */
     public Spielfeld(Feld[] spielfeld) {
         this.spielfeld = spielfeld;
     }
@@ -30,6 +34,10 @@ public class Spielfeld implements Serializable, Cloneable
         return spielfeld[index];
     }
 
+    /**
+     * Provides a way to print out information if the play field with one simple function.
+     * @return A string that contains the play field information.
+     */
     @Override
     public String toString() {
         String output = "";
@@ -50,10 +58,19 @@ public class Spielfeld implements Serializable, Cloneable
         return output;
     }
 
+    /**
+     * Sets the field array "spielfeld" to the provided array.
+     * @param felder the array of fields that will be used.
+     */
     public void setFelder(Feld[] felder) {
         this.spielfeld = felder;
     }
 
+    /**
+     * Clones the Spielfeld object
+     * @return the cloned object.
+     * @throws CloneNotSupportedException
+     */
     @Override
     public Spielfeld clone() throws CloneNotSupportedException {
         Spielfeld clone = (Spielfeld) super.clone();
