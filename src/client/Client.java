@@ -64,7 +64,6 @@ public class Client implements Runnable{
             while (!gameIsFinished) {
                 try {
                     System.out.println("\nCLIENT:\t\tWaiting for server...");
-                    spiel = null;
                     spiel = (Spiel) inputStream.readObject();
                     System.out.println("CLIENT:\t\tSpiel recived");
                     //Sending confirmation:
@@ -171,10 +170,10 @@ public class Client implements Runnable{
             try {
                 out.writeInt(-1);
                 out.flush();
-
+                return;
             } catch (IOException e) {
                 e.printStackTrace();
-
+                return;
             }
         }
 
