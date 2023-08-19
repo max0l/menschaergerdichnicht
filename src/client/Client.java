@@ -1,20 +1,22 @@
 package client;
 
 import game.Spiel;
+import game.Spielfeld;
 import game.Spielstein;
 import game.Team;
-
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
-
 public class Client implements Runnable{
     private volatile Spiel spiel;
     private final String address;
     private final int port;
-
+    private JFrame frame;
+    private JTextArea textArea;
+    private FeldGUI feldGUI; // Declare a FeldGUI object
     /**
      * Constructor of the Client class.
      * Sets member variables to its arguments
@@ -24,6 +26,18 @@ public class Client implements Runnable{
     public Client(String address, int port) {
         this.address = address;
         this.port = port;
+        frame = new JFrame("Client GUI");
+        textArea = new JTextArea(20, 50);
+        textArea.setEditable(false);
+        frame.add(new JScrollPane(textArea));
+        feldGUI = new FeldGUI();
+        frame.add(feldGUI);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+        frame.pack();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
 
     /**
@@ -57,6 +71,11 @@ public class Client implements Runnable{
                     outputStream.writeBoolean(true);
                     outputStream.flush();
                     System.out.println("CLIENT:\t\tConfirmation sent");
+
+                    SwingUtilities.invokeLater(() -> updateGUIWithData(spiel));
+
+                    // Repaint the GUI
+                    SwingUtilities.invokeLater(() -> frame.repaint());
 
                     System.out.println(spiel.getSpielfeld().toString());
 
@@ -142,6 +161,7 @@ public class Client implements Runnable{
         Team team = spiel.getTeamByColor(teamColor);
         if(team == null){
             System.out.println("CLIENT:\t\tTeam is null");
+            return;
         }
 
         List<Spielstein> movableStones = spiel.selectPiece(team, spiel.getLastDiceRoll());
@@ -151,9 +171,10 @@ public class Client implements Runnable{
             try {
                 out.writeInt(-1);
                 out.flush();
-                return;
+
             } catch (IOException e) {
                 e.printStackTrace();
+
             }
         }
 
@@ -195,6 +216,7 @@ public class Client implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     /**
@@ -274,6 +296,16 @@ public class Client implements Runnable{
         {
             saveGame();
         }
+    }
+    private void updateGUIWithData(Spiel data) {
+        SwingUtilities.invokeLater(() -> {
+            Spielfeld spielfeld = data.getSpielfeld();
+            feldGUI.updateGUIWithSpielfeld(spielfeld);
+        });
+    }
+    public void receiveFieldNumber(int fieldNumber) {
+        System.out.println("Received field number: " + fieldNumber);
+        // You can perform any additional actions you want with the received field number
     }
 
 }

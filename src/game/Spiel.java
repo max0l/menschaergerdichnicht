@@ -557,4 +557,6 @@ public class Spiel implements Serializable, Cloneable
     public int getDifficulty() {
         return difficulty;
     }
+
+
 }
