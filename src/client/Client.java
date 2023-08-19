@@ -171,10 +171,10 @@ public class Client implements Runnable{
             try {
                 out.writeInt(-1);
                 out.flush();
-                return;
+
             } catch (IOException e) {
                 e.printStackTrace();
-                return;
+
             }
         }
 
