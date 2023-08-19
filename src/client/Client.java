@@ -3,7 +3,9 @@ package client;
 import game.Spiel;
 import game.Spielstein;
 import game.Team;
+import gui.client.ClientGUI;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
@@ -14,6 +16,7 @@ public class Client implements Runnable{
     private volatile Spiel spiel;
     private final String address;
     private final int port;
+    private ClientGUI clientGUI;
 
     /**
      * Constructor of the Client class.
@@ -24,6 +27,9 @@ public class Client implements Runnable{
     public Client(String address, int port) {
         this.address = address;
         this.port = port;
+
+        clientGUI = new ClientGUI();
+        clientGUI.setVisible(true);
     }
 
     /**
@@ -33,6 +39,7 @@ public class Client implements Runnable{
      */
     @Override
     public void run() {
+
         boolean gameIsFinished = false;
 
         Color teamColor = null;
@@ -58,9 +65,9 @@ public class Client implements Runnable{
                     outputStream.flush();
                     System.out.println("CLIENT:\t\tConfirmation sent");
 
+                    SwingUtilities.invokeLater(() -> clientGUI.updateGame(spiel));
+
                     System.out.println(spiel.getSpielfeld().toString());
-
-
                     if (spiel.getLastDiceRoll() == null) {
                         System.out.println("CLIENT:\t\tgetLastDiceRoll is null");
                     } else {
