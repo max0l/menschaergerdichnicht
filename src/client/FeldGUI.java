@@ -22,14 +22,11 @@ public class FeldGUI extends JPanel {
         int totalButtons = 13 * 13;
         private JButton[][] buttons;
         private Client client;
-        private Feld[] startFields = new Feld[4];
-        private Feld[] finishFields = new Feld[4];
-        private boolean[][] occupiedCells = new boolean[13][13];
-        private Color[] playerColors = {Color.red, Color.blue, Color.green, Color.yellow};
-        private int currentPlayer = 0;
-        public void setFinishFields(Feld[] finishFields) {
-            this.finishFields = finishFields;
-        }
+        private final Feld[] startFields = new Feld[4];
+        private final Feld[] finishFields = new Feld[4];
+        private final boolean[][] occupiedCells = new boolean[13][13];
+        private final Color[] playerColors = {Color.red, Color.blue, Color.green, Color.yellow};
+        private final int currentPlayer = 0;
         public FeldGUI() {
             setLayout(new GridLayout(13, 14)); // Set the layout to a 13x14 grid
             buttons = new JButton[13][13];
