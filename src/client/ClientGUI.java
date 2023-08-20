@@ -42,7 +42,9 @@ public class ClientGUI extends JFrame {
         homeButtons = new RoundButton[4][4];
         finnishButtons = new RoundButton[4][4];
         currentlyPlayingTextField = new JTextField();
+        currentlyPlayingTextField.setEditable(false);
         lastDicerollTextField = new JTextField();
+        lastDicerollTextField.setEditable(false);
 
 
         addComponentListener(new ComponentAdapter() {
@@ -261,7 +263,6 @@ public class ClientGUI extends JFrame {
      */
     public Piece selection(Game game) {
         this.game = game;
-        System.out.println("GUI:\t\tTrying to make a selection");
         if (game.getCurrentlyPlaying().getColor() == yourColor) {
             System.out.println("GUI:\t\tPlease select a piece");
             List<Piece> movablePieces = game.selectPiece(game.getCurrentlyPlaying(), game.getLastDiceRoll());
@@ -324,24 +325,19 @@ public class ClientGUI extends JFrame {
     private void setCurrentlyPlayingTextField(Team currentlyPlaying) {
         if (currentlyPlaying == null) {
             currentlyPlayingTextField.setText("None is currently playing");
-            System.out.println("Currently playing is null");
             return;
         }
-        if (currentlyPlaying.getColor() == Color.red) {
+        if (currentlyPlaying.getColor().equals(Color.red)) {
             currentlyPlayingTextField.setText("Currently playing: Red");
-            System.out.println("Currently playing is red");
         }
-        if (currentlyPlaying.getColor() == Color.blue) {
+        if (currentlyPlaying.getColor().equals(Color.blue)) {
             currentlyPlayingTextField.setText("Currently playing: Blue");
-            System.out.println("Currently playing is blue");
         }
-        if (currentlyPlaying.getColor() == Color.green) {
+        if (currentlyPlaying.getColor().equals(Color.green)) {
             currentlyPlayingTextField.setText("Currently playing: Green");
-            System.out.println("Currently playing is green");
         }
-        if (currentlyPlaying.getColor() == Color.yellow) {
+        if (currentlyPlaying.getColor().equals(Color.yellow)) {
             currentlyPlayingTextField.setText("Currently playing: Yellow");
-            System.out.println("Currently playing is yellow");
         }
     }
 

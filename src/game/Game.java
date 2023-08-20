@@ -116,11 +116,9 @@ public class Game implements Serializable, Cloneable {
         }
         //This else if will check if a piece on the field can kick another one and removed all pieces that can't kick
         else if (checkIfPieceCanKickOtherPiece(team, diceRoll, movableSpielsteine)) {
-            System.out.println("Es kann eine andere Spielfigur geschlagen werden");
-            System.out.println("movableSpielsteine: " + movableSpielsteine.size());
+            System.out.println("You can kick another Piece");
         }
-        if (movableSpielsteine.isEmpty()) {
-            System.out.println("Keine Spielfiguren können bewegt werden");
+        if (movableSpielsteine.isEmpty()) {;
             return null;
         }
         return movableSpielsteine;
@@ -204,14 +202,13 @@ public class Game implements Serializable, Cloneable {
      * @param team the team that wants to move a piece out of their spawn.
      */
     public void movePieceOutOfSpawn(Piece piece, Team team) {
-        System.out.println("game.Spielstein aus Spawn bewegen");
+        System.out.println("Movin piece out of spawn");
 
         piece.setState(PieceState.STATE_PLAYING);
 
         Field spawn = playingField.getFeld(team.getStartField());
 
         if (spawn.getIsOccupied()) {
-            System.out.println("Spawn ist besetzt von " + spawn.getOccupier().getColor());
             if (spawn.getOccupier().getColor() == team.getColor()) {
                 moveSpielstein(spawn.getOccupier(), 6, team);
             } else {
@@ -219,7 +216,6 @@ public class Game implements Serializable, Cloneable {
                 team.pieceFromHomeToField(piece);
             }
         } else {
-            System.out.println("Spawn ist nicht besetzt");
             team.pieceFromHomeToField(piece);
         }
 
@@ -234,7 +230,6 @@ public class Game implements Serializable, Cloneable {
      * @param occupier the piece that will be kicked.
      */
     private void kickSpielstein(Piece occupier) {
-        System.out.println("game.Spielstein von " + occupier.getColor() + " wird gekickt");
         occupier.getTeam().pieceFromFieldToHome(occupier);
     }
 
@@ -245,7 +240,7 @@ public class Game implements Serializable, Cloneable {
      */
     public int rollDice() {
         int rand = random.nextInt(6) + 1;
-        System.out.println("Würfel zeigt " + rand);
+        System.out.println("You rolled:  " + rand);
         lastDiceRoll = rand;
         return rand;
     }
@@ -275,19 +270,16 @@ public class Game implements Serializable, Cloneable {
     public void moveSpielstein(Piece piece, int diceRoll, Team team) {
 
         if (piece == null) {
-            System.out.println("Kein Spielstein ausgewählt");
+            System.out.println("No Piece Slectect");
             return;
         }
 
         if (piece.getState() == PieceState.STATE_HOME && diceRoll == 6) {
-            System.out.println("Ausgewählter game.Spielstein ist im Home");
             movePieceOutOfSpawn(piece, team);
             return;
         }
 
 
-        System.out.println("Bewege game.Spielstein von " + piece.getFieldId());
-        System.out.println("Bewege game.Spielstein um " + diceRoll + " Felder");
         int nextSpielFeld = (piece.getFieldId() + diceRoll) % 40;
         int currentSpielFeld = piece.getFieldId();
 
@@ -330,7 +322,6 @@ public class Game implements Serializable, Cloneable {
             currentSpielFeld = piece.getFieldId();
         }
 
-        System.out.println("game.Spielstein ist auf game.Feld " + piece.getFieldId());
         piece.addWalkedFields(diceRoll);
     }
 
@@ -342,7 +333,7 @@ public class Game implements Serializable, Cloneable {
      * @param piece    the piece that is moving.
      */
     private void moveSpielsteinInGoalAround(Team team, int diceRoll, Piece piece) {
-        System.out.println("game.Spielstein ist im Ziel");
+        System.out.println("Piece is in Goal");
         int currentField = piece.getFieldId();
         int goalField = currentField + diceRoll;
 

@@ -22,11 +22,9 @@ public class ClientHandler {
      * @throws IOException
      */
     public ClientHandler(Socket client) throws IOException {
-        System.out.println("Trying to creade a new client handler");
         this.client = client;
         this.outputStream = new ObjectOutputStream(client.getOutputStream());
         this.inputStream = new ObjectInputStream(client.getInputStream());
-        System.out.println("Done");
     }
 
     /**
@@ -70,7 +68,7 @@ public class ClientHandler {
      */
     public int receivePiece() throws IOException {
         int spielsteinNumber = inputStream.readInt();
-        System.out.println("SERVER:\tSpielstein recived");
+        System.out.println("SERVER:\tPiece recived");
         return spielsteinNumber;
     }
 

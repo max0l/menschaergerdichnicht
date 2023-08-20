@@ -82,11 +82,6 @@ public class Server implements Runnable {
             System.out.println("SERVER:\t\tNumber of players: " + numPlayers);
             System.out.println("SERVER:\t\tNumber of Teams: " + game.getTeams().size());
 
-            System.out.println(game.getSpielfeld().toString());
-            for (Team team : game.getTeams()) {
-                System.out.println(team.toString());
-            }
-
             startGame();
 
         } catch (Exception e) {
@@ -99,11 +94,6 @@ public class Server implements Runnable {
      * Starts the Game on the Server.
      */
     private void startGame() {
-        System.out.println("SERVER:\t\tTeams:");
-        for (Team team : game.getTeams()) {
-            System.out.println(team.getColor());
-        }
-
         if (isSavedGame) {
             System.out.println("SERVER:\t\tGame is saved. Continuing...");
             System.out.println("SERVER:\t\tCurrently playing: " + game.getCurrentlyPlaying().getColor());
@@ -156,13 +146,13 @@ public class Server implements Runnable {
         int diceRoll;
         game.setCurrentlyPlaying(team);
         if (!team.getIsFinished()) {
-            System.out.println("SERVER:\tTeam " + team.getColor() + " is playing");
+            System.out.println("SERVER:\t\tTeam " + team.getColor() + " is playing");
             if (game.getLastDiceRoll() == null) {
                 diceRoll = game.rollDice();
                 game.setLastDiceRoll(diceRoll);
-                System.out.println("SERVER:\tDice rolled: " + game.getLastDiceRoll());
+                System.out.println("SERVER:\t\tDice rolled: " + game.getLastDiceRoll());
             } else {
-                System.out.println("SERVER:\tLast dice roll was null, now: " + game.getLastDiceRoll());
+                System.out.println("SERVER:\t\tDice Roll is now: " + game.getLastDiceRoll());
                 diceRoll = game.getLastDiceRoll();
             }
             game.setCurrentlyPlaying(team);
@@ -187,8 +177,6 @@ public class Server implements Runnable {
                 if (checkIfSelectionIsValid(receivedSpielsteinNumber, team)) {
                     selection = receivedSpielsteinNumber;
                     if (receivedSpielsteinNumber != -1) {
-                        System.out.println("SERVER:\t\tSpielstein steht auf: " + team.getSpielsteine().get(receivedSpielsteinNumber).getFieldId() + "; " +
-                                "Walked fields pf spielstein: " + team.getSpielsteine().get(receivedSpielsteinNumber).getWalkedFields());
                         game.moveSpielstein(team.getSpielsteine().get(receivedSpielsteinNumber), game.getLastDiceRoll(), team);
                     }
                 }
@@ -224,7 +212,7 @@ public class Server implements Runnable {
             try {
                 client.sendSelectionToClient(selection);
             } catch (Exception e) {
-                System.out.println("Could not send object to client!");
+                System.out.println("SERVER:\t\tCould not send object to client!");
                 e.printStackTrace();
 
                 client.getTeam().setIsBot(true);
@@ -233,7 +221,7 @@ public class Server implements Runnable {
                     client.getClient().close();
                     return;
                 } catch (Exception ex) {
-                    System.out.println("Could not close client socket!");
+                    System.out.println("SERVER:\t\tCould not close client socket!");
                     ex.printStackTrace();
                 }
             }
@@ -268,7 +256,7 @@ public class Server implements Runnable {
                 client.sendToClient(game);
 
             } catch (Exception e) {
-                System.out.println("Could not send object to client!");
+                System.out.println("SERVER:\t\tCould not send object to client!");
                 clientConfirmationErrorHandler(client, e);
             }
         }
@@ -286,7 +274,7 @@ public class Server implements Runnable {
                 boolean confirmation = client.getInputStream().readBoolean();
                 System.out.println("SERVER:\t\tRecived confirmation from client: " + confirmation);
             } catch (Exception e) {
-                System.out.println("Could not get confirmation from client!");
+                System.out.println("SERVER:\t\tCould not get confirmation from client!");
                 clientConfirmationErrorHandler(client, e);
             }
         }
@@ -306,7 +294,7 @@ public class Server implements Runnable {
         try {
             client.getClient().close();
         } catch (Exception ex) {
-            System.out.println("Could not close client socket!");
+            System.out.println("SERVER:\t\tCould not close client socket!");
             ex.printStackTrace();
         }
     }
@@ -337,7 +325,6 @@ public class Server implements Runnable {
      */
     private Piece botSelection(List<Piece> spielsteine) {
         if (spielsteine == null) {
-            System.out.println("SERVER:\t\tBot selection is null");
             return null;
         } else if (spielsteine.size() == 1) {
             return spielsteine.get(0);

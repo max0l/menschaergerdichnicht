@@ -125,7 +125,7 @@ public class Team implements Serializable, Cloneable {
      * @param piece the piece to be moved.
      */
     public void pieceFromHomeToField(Piece piece) {
-        System.out.println("Bewege game.Spielstein von Home aufs game.Feld");
+        System.out.println("Moving piece from home to field");
         piece.setFieldId(startField);
         piece.setState(PieceState.STATE_PLAYING);
         playingField.getFeld(startField).setOccupier(piece);
@@ -221,7 +221,6 @@ public class Team implements Serializable, Cloneable {
      * @return {@code true} if the field is occupied. Otherwise {@code false}.
      */
     public boolean getIsOccupiedInFinish(int index) {
-        System.out.println("Check if Occupied in finish: " + index);
         return finishFields[index].getIsOccupied();
     }
 
@@ -232,13 +231,11 @@ public class Team implements Serializable, Cloneable {
      * @param goalField the index of the goal field where the piece will be moved.
      */
     public void moveSpielsteinToFinish(Piece piece, int goalField) {
-        System.out.println("Bewege game.Spielstein ins Ziel");
-        System.out.println("GoalField: " + goalField);
+        System.out.println("Moving piece to goal");
 
         piece.setFieldId(goalField);
         piece.setState(PieceState.STATE_FINISH);
         printFinishFields();
-        System.out.println("game.Spielstein: " + piece.getFieldId() + " Walked: " + piece.getWalkedFields());
         finishFields[goalField].setOccupier(piece);
         printFinishFields();
     }

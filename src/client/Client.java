@@ -53,7 +53,7 @@ public class Client implements Runnable {
             //recive team from server over socket
 
             teamColor = (Color) inputStream.readObject();
-            System.out.println("CLIENT:\t\tTeam color: " + teamColor);
+            System.out.println("CLIENT:\t\tYour Team color: " + teamColor);
             clientGUI.setYourColor(teamColor);
 
             while (!gameIsFinished) {
@@ -61,7 +61,7 @@ public class Client implements Runnable {
                     System.out.println("\nCLIENT:\t\tWaiting for server...");
                     game = null;
                     game = (Game) inputStream.readObject();
-                    System.out.println("CLIENT:\t\tSpiel recived");
+                    System.out.println("CLIENT:\t\tGame recived");
                     //Sending confirmation:
                     outputStream.writeBoolean(true);
                     outputStream.flush();
@@ -69,21 +69,6 @@ public class Client implements Runnable {
 
                     SwingUtilities.invokeLater(() -> clientGUI.updateGame(game));
 
-                    System.out.println(game.getSpielfeld().toString());
-                    if (game.getLastDiceRoll() == null) {
-                        System.out.println("CLIENT:\t\tgetLastDiceRoll is null");
-                    } else {
-                        System.out.println("CLIENT:\t\tgetLastDiceRoll is not null: " + game.getLastDiceRoll());
-                    }
-
-                    if (game == null || game.getCurrentlyPlaying() == null) {
-                        if (game.getCurrentlyPlaying() == null) {
-                            System.out.println("CLIENT:\t\tcurrently playing is null");
-                        }
-                        if (game.getLastDiceRoll() == null) {
-                            System.out.println("CLIENT:\t\tlast dice roll is null");
-                        }
-                    }
 
                     if (game.checkIfGameIsFinished()) {
                         gameIsFinished = true;
@@ -155,7 +140,6 @@ public class Client implements Runnable {
     private void movePieceStepByStep(int selection) {
         System.out.println("CLIENT:\t\tMoving piece step by step");
         //print current spielfeld
-        System.out.println(game.getSpielfeld().toString());
         PlayingField playingField = game.getSpielfeld();
         Team currentTeam = game.getCurrentlyPlaying();
         int diceRoll = game.getLastDiceRoll();
@@ -205,14 +189,11 @@ public class Client implements Runnable {
      */
     private void sendSelectionToServer(Game game, Color teamColor, ObjectOutputStream out) {
         Team team = game.getTeamByColor(teamColor);
-        if (team == null) {
-            System.out.println("CLIENT:\t\tTeam is null");
-        }
 
         List<Piece> movableStones = game.selectPiece(team, game.getLastDiceRoll());
 
         if (movableStones == null) {
-            System.out.println("CLIENT:\t\tmovableStones is null");
+            System.out.println("CLIENT:\t\tYou can't move any pieces");
             try {
                 out.writeInt(-1);
                 out.flush();
@@ -226,7 +207,7 @@ public class Client implements Runnable {
         for (int i = 0; i < movableStones.size(); i++) {
             System.out.println("CLIENT:\t\t" + i + ": " + movableStones.get(i).getFieldId() + " Gelaufene Felder: " + movableStones.get(i).getWalkedFields());
         }
-        System.out.println("CLIENT:\t\tSelect a stone to move: ");
+        System.out.println("CLIENT:\t\tSelect a Piece to move: ");
         Scanner scanner = new Scanner(System.in);
 
         int minRange = 0;
@@ -250,7 +231,7 @@ public class Client implements Runnable {
             }
         }
 
-        System.out.printf("CLIENT:\t\tou entered: %d\n", userInput);
+        System.out.printf("CLIENT:\t\tYou entered: %d\n", userInput);
         //Send selection to server
 
         try {
