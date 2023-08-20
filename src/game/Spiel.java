@@ -195,14 +195,13 @@ public class Spiel implements Serializable, Cloneable
     /**
      * Tries to move a piece out of the teams spawn. If the spawn is occupied by another piece of the own team
      * this function will move the blocking piece away first. Blocking pieces of another team will be kicked.
+     *
      * @param team the team that wants to move a piece out of their spawn.
-     * @return the piece that got moved out of spawn
      */
-    private Spielstein movePieceOutOfSpawn(Team team) {
+    public void movePieceOutOfSpawn(Spielstein spielstein, Team team) {
         System.out.println("game.Spielstein aus Spawn bewegen");
 
-        Spielstein currentSpielstein = team.getSpielsteinFromHome();
-        currentSpielstein.setState(SpielsteinState.STATE_PLAYING);
+        spielstein.setState(SpielsteinState.STATE_PLAYING);
 
         Feld spawn = spielfeld.getFeld(team.getStartField());
 
@@ -212,17 +211,16 @@ public class Spiel implements Serializable, Cloneable
                 moveSpielstein(spawn.getOccupier(), 6, team);
             } else {
                 kickSpielstein(spawn.getOccupier());
-                team.pieceFromHomeToField(currentSpielstein);
+                team.pieceFromHomeToField(spielstein);
             }
         }else {
             System.out.println("Spawn ist nicht besetzt");
-            team.pieceFromHomeToField(currentSpielstein);
+            team.pieceFromHomeToField(spielstein);
         }
 
-        currentSpielstein.setFieldId(team.getStartField());
-        spielfeld.getFeld(team.getStartField()).setOccupier(currentSpielstein);
+        spielstein.setFieldId(team.getStartField());
+        spielfeld.getFeld(team.getStartField()).setOccupier(spielstein);
 
-        return currentSpielstein;
     }
 
     /**
@@ -277,7 +275,7 @@ public class Spiel implements Serializable, Cloneable
 
         if(spielstein.getState() == SpielsteinState.STATE_HOME && diceRoll == 6){
             System.out.println("Ausgewählter game.Spielstein ist im Home");
-            movePieceOutOfSpawn(team);
+            movePieceOutOfSpawn(spielstein, team);
             return;
         }
 
@@ -294,15 +292,15 @@ public class Spiel implements Serializable, Cloneable
             kickSpielstein(spielfeld.getFeld(nextSpielFeld).getOccupier());
         }
 
+        if(spielstein.getState() == SpielsteinState.STATE_FINISH) {
+            moveSpielsteinInGoalAround(team, diceRoll, spielstein);
+            return;
+        }
+
         if(spielstein.getWalkedFields()+diceRoll >= 40 && spielstein.getWalkedFields()+diceRoll <= 44) {
             moveSpielsteinToGoal(team, diceRoll, spielstein);
             return;
         }
-
-        if(spielstein.getState() == SpielsteinState.STATE_HOME){
-            moveSpielsteinInGoalAround(team, diceRoll, spielstein);
-        }
-
 
         moveSpielsteinStepByStep(nextSpielFeld, spielstein, currentSpielFeld, diceRoll);
 
@@ -490,16 +488,16 @@ public class Spiel implements Serializable, Cloneable
      * @throws CloneNotSupportedException
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Spiel clone() throws CloneNotSupportedException {
         Spiel clone = (Spiel) super.clone();
         clone.teams = new ArrayList<>();
         for(Team team : teams){
-            clone.teams.add((Team) team.clone());
+            clone.teams.add( team.clone());
         }
-        clone.spielfeld = (Spielfeld) spielfeld.clone();
+        clone.spielfeld = spielfeld.clone();
         clone.numPlayers = numPlayers;
         clone.gameIsRunning = gameIsRunning;
-        clone.currentlyPlaying = (Team) currentlyPlaying.clone();
+        clone.currentlyPlaying = currentlyPlaying.clone();
         clone.lastDiceRoll = lastDiceRoll;
         clone.firstRun = firstRun;
         clone.numBots = numBots;

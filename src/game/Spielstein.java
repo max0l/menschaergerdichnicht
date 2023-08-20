@@ -100,7 +100,7 @@ public class Spielstein implements Serializable, Cloneable {
      * @throws CloneNotSupportedException
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Spielstein clone() throws CloneNotSupportedException {
         Spielstein spielstein = (Spielstein) super.clone();
         spielstein.color = color;
         spielstein.state = state;

@@ -167,7 +167,11 @@ public class Server implements Runnable{
             }
             spiel.setCurrentlyPlaying(team);
             spiel.setLastDiceRoll(diceRoll);
-            doBroadcastToAllClients(spiel);
+            try {
+                doBroadcastToAllClients(spiel.clone());
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
             int selection = -1;
 
             if(team.getIsBot())
@@ -258,6 +262,7 @@ public class Server implements Runnable{
         for(ClientHandler client : this.clients) {
             try {
                 client.sendToClient(spiel);
+
             } catch (Exception e) {
                 System.out.println("Could not send object to client!");
                 clientConfirmationErrorHandler(client, e);

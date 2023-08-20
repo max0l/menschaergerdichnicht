@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.ServerSocket;
+import java.util.Objects;
 
 public class LauncherGUI extends JFrame {
     private final JRadioButton singleplayerButton;
@@ -248,11 +249,11 @@ public class LauncherGUI extends JFrame {
             JOptionPane.showMessageDialog(null, "Please select a mode!");
             return false;
         } else {
-            int port = -1;
+            int port;
 
             String sPort = portField.getText();
             port = checkIfPortIsValid(sPort);
-            if(portField.getText().equals("") || port == -1) {
+            if(port == -1) {
                 JOptionPane.showMessageDialog(null, "Please enter a Valid port!");
                 return false;
             }
@@ -359,13 +360,21 @@ public class LauncherGUI extends JFrame {
      * @return the port if it's in a valid port range, otherwise {@code -1}
      */
     private int checkIfPortIsValid(String portStr) {
+        int port;
         try {
-            int port = Integer.parseInt(portStr);
-            if (port >= 0 && port <= 65535) {
-                return port;
+            if(!Objects.equals(portStr, "")){
+                port = Integer.parseInt(portStr);
+                if (port >= 0 && port <= 65535) {
+                    return port;
+                } else {
+                    return -1;
+                }
+
             } else {
-                return -1;
+                port = 47399;
+                return port;
             }
+
         } catch (NumberFormatException e) {
             return -1;
         }

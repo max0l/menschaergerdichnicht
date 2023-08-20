@@ -1,9 +1,6 @@
 package client;
 
-import game.Spiel;
-import game.Spielstein;
-import game.Team;
-import client.ClientGUI;
+import game.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,6 +8,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Client implements Runnable{
     private volatile Spiel spiel;
@@ -28,7 +26,7 @@ public class Client implements Runnable{
         this.address = address;
         this.port = port;
 
-        clientGUI = new ClientGUI();
+        clientGUI = new ClientGUI(spiel);
         clientGUI.setVisible(true);
     }
 
@@ -53,6 +51,7 @@ public class Client implements Runnable{
 
             teamColor = (Color) inputStream.readObject();
             System.out.println("CLIENT:\t\tTeam color: " + teamColor);
+            clientGUI.setYourColor(teamColor);
 
             while (!gameIsFinished) {
                 try {
@@ -91,6 +90,8 @@ public class Client implements Runnable{
 
                     if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
                         System.out.println("CLIENT:\t\tIt's your turn!");
+                        //AtomicReference<Spielstein> selction = new AtomicReference<>(clientGUI.selection(spiel));
+                        //SwingUtilities.invokeLater(() -> selction.set(clientGUI.selection(spiel)));
                         sendSelectionToServer(spiel, teamColor, outputStream);
                         //askForSave();
                     }else{
@@ -105,6 +106,9 @@ public class Client implements Runnable{
                     int seletion = inputStream.readInt();
                     System.out.println("CLIENT:\t\tServer confirmed selection: " + seletion);
 
+                    if(seletion != -1 && spiel.getLastDiceRoll() != null ){
+                        movePieceStepByStep(seletion);
+                    }
 
                     //movePiece(selection) -> Selction is int, so you have to convert it to a Spielstein from spiel.selectPiece()
                     //which well return a list of Spielstein, so you have to get the right one from the list
@@ -136,6 +140,50 @@ public class Client implements Runnable{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+    }
+
+    private void movePieceStepByStep(int selection) {
+        System.out.println("CLIENT:\t\tMoving piece step by step");
+        //print current spielfeld
+        System.out.println(spiel.getSpielfeld().toString());
+        Spielfeld spielfeld = spiel.getSpielfeld();
+        Team currentTeam = spiel.getCurrentlyPlaying();
+        int diceRoll = spiel.getLastDiceRoll();
+        Spielstein selectedPiece = spiel.selectPiece(currentTeam, diceRoll).get(selection);
+        if(selectedPiece.getFieldId() == -1) {
+            spiel.movePieceOutOfSpawn(selectedPiece, currentTeam);
+            return;
+        }
+        int currentField = selectedPiece.getFieldId();
+        int moveToFeldID = (selectedPiece.getFieldId() + diceRoll) % 40;
+
+        while(selectedPiece.getFieldId() != moveToFeldID){
+            int nextStepFeldId = (selectedPiece.getFieldId() + 1) % 40;
+            if(spielfeld.getFeld(nextStepFeldId).getOccupier() != null && nextStepFeldId != moveToFeldID) {
+                selectedPiece.setFieldId((selectedPiece.getFieldId() + 2) % 40);
+            } else {
+                selectedPiece.setFieldId((selectedPiece.getFieldId() + 1) % 40);
+            }
+            spielfeld.getFeld(currentField).setOccupier(null);
+            spielfeld.getFeld(selectedPiece.getFieldId()).setOccupier(selectedPiece);
+            currentField = selectedPiece.getFieldId();
+            SwingUtilities.invokeLater(() -> {
+                // Perform GUI updates and wait for them to complete
+                SwingUtilities.invokeLater(() -> {
+                    clientGUI.updateGame(spiel); // Replace spiel with your data
+                    synchronized (clientGUI) {
+                        clientGUI.notify(); // Notify waiting thread
+                    }
+                });
+            });
+            try{
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
 
     }
 

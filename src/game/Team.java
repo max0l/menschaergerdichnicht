@@ -274,7 +274,7 @@ public class Team implements Serializable, Cloneable {
      * @throws CloneNotSupportedException
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
+    public Team clone() throws CloneNotSupportedException {
         Team team = (Team) super.clone();
         team.startField = startField;
         team.finishField = finishField;
@@ -284,7 +284,7 @@ public class Team implements Serializable, Cloneable {
         team.isFinished = isFinished;
         for(int i = 0; i<4;i++) {
             if(homeFields[i] != null) {
-                team.homeFields[i] = (Spielstein) homeFields[i].clone();
+                team.homeFields[i] = homeFields[i].clone();
             }
             if(finishFields[i] != null) {
                 team.finishFields[i] = (Feld) finishFields[i].clone();
@@ -313,5 +313,13 @@ public class Team implements Serializable, Cloneable {
                 ", isFinished=" + isFinished +
                 ", spielsteine=" + spielsteine +
                 '}';
+    }
+
+    public Spielstein[] getHomeFields() {
+        return homeFields;
+    }
+
+    public Feld[] getFinishFields() {
+        return finishFields;
     }
 }
