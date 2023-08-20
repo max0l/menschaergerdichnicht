@@ -309,7 +309,7 @@ public class Client implements Runnable {
      * Asks if the game should be saved
      */
     void askForSave() {
-        Character input;
+        char input;
         System.out.println("Do you want to save a game? (y/n)");
 
         try {

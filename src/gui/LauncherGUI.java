@@ -354,6 +354,7 @@ public class LauncherGUI extends JFrame {
      * @return {@code true} if the server address is a valid address, otherwise {@code false}
      */
     private boolean isServerAddressValid(String serverAddressFromField) {
+        //Source: https://stackoverflow.com/Questions/5667371/validate-ipv4-address-in-java
         String ipv4Pattern = "^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$";
         return serverAddressFromField.matches(ipv4Pattern) || serverAddressFromField.equals("localhost");
     }
