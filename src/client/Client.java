@@ -1,6 +1,9 @@
 package client;
 
-import game.*;
+import game.Game;
+import game.Piece;
+import game.PlayingField;
+import game.Team;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,25 +11,25 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicReference;
 
-public class Client implements Runnable{
-    private volatile Spiel spiel;
+public class Client implements Runnable {
     private final String address;
     private final int port;
-    private ClientGUI clientGUI;
+    private volatile Game game;
+    private final ClientGUI clientGUI;
 
     /**
      * Constructor of the Client class.
      * Sets member variables to its arguments
+     *
      * @param address the address the client will connect to
-     * @param port the port the client will connect on
+     * @param port    the port the client will connect on
      */
     public Client(String address, int port) {
         this.address = address;
         this.port = port;
 
-        clientGUI = new ClientGUI(spiel);
+        clientGUI = new ClientGUI(game);
         clientGUI.setVisible(true);
     }
 
@@ -40,8 +43,8 @@ public class Client implements Runnable{
 
         boolean gameIsFinished = false;
 
-        Color teamColor = null;
-        Socket socket = null;
+        Color teamColor;
+        Socket socket;
         try {
             socket = new Socket(address, port);
             System.out.println("CLIENT:\t\tConnected!");
@@ -56,47 +59,47 @@ public class Client implements Runnable{
             while (!gameIsFinished) {
                 try {
                     System.out.println("\nCLIENT:\t\tWaiting for server...");
-                    spiel = null;
-                    spiel = (Spiel) inputStream.readObject();
+                    game = null;
+                    game = (Game) inputStream.readObject();
                     System.out.println("CLIENT:\t\tSpiel recived");
                     //Sending confirmation:
                     outputStream.writeBoolean(true);
                     outputStream.flush();
                     System.out.println("CLIENT:\t\tConfirmation sent");
 
-                    SwingUtilities.invokeLater(() -> clientGUI.updateGame(spiel));
+                    SwingUtilities.invokeLater(() -> clientGUI.updateGame(game));
 
-                    System.out.println(spiel.getSpielfeld().toString());
-                    if (spiel.getLastDiceRoll() == null) {
+                    System.out.println(game.getSpielfeld().toString());
+                    if (game.getLastDiceRoll() == null) {
                         System.out.println("CLIENT:\t\tgetLastDiceRoll is null");
                     } else {
-                        System.out.println("CLIENT:\t\tgetLastDiceRoll is not null: " + spiel.getLastDiceRoll());
+                        System.out.println("CLIENT:\t\tgetLastDiceRoll is not null: " + game.getLastDiceRoll());
                     }
 
-                    if (spiel == null || spiel.getCurrentlyPlaying() == null) {
-                        if (spiel.getCurrentlyPlaying() == null) {
+                    if (game == null || game.getCurrentlyPlaying() == null) {
+                        if (game.getCurrentlyPlaying() == null) {
                             System.out.println("CLIENT:\t\tcurrently playing is null");
                         }
-                        if (spiel.getLastDiceRoll() == null) {
+                        if (game.getLastDiceRoll() == null) {
                             System.out.println("CLIENT:\t\tlast dice roll is null");
                         }
                     }
 
-                    if (spiel.checkIfGameIsFinished()) {
+                    if (game.checkIfGameIsFinished()) {
                         gameIsFinished = true;
                         System.out.println("CLIENT:\t\tGame is finished");
                         socket.close();
                     }
 
-                    if (spiel.getCurrentlyPlaying().getColor() == teamColor && spiel.getLastDiceRoll() != null) {
+                    if (game.getCurrentlyPlaying().getColor() == teamColor && game.getLastDiceRoll() != null) {
                         System.out.println("CLIENT:\t\tIt's your turn!");
                         //AtomicReference<Spielstein> selction = new AtomicReference<>(clientGUI.selection(spiel));
                         //SwingUtilities.invokeLater(() -> selction.set(clientGUI.selection(spiel)));
-                        sendSelectionToServer(spiel, teamColor, outputStream);
+                        sendSelectionToServer(game, teamColor, outputStream);
                         //askForSave();
-                    }else{
-                        System.out.println("CLIENT:\t\t last dice roll: " + spiel.getLastDiceRoll());
-                        System.out.println("CLIENT:\t\t currently playing: " + spiel.getCurrentlyPlaying().getColor());
+                    } else {
+                        System.out.println("CLIENT:\t\t last dice roll: " + game.getLastDiceRoll());
+                        System.out.println("CLIENT:\t\t currently playing: " + game.getCurrentlyPlaying().getColor());
                     }
 
                     //TODO: If all clients are still in spawn, just say that each client (including yourself)
@@ -106,7 +109,7 @@ public class Client implements Runnable{
                     int seletion = inputStream.readInt();
                     System.out.println("CLIENT:\t\tServer confirmed selection: " + seletion);
 
-                    if(seletion != -1 && spiel.getLastDiceRoll() != null ){
+                    if (seletion != -1 && game.getLastDiceRoll() != null) {
                         movePieceStepByStep(seletion);
                     }
 
@@ -143,41 +146,47 @@ public class Client implements Runnable{
 
     }
 
+
+    /**
+     * Generates a selection request to the user through the concole and sends the selection to the server
+     *
+     * @param selection the selection the of the piece that should be moved
+     */
     private void movePieceStepByStep(int selection) {
         System.out.println("CLIENT:\t\tMoving piece step by step");
         //print current spielfeld
-        System.out.println(spiel.getSpielfeld().toString());
-        Spielfeld spielfeld = spiel.getSpielfeld();
-        Team currentTeam = spiel.getCurrentlyPlaying();
-        int diceRoll = spiel.getLastDiceRoll();
-        Spielstein selectedPiece = spiel.selectPiece(currentTeam, diceRoll).get(selection);
-        if(selectedPiece.getFieldId() == -1) {
-            spiel.movePieceOutOfSpawn(selectedPiece, currentTeam);
+        System.out.println(game.getSpielfeld().toString());
+        PlayingField playingField = game.getSpielfeld();
+        Team currentTeam = game.getCurrentlyPlaying();
+        int diceRoll = game.getLastDiceRoll();
+        Piece selectedPiece = game.selectPiece(currentTeam, diceRoll).get(selection);
+        if (selectedPiece.getFieldId() == -1) {
+            game.movePieceOutOfSpawn(selectedPiece, currentTeam);
             return;
         }
         int currentField = selectedPiece.getFieldId();
         int moveToFeldID = (selectedPiece.getFieldId() + diceRoll) % 40;
 
-        while(selectedPiece.getFieldId() != moveToFeldID){
+        while (selectedPiece.getFieldId() != moveToFeldID) {
             int nextStepFeldId = (selectedPiece.getFieldId() + 1) % 40;
-            if(spielfeld.getFeld(nextStepFeldId).getOccupier() != null && nextStepFeldId != moveToFeldID) {
+            if (playingField.getFeld(nextStepFeldId).getOccupier() != null && nextStepFeldId != moveToFeldID) {
                 selectedPiece.setFieldId((selectedPiece.getFieldId() + 2) % 40);
             } else {
                 selectedPiece.setFieldId((selectedPiece.getFieldId() + 1) % 40);
             }
-            spielfeld.getFeld(currentField).setOccupier(null);
-            spielfeld.getFeld(selectedPiece.getFieldId()).setOccupier(selectedPiece);
+            playingField.getFeld(currentField).setOccupier(null);
+            playingField.getFeld(selectedPiece.getFieldId()).setOccupier(selectedPiece);
             currentField = selectedPiece.getFieldId();
             SwingUtilities.invokeLater(() -> {
                 // Perform GUI updates and wait for them to complete
                 SwingUtilities.invokeLater(() -> {
-                    clientGUI.updateGame(spiel); // Replace spiel with your data
+                    clientGUI.updateGame(game); // Replace spiel with your data
                     synchronized (clientGUI) {
                         clientGUI.notify(); // Notify waiting thread
                     }
                 });
             });
-            try{
+            try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
@@ -189,19 +198,20 @@ public class Client implements Runnable{
 
     /**
      * Sends the index of the piece that the client wants to move to the server.
-     * @param spiel the game object.
+     *
+     * @param game      the game object.
      * @param teamColor the clients team color.
-     * @param out the output stream.
+     * @param out       the output stream.
      */
-    private void sendSelectionToServer(Spiel spiel, Color teamColor, ObjectOutputStream out) {
-        Team team = spiel.getTeamByColor(teamColor);
-        if(team == null){
+    private void sendSelectionToServer(Game game, Color teamColor, ObjectOutputStream out) {
+        Team team = game.getTeamByColor(teamColor);
+        if (team == null) {
             System.out.println("CLIENT:\t\tTeam is null");
         }
 
-        List<Spielstein> movableStones = spiel.selectPiece(team, spiel.getLastDiceRoll());
+        List<Piece> movableStones = game.selectPiece(team, game.getLastDiceRoll());
 
-        if(movableStones == null){
+        if (movableStones == null) {
             System.out.println("CLIENT:\t\tmovableStones is null");
             try {
                 out.writeInt(-1);
@@ -213,14 +223,14 @@ public class Client implements Runnable{
         }
 
         //Ask user for input for an entry in the list of movable stones
-        for(int i = 0; i < movableStones.size(); i++){
-            System.out.println("CLIENT:\t\t"+i + ": " + movableStones.get(i).getFieldId() + " Gelaufene Felder: " + movableStones.get(i).getWalkedFields());
+        for (int i = 0; i < movableStones.size(); i++) {
+            System.out.println("CLIENT:\t\t" + i + ": " + movableStones.get(i).getFieldId() + " Gelaufene Felder: " + movableStones.get(i).getWalkedFields());
         }
         System.out.println("CLIENT:\t\tSelect a stone to move: ");
         Scanner scanner = new Scanner(System.in);
 
         int minRange = 0;
-        int maxRange = movableStones.size()-1;
+        int maxRange = movableStones.size() - 1;
 
         System.out.printf("CLIENT:\t\tPlease enter a number between %d and %d: ", minRange, maxRange);
 
@@ -255,31 +265,23 @@ public class Client implements Runnable{
     /**
      * Saves the game to a persistent directory
      */
-    public void saveGame()
-    {
+    public void saveGame() {
         String userHome = System.getProperty("user.home");
 
         String persistentDirPath;
-        if (System.getProperty("os.name").toLowerCase().contains("win"))
-        {
+        if (System.getProperty("os.name").toLowerCase().contains("win")) {
             String appData = System.getenv("APPDATA");
             persistentDirPath = appData + File.separator + "menschaergerdichnicht";
-        }
-        else
-        {
+        } else {
             persistentDirPath = userHome + File.separator + ".menschaergerdichnicht";
         }
 
         File persistentDir = new File(persistentDirPath);
 
-        if (!persistentDir.exists())
-        {
-            if (persistentDir.mkdirs())
-            {
+        if (!persistentDir.exists()) {
+            if (persistentDir.mkdirs()) {
                 System.out.println("Directory created: " + persistentDirPath);
-            }
-            else
-            {
+            } else {
                 System.err.println("Failed to create directory: " + persistentDirPath);
             }
         }
@@ -288,21 +290,17 @@ public class Client implements Runnable{
         String filePath = persistentDirPath + File.separator + fileName;
 
         int i = 0;
-        while(new File(filePath).exists())
-        {
+        while (new File(filePath).exists()) {
             i++;
             String newFileName = fileName + i;
             filePath = persistentDirPath + File.separator + newFileName;
 
         }
 
-        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath)))
-        {
-            outputStream.writeObject(spiel);
+        try (ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(filePath))) {
+            outputStream.writeObject(game);
             System.out.println("Game saved at: " + filePath);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -310,23 +308,18 @@ public class Client implements Runnable{
     /**
      * Asks if the game should be saved
      */
-    void askForSave()
-    {
-        Character input = null;
+    void askForSave() {
+        Character input;
         System.out.println("Do you want to save a game? (y/n)");
 
-        try
-        {
+        try {
             input = (char) System.in.read();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             return;
         }
 
-        if(input == 'y')
-        {
+        if (input == 'y') {
             saveGame();
         }
     }

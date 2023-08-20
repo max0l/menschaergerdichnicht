@@ -1,7 +1,7 @@
 package gui;
 
 import client.Client;
-import game.Spiel;
+import game.Game;
 import server.Server;
 
 import javax.swing.*;
@@ -33,7 +33,7 @@ public class LauncherGUI extends JFrame {
     private final JLabel selectedFileLabel; // Added label to display selected file name
 
     private final JFileChooser fileChooser;
-    private Spiel spiel = null;
+    private Game game = null;
 
     /**
      * The Constructor of the LauncherGUI class.
@@ -122,7 +122,8 @@ public class LauncherGUI extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
             }
-        });;
+        });
+
         portPanel.add(portField);
         add(portPanel);
 
@@ -221,7 +222,7 @@ public class LauncherGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 boolean doStartGame = startGame();
-                if(doStartGame) {
+                if (doStartGame) {
                     dispose();
                 }
             }
@@ -231,6 +232,7 @@ public class LauncherGUI extends JFrame {
     /**
      * Performs checks on the selections of the user and displays an error dialog if the user
      * has made invalid selections. If all checks are met this function starts the client, the server or both and returns true.
+     *
      * @return {@code true} if the game has been started successfully, otherwise {@code false}
      */
     private boolean startGame() {
@@ -241,11 +243,11 @@ public class LauncherGUI extends JFrame {
 
         System.out.println("PlayerCound: " + playerCount + ", botCount: " + botCount + ", difficulty: " + difficulty);
 
-        if((playerCount + botCount) > 4 || (playerCount + botCount) == 0){
+        if ((playerCount + botCount) > 4 || (playerCount + botCount) == 0) {
             JOptionPane.showMessageDialog(null, "Die Summe aus Spielern und Bots muss" +
                     "\nkleiner gleich 4 und größer 0 sein!");
             return false;
-        } else if(!multiplayerButton.isSelected() && !singleplayerButton.isSelected()){
+        } else if (!multiplayerButton.isSelected() && !singleplayerButton.isSelected()) {
             JOptionPane.showMessageDialog(null, "Please select a mode!");
             return false;
         } else {
@@ -253,18 +255,18 @@ public class LauncherGUI extends JFrame {
 
             String sPort = portField.getText();
             port = checkIfPortIsValid(sPort);
-            if(port == -1) {
+            if (port == -1) {
                 JOptionPane.showMessageDialog(null, "Please enter a Valid port!");
                 return false;
             }
 
             if (singleplayerButton.isSelected()) {
 
-                if(checkIfPortIsOccupied(port)){
+                if (checkIfPortIsOccupied(port)) {
                     JOptionPane.showMessageDialog(null, "Port is already in use!");
                     return false;
                 }
-                Server server = new Server(spiel, playerCount, botCount, difficulty, port);
+                Server server = new Server(game, playerCount, botCount, difficulty, port);
 
                 Thread serverThread = new Thread(server);
 
@@ -276,17 +278,17 @@ public class LauncherGUI extends JFrame {
 
                 clientThread.start();
             } else if (multiplayerButton.isSelected()) {
-                if(!hostButton.isSelected() && !connectButton.isSelected() && !hostOnlyButton.isSelected()){
+                if (!hostButton.isSelected() && !connectButton.isSelected() && !hostOnlyButton.isSelected()) {
                     JOptionPane.showMessageDialog(null, "Please select a Multiplayer mode!");
                     return false;
                 }
                 if (hostButton.isSelected()) {
 
-                    if(checkIfPortIsOccupied(port)){
+                    if (checkIfPortIsOccupied(port)) {
                         JOptionPane.showMessageDialog(null, "Port is already in use!");
                         return false;
                     }
-                    Server server = new Server(spiel, playerCount, botCount, difficulty, port);
+                    Server server = new Server(game, playerCount, botCount, difficulty, port);
 
                     Thread serverThread = new Thread(server);
 
@@ -300,7 +302,7 @@ public class LauncherGUI extends JFrame {
                 } else if (connectButton.isSelected()) {
 
                     String serverAddressFromField = serverAddressField.getText();
-                    if(!isServerAddressValid(serverAddressFromField)){
+                    if (!isServerAddressValid(serverAddressFromField)) {
                         JOptionPane.showMessageDialog(null, "Please enter a valid server address!");
                         return false;
                     }
@@ -309,14 +311,14 @@ public class LauncherGUI extends JFrame {
                     Thread clientThread = new Thread(client);
 
                     clientThread.start();
-                } else if(hostOnlyButton.isSelected()) {
+                } else if (hostOnlyButton.isSelected()) {
 
-                    if(checkIfPortIsOccupied(port)){
+                    if (checkIfPortIsOccupied(port)) {
                         JOptionPane.showMessageDialog(null, "Port is already in use!");
                         return false;
                     }
 
-                    Server server = new Server(spiel, playerCount, botCount, difficulty, port);
+                    Server server = new Server(game, playerCount, botCount, difficulty, port);
 
                     Thread serverThread = new Thread(server);
 
@@ -331,6 +333,7 @@ public class LauncherGUI extends JFrame {
     /**
      * Tries to create a ServerSocket on the specified port to check if the given
      * port is available or if it's already in use.
+     *
      * @param port the port to be checked
      * @return {@code true} if the port is Occupied and {@code false} if it's not in use.
      */
@@ -346,6 +349,7 @@ public class LauncherGUI extends JFrame {
 
     /**
      * Checks if the given server address is a valid address or not
+     *
      * @param serverAddressFromField the address that has to be checked
      * @return {@code true} if the server address is a valid address, otherwise {@code false}
      */
@@ -356,13 +360,14 @@ public class LauncherGUI extends JFrame {
 
     /**
      * Checks if a given port is in a valid port range
+     *
      * @param portStr the port that needs to be checked
      * @return the port if it's in a valid port range, otherwise {@code -1}
      */
     private int checkIfPortIsValid(String portStr) {
         int port;
         try {
-            if(!Objects.equals(portStr, "")){
+            if (!Objects.equals(portStr, "")) {
                 port = Integer.parseInt(portStr);
                 if (port >= 0 && port <= 65535) {
                     return port;
@@ -382,18 +387,16 @@ public class LauncherGUI extends JFrame {
 
     /**
      * Tries to load a save game
+     *
      * @param file the file to load the save game from
      */
     private void loadGameFromFile(File file) {
-        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file)))
-        {
-            spiel = (Spiel) inputStream.readObject();
+        try (ObjectInputStream inputStream = new ObjectInputStream(new FileInputStream(file))) {
+            game = (Game) inputStream.readObject();
             System.out.println("Save Game loaded!");
             String old = selectedFileLabel.getText();
             selectedFileLabel.setText(old + " - Loaded Successfully!");
-        }
-        catch (IOException | ClassNotFoundException e)
-        {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
             selectedFileLabel.setText("Error loading file!, Try again or start without");
         }

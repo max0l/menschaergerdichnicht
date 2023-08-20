@@ -17,23 +17,23 @@
 -
 
 ### Spielklasse
-- game.Spiel Startet
+- game.Game Startet
 - Anzahl der Spieler initialisieren
 - Würfeln
 - Managed Logik (Spieler springen etc.)
 -
 
-### game.Spielfeld
-- game.Spielfeld ist 40 Felder groß (array mir modulo)
-- Wenn feld beseutzt, speichert es farbe/spieler
+### game.PlayingField
+- game.PlayingField ist 40 Felder groß (array mir modulo)
+- Wenn field beseutzt, speichert es farbe/spieler
 - (Felder haben Prioritäten)
 
-#### game.Feld
+#### game.Field
 - hat Attribute: Besetzt von Farbe und Nummer
 
 ### Spielsteine
 - Eigenes Array pro team
-- Hat attribute: Farbe (enum/COLOR.RED), Nummer des Feldes auf game.Spielfeld
+- Hat attribute: Farbe (enum/COLOR.RED), Nummer des Feldes auf game.PlayingField
 - Ist zu Hause / auf dem Spielbrett / im Ziel
 - Nummer im Zielfeld
 
@@ -41,17 +41,17 @@
 - Spielfarben Enums/<COLOR.>
 - Liste der Farben
 - 4 Teams
-- Jedes game.Team hat ein Startfeld (Auf game.Spielfeld) und endbereich bzw. was das letzte game.Feld vor dem Ziel ist
+- Jedes game.Team hat ein Startfeld (Auf game.PlayingField) und endbereich bzw. was das letzte game.Field vor dem Ziel ist
 - Pro game.Team: 2 interne Arrays
 
 ### Menschlicher Spieler
-- Hat manchmal die Wahl, ob neuer game.Spielstein raus oder weiter ziehen
+- Hat manchmal die Wahl, ob neuer game.Piece raus oder weiter ziehen
 - Auswahl des Steines, welcher bewegt werden soll
 
 ### Bot
 - Prio:
     1. Ziel
-    2. Vom Spawn des Gegners runter -> muss irgendwie implementiert werden (game.Feld hat )
+    2. Vom Spawn des Gegners runter -> muss irgendwie implementiert werden (game.Field hat )
     3. Gegner Schlagen (Wenn ein Spieler nahe des Bot-Spawns steht, eher mit ner 6 versuchen Gegner zu behindern)
 - Je nach Schwierigkeit, ?Priorität abschwächen (Fehlerwahrscheinlichkeit)
 
@@ -62,7 +62,7 @@
 
 ### Spielsteine
 - Kleinere kreise als Spielfeldkreis
-- Wenn angeklickt -> game.Feld wo stein hingeschoben ?Blinkt? werden könnte, kann aber wieder zurück (nicht finale entscheidung)
+- Wenn angeklickt -> game.Field wo stein hingeschoben ?Blinkt? werden könnte, kann aber wieder zurück (nicht finale entscheidung)
 
 ### Settings
 - Lautstärke
@@ -71,7 +71,7 @@
 
 ### Ideen
 - Würfel Sound
-- Spieler über das game.Feld bewegen (Animation)
+- Spieler über das game.Field bewegen (Animation)
 - Stein schieben/setzen sound
 
 
@@ -92,7 +92,7 @@
 # AOP Beschreibung
 
 ## Aufgabe
-ErstellenSie ein Programm, welches das game.Spiel "Mensch ärgere Dich nicht" simuliert.
+ErstellenSie ein Programm, welches das game.Game "Mensch ärgere Dich nicht" simuliert.
 Hierbei können maximal vier menschliche Spieler teilnehmen. Nehmen weniger als vier
 Spieler teil sollen die restlichen vom Computer simuliert werden. Der Computer sollte ein
 möglichst sinnvolles Verhalten zeigen.

@@ -4,10 +4,8 @@ import java.io.Serializable;
 
 /**
  * Represents the possible states of a piece in the game.
- *
  */
-public enum SpielsteinState implements Serializable
-{
+public enum PieceState implements Serializable {
     /**
      * The game piece is in the home position.
      */

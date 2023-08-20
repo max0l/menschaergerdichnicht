@@ -1,6 +1,6 @@
 package server;
 
-import game.Spiel;
+import game.Game;
 import game.Team;
 
 import java.io.IOException;
@@ -10,14 +10,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ClientHandler {
-    private ServerSocket server;
-    private Socket client;
-    private ObjectOutputStream outputStream;
-    private ObjectInputStream inputStream;
+    private final Socket client;
+    private final ObjectOutputStream outputStream;
+    private final ObjectInputStream inputStream;
     private volatile Team team;
 
     /**
      * The Constructor of the ClientHandler class.
+     *
      * @param client the client's socket.
      * @throws IOException
      */
@@ -31,6 +31,7 @@ public class ClientHandler {
 
     /**
      * Gets the client of the ClientHandler.
+     *
      * @return the client's socket.
      */
     public Socket getClient() {
@@ -39,6 +40,7 @@ public class ClientHandler {
 
     /**
      * Gets the input stream of the ClientHandler.
+     *
      * @return the inputStream member variable.
      */
     public ObjectInputStream getInputStream() {
@@ -48,19 +50,21 @@ public class ClientHandler {
 
     /**
      * Sends a clone of the game object to the client.
-     * @param spiel the game object that will be cloned and sent.
+     *
+     * @param game the game object that will be cloned and sent.
      * @throws IOException
      * @throws CloneNotSupportedException
      */
-    public void sendToClient(Spiel spiel) throws IOException, CloneNotSupportedException {
+    public void sendToClient(Game game) throws IOException, CloneNotSupportedException {
         System.out.println("SERVER:\tSending object to client");
-        outputStream.writeObject(spiel.clone());
+        outputStream.writeObject(game.clone());
         outputStream.flush();
         System.out.println("SERVER:\tObject sent");
     }
 
     /**
      * Receives the index of the piece the client has selected.
+     *
      * @return the selected pieces index.
      * @throws IOException
      */
@@ -72,11 +76,12 @@ public class ClientHandler {
 
     /**
      * Sets the Team for the ClientHandler. The Team will be played by a bot if this fails.
+     *
      * @param team the team that will be set.
      */
     public void setTeam(Team team) {
         this.team = team;
-        try{
+        try {
             outputStream.writeObject(team.getColor());
             outputStream.flush();
         } catch (IOException e) {
@@ -88,6 +93,7 @@ public class ClientHandler {
 
     /**
      * Gets the team of the ClientHandler
+     *
      * @return the Team.
      */
     public Team getTeam() {
@@ -96,6 +102,7 @@ public class ClientHandler {
 
     /**
      * Sends the selected number to the output stream.
+     *
      * @param selection
      * @throws IOException
      */

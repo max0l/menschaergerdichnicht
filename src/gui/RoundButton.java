@@ -1,7 +1,6 @@
 package gui;
 
-import game.Spielstein;
-import game.Team;
+import game.Piece;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +10,13 @@ import java.awt.event.ActionListener;
 public class RoundButton extends JButton {
     private Color outlineColor;
     private Color innerColor; // Use an array to store inner colors
-    private Spielstein spielstein;
+    private Piece piece;
+
+    /**
+     * Constructor of the RoundButton class
+     *
+     * @param outlineColor the color of the outline of the button.
+     */
     public RoundButton(Color outlineColor) {
         this.outlineColor = outlineColor;
         this.innerColor = Color.white; // Initialize the array
@@ -27,9 +32,16 @@ public class RoundButton extends JButton {
             }
         });
     }
+
+    /**
+     * Constructor of the RoundButton class
+     *
+     * @param outlineColor the color of the outline of the button.
+     * @param b            if true, the inner color is the same as the outline color.
+     */
     public RoundButton(Color outlineColor, Boolean b) {
         this.outlineColor = outlineColor;
-        if(b){
+        if (b) {
             this.innerColor = outlineColor;
         }
         setOpaque(false);
@@ -66,23 +78,48 @@ public class RoundButton extends JButton {
         repaint();
     }
 
+    /**
+     * Sets the inner color of the button.
+     *
+     * @param innerColor the new inner color.
+     */
     public void setInnerColor(Color innerColor) {
         this.innerColor = innerColor;
         repaint();
     }
 
-    public void setSpielstein(Spielstein spielstein) {
-        this.spielstein = spielstein;
+    /**
+     * Sets the inner color of the button.
+     *
+     * @param piece the new inner color.
+     */
+    public void setSpielstein(Piece piece) {
+        this.piece = piece;
     }
 
-    public Spielstein getSpielstein() {
-        return spielstein;
+    /**
+     * Gets the inner color of the button.
+     *
+     * @return the inner color (aka Background Color).
+     */
+    public Piece getSpielstein() {
+        return piece;
     }
 
+    /**
+     * Gets the outer color of the button.
+     *
+     * @return the outer color.
+     */
     public Color getOutlineColor() {
         return outlineColor;
     }
 
+    /**
+     * Sets the outline color of the button.
+     *
+     * @param outlineColor the new outline color.
+     */
     public void setOutlineColor(Color outlineColor) {
         this.outlineColor = outlineColor;
     }
